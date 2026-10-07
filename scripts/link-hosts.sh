@@ -2,12 +2,10 @@
 # Point this checkout at a GitHub repo and a GitLab repo, both named project-equinox.
 # Usage:
 #   scripts/link-hosts.sh <github-url> <gitlab-url>
-# Example:
+# Example (GitLab is labs.gauntletai.com):
 #   scripts/link-hosts.sh \
 #     https://github.com/joshuatagoe/project-equinox.git \
-#     https://gitlab.com/joshuatagoe/project-equinox.git
-# Gauntlet labs works as the GitLab URL:
-#   https://labs.gauntletai.com/<username>/project-equinox.git
+#     https://labs.gauntletai.com/<username>/project-equinox.git
 set -euo pipefail
 
 if [[ $# -ne 2 ]]; then

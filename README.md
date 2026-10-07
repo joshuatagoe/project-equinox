@@ -11,21 +11,13 @@ Both pipelines install the pinned dependencies and run `make gate` (ruff, then p
 
 ## Create the two repositories
 
-This environment is not logged into GitHub or GitLab, so those remotes are not created from here. Create two empty repositories named `project-equinox` (no README, no license, so the first push is clean), then link them:
-
-```bash
-scripts/link-hosts.sh \
-  https://github.com/joshuatagoe/project-equinox.git \
-  https://gitlab.com/joshuatagoe/project-equinox.git
-make push-hosts
-```
-
-On Gauntlet labs, pass the labs clone URL as the GitLab argument:
+GitLab for this project is [labs.gauntletai.com](https://labs.gauntletai.com). This environment is not signed in there or on GitHub, so the remotes are not created from here. Create two empty repositories named `project-equinox` (no README, no license, so the first push is clean), then link them:
 
 ```bash
 scripts/link-hosts.sh \
   https://github.com/joshuatagoe/project-equinox.git \
   https://labs.gauntletai.com/<username>/project-equinox.git
+make push-hosts
 ```
 
 `scripts/link-hosts.sh` adds or updates the `github` and `gitlab` remotes. `make push-hosts` pushes the current `HEAD` to `main` on both. The existing `origin` remote is left as it is.
