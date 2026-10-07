@@ -1,0 +1,15 @@
+# Same check as GitHub Actions: make gate on merge requests and the default branch.
+gate:
+  image: python:3.12
+  cache:
+    paths:
+      - .cache/pip
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  script:
+    - python -m venv .venv
+    - .venv/bin/pip install -q -r requirements.txt
+    - make gate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
