@@ -5,7 +5,7 @@
 # Example (GitLab is labs.gauntletai.com):
 #   scripts/link-hosts.sh \
 #     https://github.com/joshuatagoe/project-equinox.git \
-#     https://labs.gauntletai.com/<username>/project-equinox.git
+#     https://labs.gauntletai.com/calebtagoe/project-equinox.git
 set -euo pipefail
 
 if [[ $# -ne 2 ]]; then

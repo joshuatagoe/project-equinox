@@ -16,7 +16,7 @@ GitLab for this project is [labs.gauntletai.com](https://labs.gauntletai.com). T
 ```bash
 scripts/link-hosts.sh \
   https://github.com/joshuatagoe/project-equinox.git \
-  https://labs.gauntletai.com/<username>/project-equinox.git
+  https://labs.gauntletai.com/calebtagoe/project-equinox.git
 make push-hosts
 ```
 
