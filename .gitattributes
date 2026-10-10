@@ -1,0 +1,3 @@
+# Raw API responses are kept byte-for-byte: never convert their line endings.
+docs/research/samples/** -text
+src/equinox/fixtures/** -text
