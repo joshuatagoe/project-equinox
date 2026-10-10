@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git worktree list *)",
+      "Bash(.venv/Scripts/python scripts/gate.py)",
+      "Bash(.venv/bin/python scripts/gate.py)",
+      "PowerShell(.venv\\Scripts\\python scripts\\gate.py)",
+      "Bash(make gate)",
+      "Bash(.venv/Scripts/python -m pytest *)",
+      "Bash(.venv/bin/python -m pytest *)",
+      "Bash(node scripts/check-diagrams.mjs *)"
+    ],
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git -C * commit *)",
+      "Bash(git -C * push *)",
+      "Bash(make push-hosts)",
+      "PowerShell(git commit *)",
+      "PowerShell(git push *)"
+    ]
+  }
+}

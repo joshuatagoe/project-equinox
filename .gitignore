@@ -9,3 +9,5 @@ dist/
 build/
 .cache/
 /PRD.md
+.claude/worktrees/
+.claude/settings.local.json

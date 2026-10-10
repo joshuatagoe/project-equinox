@@ -18,12 +18,14 @@ fmt:
 test:
 	.venv/bin/pytest
 
-gate: lint test
+# The same script runs on Windows without make: .venv\Scripts\python scripts\gate.py
+gate:
+	$(PY) scripts/gate.py
 
 run:
 	PYTHONPATH=src $(PY) -m equinox.server --port $(PORT)
 
-# Push main to the github and gitlab remotes added by scripts/link-hosts.sh.
+# Push the current branch to both hosts: origin is GitLab, github is GitHub.
 push-hosts:
-	git push github HEAD:main
-	git push gitlab HEAD:main
+	git push origin HEAD
+	git push github HEAD

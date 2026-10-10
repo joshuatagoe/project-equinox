@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Point this checkout at a GitHub repo and a GitLab repo, both named project-equinox.
+# Point this checkout at a GitHub repo (remote "github") and a GitLab repo (remote "origin").
 # Usage:
 #   scripts/link-hosts.sh <github-url> <gitlab-url>
 # Example (GitLab is labs.gauntletai.com):
@@ -27,8 +27,8 @@ upsert_remote() {
 }
 
 upsert_remote github "$github_url"
-upsert_remote gitlab "$gitlab_url"
+upsert_remote origin "$gitlab_url"
 
-echo "github $(git remote get-url github)"
-echo "gitlab $(git remote get-url gitlab)"
+echo "github (GitHub) $(git remote get-url github)"
+echo "origin (GitLab) $(git remote get-url origin)"
 echo "Next: make push-hosts"
