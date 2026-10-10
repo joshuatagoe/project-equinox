@@ -248,7 +248,7 @@ Clock = Callable[[], datetime]      # the time a response was read, time-zone aw
 @dataclass(frozen=True)
 class AdapterResult:
     markets: list[CanonicalMarket]
-    warnings: list[str]             # e.g. "kalshi: market X skipped: no parser for custom_strike {...}"
+    warnings: list[str]             # e.g. "kalshi: market X has no terms: no parser for custom_strike {...}"
 
 class VenueAdapter(ABC):
     venue: ClassVar[str]

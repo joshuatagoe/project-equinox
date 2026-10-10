@@ -34,7 +34,7 @@ class TrackedEvent:
 @dataclass(frozen=True)
 class AdapterResult:
     markets: list[CanonicalMarket]
-    warnings: list[str]  # e.g. "kalshi: market X skipped: no parser for custom_strike {...}"
+    warnings: list[str]  # one line each, e.g. "kalshi: market X has no terms: ..."
 
 
 class VenueAdapter(ABC):
