@@ -517,7 +517,7 @@ class EquinoxTrace(Frozen):
     decision: Decision | None
     rationale: str
     assumptions: tuple[str, ...]   # A1, A2, A3, A5, worded for the reader
-    warnings: tuple[str, ...]      # adapter warnings plus quote warnings, in plain words
+    warnings: tuple[str, ...]      # quote warnings from simulate(), plus adapter warnings the CLI adds
 ```
 
 The trace uses typed sections instead of the first version's generic "spans" (D30). Each section is a field that tests can assert on directly.

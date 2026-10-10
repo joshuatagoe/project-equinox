@@ -20,6 +20,7 @@ Wire the adapters, matcher and router into the three commands, and prove the who
   - Validate the input into an `OrderRequest`. A failure → `failure_trace(INVALID_INPUT)`, exit 4.
   - Look up the market's cluster. If the market isn't loaded → MARKET_NOT_FOUND, exit 1. If it is loaded but has no terms → MARKET_NOT_FOUND, with the message "no contract terms: this market can only be matched by text".
   - Call `simulate` with `now = datetime.now(UTC)`.
+  - Add the adapters' warnings to the trace's `warnings` (`model_copy`): `simulate()` sees only the quotes (D43).
   - Print the report, or the trace with `--json`. Return `EXIT_CODES[status]`.
 - **Report layout:**
   - One line each for the status, the order and the cluster (members and risk flags).
