@@ -318,14 +318,16 @@ The base URL is `https://external-api.kalshi.com/trade-api/v2` (K1).
 flowchart TD
     A["Pair of markets on different venues"] --> B{"Both have terms?"}
     B -->|no| T["Text fallback<br/>at most AMBIGUOUS"]
-    B -->|yes| C{"Same subject, measure,<br/>unit and observed_on?"}
+    B -->|yes| C{"Same subject, measure, unit<br/>and observed_on, and the same<br/>observed_at if both state one?"}
     C -->|no| D1["DISTINCT<br/>different event"]
     C -->|yes| G["Normalize on the measure's grid<br/>Fed change grid is 25 bps<br/>lt t becomes le t-25, gt t becomes ge t+25"]
     G --> E{"Same direction and threshold?"}
     E -->|no| D2["DISTINCT<br/>different outcome"]
     E -->|yes| H{"Same measured_by?"}
     H -->|no| AM["AMBIGUOUS<br/>measured differently, never routed"]
-    H -->|yes| EQ["EQUIVALENT<br/>plus risk flags"]
+    H -->|yes| O{"observed_at stated<br/>by only one market?"}
+    O -->|yes| AM2["AMBIGUOUS<br/>observation time unknown, never routed"]
+    O -->|no| EQ["EQUIVALENT<br/>plus risk flags"]
 ```
 
 - **Direction** groups `gt` with `ge` as "above", and `lt` with `le` as "below". `eq` and `between` are their own groups. After grid normalization, a pair that differs only between `gt` and `ge` is "same direction and threshold".
@@ -339,7 +341,9 @@ flowchart TD
 
 A cluster is every market whose normalized terms key is identical:
 
-> (subject, measure, measured_by, observed_on, direction, normalized threshold, upper, unit)
+> (subject, measure, measured_by, observed_on, observed_at when stated, direction, normalized threshold, upper, unit)
+
+A stated `observed_at` is compared as an instant in UTC (D23, D42), so two markets that observe the same day at different times never share a cluster.
 
 A cluster may hold one market. By construction every pair inside a cluster is EQUIVALENT, and a test checks that. A cluster's `ambiguous` list holds the AMBIGUOUS pairs that involve its members. The trace shows them, but they are never routed.
 
