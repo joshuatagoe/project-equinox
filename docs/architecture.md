@@ -223,6 +223,11 @@ These hold even if an adapter has a bug:
 | `upper` is present exactly when the comparison is `between`, and is greater than `threshold` | `ContractTerms` | Malformed ranges |
 | `coefficient >= 0`, `exponent >= 1`, `rounding_step > 0` | `FeeSchedule` | Negative or zero-step fees |
 | JSON numbers are parsed as `Decimal` (`parse_float=Decimal`) | `Fetcher` | Polymarket's `feeSchedule.rate: 0.05` becoming the float 0.05000000000000000277 |
+| A float is refused where an exact number is expected (D3) | every `Decimal` field except `text_score` | A float slipping past the fetcher into money or a threshold |
+| A text match is never EQUIVALENT (D15) | `MatchResult` | The fallback routing a pair that has no terms |
+| `eligible` is true exactly when `reasons` is empty | `VenueQuote` | A venue excluded without a reason, or a reason that doesn't exclude |
+| `decision` is present exactly when the status is ROUTED | `EquinoxTrace` | A failure trace that still names a winner |
+| A cluster holds at least one market | `EquivalenceCluster` | An empty cluster reaching the router |
 
 ### 4.6 Money rules
 

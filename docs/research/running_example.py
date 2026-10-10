@@ -1,4 +1,4 @@
-"""Running example and demo scenarios, from the snapshot in samples/snapshot-2026-10-10.
+"""Running example and demo scenarios, from the snapshot in src/equinox/fixtures/.
 
 Fed pair: Kalshi KXFEDDECISION-26OCT-H0 and Polymarket market 2589812 ("No change"), plus the
 Kalshi C25 / Polymarket 2589811 ("25 bps decrease") pair. AAPL pair: Polymarket 5455686 ("$330")
@@ -11,7 +11,7 @@ import json
 from decimal import ROUND_CEILING, Decimal
 from pathlib import Path
 
-SNAPSHOT = Path(__file__).with_name("samples") / "snapshot-2026-10-10"
+SNAPSHOT = Path(__file__).resolve().parents[2] / "src/equinox/fixtures/snapshot-2026-10-10"
 KALSHI_COEFFICIENT, KALSHI_STEP = Decimal("0.07"), Decimal("0.01")  # series fee_multiplier is 1
 POLY_STEP = Decimal("0.00001")
 

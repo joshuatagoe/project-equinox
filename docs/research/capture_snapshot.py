@@ -5,7 +5,9 @@ Fixtures then don't depend on when they're built: the events close on 2026-10-12
 Captures Kalshi KXFEDDECISION-26OCT and Polymarket's matching Fed event, plus Polymarket's
 "AAPL closes above ___ on October 12" event (the Meridian fit-check pair). Read-only public GETs.
 
-    python docs/research/capture_snapshot.py docs/research/samples/snapshot-2026-10-10
+    python docs/research/capture_snapshot.py src/equinox/fixtures/snapshot-YYYY-MM-DD
+
+Write into a new dated directory: never overwrite an existing snapshot, because tests read it.
 """
 
 import json

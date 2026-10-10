@@ -18,7 +18,9 @@ For one order and one cluster, simulate the order on every market. Walk the book
 - `router/rationale.py`: the sentences in §7.2. It reads venue display names from `market.venue` (capitalized), and copies the cluster's risk flags. Assumptions A1, A2, A3 and A5 go into `trace.assumptions` in plain words.
 - No venue names in the code. The layering guard enforces it.
 
-## Acceptance tests (golden markets; injected `now = 2026-10-10T20:50:00Z`)
+## Acceptance tests (golden markets; injected `now = 2026-10-10T20:48:00Z`)
+
+At that time every golden book is 208–229 s old, under the 300 s threshold, so only test 12's book is stale.
 
 | # | Order on the cluster | Expected |
 |---|---|---|

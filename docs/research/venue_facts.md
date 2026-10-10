@@ -66,7 +66,7 @@ Read from `binary-stock-outcome/docs` (working tree, 2026-10-10). Labels are Mer
 
 ## Running example: "Fed holds rates at the October 2026 meeting"
 
-From the snapshot `samples/snapshot-2026-10-10/` (captured 2026-10-10T20:44:29Z by `capture_snapshot.py`): Kalshi `KXFEDDECISION-26OCT-H0` and Polymarket market 2589812 ("No change"). Fees are summed per level and rounded up once per order: $0.01 for Kalshi, $0.00001 for Polymarket. Reproduce with `python docs/research/running_example.py`, which also prints the other demo scenarios in architecture §7.4.
+From the snapshot `src/equinox/fixtures/snapshot-2026-10-10/` (moved there from `samples/` by feat-01; captured 2026-10-10T20:44:29Z by `capture_snapshot.py`): Kalshi `KXFEDDECISION-26OCT-H0` and Polymarket market 2589812 ("No change"). Fees are summed per level and rounded up once per order: $0.01 for Kalshi, $0.00001 for Polymarket. Reproduce with `python docs/research/running_example.py`, which also prints the other demo scenarios in architecture §7.4.
 
 | Order | Kalshi | Polymarket | Cheaper |
 |---|---|---|---|

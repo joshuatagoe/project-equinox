@@ -1,0 +1,8 @@
+{
+  "kalshi": [
+    {"event_id": "KXFEDDECISION-26OCT", "family": "fed_decision"}
+  ],
+  "polymarket": [
+    {"event_id": "fed-decision-in-october-20260617190323537", "family": "fed_decision"}
+  ]
+}

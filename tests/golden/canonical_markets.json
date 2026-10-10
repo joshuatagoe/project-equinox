@@ -1,0 +1,1755 @@
+[
+  {
+    "market_id": "kalshi:KXFEDDECISION-26OCT-C26",
+    "venue": "kalshi",
+    "native_id": "KXFEDDECISION-26OCT-C26",
+    "event_id": "KXFEDDECISION-26OCT",
+    "title": "Will the Federal Reserve Cut rates by >25bps at their October 2026 meeting?",
+    "outcome_label": "Cut >25bps",
+    "rules_text": "If the Federal Reserve does a Cut of   25bps on October 28, 2026, then the market resolves to Yes.\n\nThe outcomes are mutually exclusive: at most one can resolve to Yes. For example, a 50-basis-point hike resolves “Hike   25 bps” to Yes and “Hike 25 bps” to No.\n\nIf the scheduled FOMC meeting is canceled and does not occur on its scheduled date, “Fed maintains rate” resolves to Yes and all other outcomes resolve to No.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "lt",
+      "threshold": "-25",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "If the meeting is cancelled, 'Fed maintains rate' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "Federal Reserve",
+      "url": "https://www.federalreserve.gov"
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-28T17:59:00Z",
+    "resolves_at": "2026-10-28T18:05:00Z",
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.0100",
+            "quantity": "2326781.64"
+          },
+          {
+            "price": "0.0200",
+            "quantity": "4500.00"
+          },
+          {
+            "price": "0.0300",
+            "quantity": "7013.03"
+          }
+        ],
+        "bids": [],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [],
+        "bids": [
+          {
+            "price": "0.9900",
+            "quantity": "2326781.64"
+          },
+          {
+            "price": "0.9800",
+            "quantity": "4500.00"
+          },
+          {
+            "price": "0.9700",
+            "quantity": "7013.03"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "kalshi:KXFEDDECISION-26OCT-C25",
+    "venue": "kalshi",
+    "native_id": "KXFEDDECISION-26OCT-C25",
+    "event_id": "KXFEDDECISION-26OCT",
+    "title": "Will the Federal Reserve Cut rates by 25bps at their October 2026 meeting?",
+    "outcome_label": "Cut 25bps",
+    "rules_text": "If the Federal Reserve does a Cut of 25bps on October 28, 2026, then the market resolves to Yes.\n\nThe outcomes are mutually exclusive: at most one can resolve to Yes. For example, a 50-basis-point hike resolves “Hike   25 bps” to Yes and “Hike 25 bps” to No.\n\nIf the scheduled FOMC meeting is canceled and does not occur on its scheduled date, “Fed maintains rate” resolves to Yes and all other outcomes resolve to No.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "eq",
+      "threshold": "-25",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "If the meeting is cancelled, 'Fed maintains rate' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "Federal Reserve",
+      "url": "https://www.federalreserve.gov"
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-28T17:59:00Z",
+    "resolves_at": "2026-10-28T18:05:00Z",
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.0100",
+            "quantity": "1720836.91"
+          },
+          {
+            "price": "0.0200",
+            "quantity": "105700.00"
+          },
+          {
+            "price": "0.0300",
+            "quantity": "5036.00"
+          }
+        ],
+        "bids": [],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [],
+        "bids": [
+          {
+            "price": "0.9900",
+            "quantity": "1720836.91"
+          },
+          {
+            "price": "0.9800",
+            "quantity": "105700.00"
+          },
+          {
+            "price": "0.9700",
+            "quantity": "5036.00"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "kalshi:KXFEDDECISION-26OCT-H0",
+    "venue": "kalshi",
+    "native_id": "KXFEDDECISION-26OCT-H0",
+    "event_id": "KXFEDDECISION-26OCT",
+    "title": "Will the Federal Reserve Hike rates by 0bps at their October 2026 meeting?",
+    "outcome_label": "Fed maintains rate",
+    "rules_text": "If the Federal Reserve does a Hike of 0bps on October 28, 2026, then the market resolves to Yes.\n\nThe outcomes are mutually exclusive: at most one can resolve to Yes. For example, a 50-basis-point hike resolves “Hike   25 bps” to Yes and “Hike 25 bps” to No.\n\nIf the scheduled FOMC meeting is canceled and does not occur on its scheduled date, “Fed maintains rate” resolves to Yes and all other outcomes resolve to No.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "eq",
+      "threshold": "0",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "If the meeting is cancelled, 'Fed maintains rate' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "Federal Reserve",
+      "url": "https://www.federalreserve.gov"
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-28T17:59:00Z",
+    "resolves_at": "2026-10-28T18:05:00Z",
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.8500",
+            "quantity": "60329.95"
+          },
+          {
+            "price": "0.8600",
+            "quantity": "114447.73"
+          },
+          {
+            "price": "0.8700",
+            "quantity": "77340.59"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.8400",
+            "quantity": "534.49"
+          },
+          {
+            "price": "0.8300",
+            "quantity": "22576.45"
+          },
+          {
+            "price": "0.8200",
+            "quantity": "6524.26"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.1600",
+            "quantity": "534.49"
+          },
+          {
+            "price": "0.1700",
+            "quantity": "22576.45"
+          },
+          {
+            "price": "0.1800",
+            "quantity": "6524.26"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.1500",
+            "quantity": "60329.95"
+          },
+          {
+            "price": "0.1400",
+            "quantity": "114447.73"
+          },
+          {
+            "price": "0.1300",
+            "quantity": "77340.59"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "kalshi:KXFEDDECISION-26OCT-H26",
+    "venue": "kalshi",
+    "native_id": "KXFEDDECISION-26OCT-H26",
+    "event_id": "KXFEDDECISION-26OCT",
+    "title": "Will the Federal Reserve Hike rates by >25bps at their October 2026 meeting?",
+    "outcome_label": "Hike >25bps",
+    "rules_text": "If the Federal Reserve does a Hike of   25bps on October 28, 2026, then the market resolves to Yes.\n\nThe outcomes are mutually exclusive: at most one can resolve to Yes. For example, a 50-basis-point hike resolves “Hike   25 bps” to Yes and “Hike 25 bps” to No.\n\nIf the scheduled FOMC meeting is canceled and does not occur on its scheduled date, “Fed maintains rate” resolves to Yes and all other outcomes resolve to No.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "gt",
+      "threshold": "25",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "If the meeting is cancelled, 'Fed maintains rate' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "Federal Reserve",
+      "url": "https://www.federalreserve.gov"
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-28T17:59:00Z",
+    "resolves_at": "2026-10-28T18:05:00Z",
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.0100",
+            "quantity": "1222041.94"
+          },
+          {
+            "price": "0.0200",
+            "quantity": "585500.00"
+          },
+          {
+            "price": "0.0300",
+            "quantity": "5013.00"
+          }
+        ],
+        "bids": [],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [],
+        "bids": [
+          {
+            "price": "0.9900",
+            "quantity": "1222041.94"
+          },
+          {
+            "price": "0.9800",
+            "quantity": "585500.00"
+          },
+          {
+            "price": "0.9700",
+            "quantity": "5013.00"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:2589810",
+    "venue": "polymarket",
+    "native_id": "2589810",
+    "event_id": "606422",
+    "title": "Will the Fed decrease interest rates by 50+ bps after the October 2026 meeting?",
+    "outcome_label": "50+ bps decrease",
+    "rules_text": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for October 27-28, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their October meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "le",
+      "threshold": "-50",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "A change not shown in the brackets is rounded up to the nearest 25 bps.",
+        "If no statement is released by the end date of the next scheduled meeting, 'No change' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "www.federalreserve.gov",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-29T03:59:00Z",
+    "captured_at": "2026-10-10T20:44:30.393000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.002",
+            "quantity": "22892.65"
+          },
+          {
+            "price": "0.003",
+            "quantity": "811802.79"
+          },
+          {
+            "price": "0.004",
+            "quantity": "7000.29"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.001",
+            "quantity": "2798373.47"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.999",
+            "quantity": "2798373.47"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.998",
+            "quantity": "22892.65"
+          },
+          {
+            "price": "0.997",
+            "quantity": "811802.79"
+          },
+          {
+            "price": "0.996",
+            "quantity": "7000.29"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:2589811",
+    "venue": "polymarket",
+    "native_id": "2589811",
+    "event_id": "606422",
+    "title": "Will the Fed decrease interest rates by 25 bps after the October 2026 meeting?",
+    "outcome_label": "25 bps decrease",
+    "rules_text": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for October 27-28, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their October meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "eq",
+      "threshold": "-25",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "A change not shown in the brackets is rounded up to the nearest 25 bps.",
+        "If no statement is released by the end date of the next scheduled meeting, 'No change' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "www.federalreserve.gov",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-29T03:59:00Z",
+    "captured_at": "2026-10-10T20:44:11.169000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.005",
+            "quantity": "21016.79"
+          },
+          {
+            "price": "0.006",
+            "quantity": "74104.9"
+          },
+          {
+            "price": "0.007",
+            "quantity": "2112.37"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.004",
+            "quantity": "20412.61"
+          },
+          {
+            "price": "0.003",
+            "quantity": "2276416.4"
+          },
+          {
+            "price": "0.002",
+            "quantity": "2250070.95"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.996",
+            "quantity": "20412.61"
+          },
+          {
+            "price": "0.997",
+            "quantity": "2276416.4"
+          },
+          {
+            "price": "0.998",
+            "quantity": "2250070.95"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.995",
+            "quantity": "21016.79"
+          },
+          {
+            "price": "0.994",
+            "quantity": "74104.9"
+          },
+          {
+            "price": "0.993",
+            "quantity": "2112.37"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:2589812",
+    "venue": "polymarket",
+    "native_id": "2589812",
+    "event_id": "606422",
+    "title": "Will there be no change in Fed interest rates after the October 2026 meeting?",
+    "outcome_label": "No change",
+    "rules_text": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for October 27-28, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their October meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "eq",
+      "threshold": "0",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "A change not shown in the brackets is rounded up to the nearest 25 bps.",
+        "If no statement is released by the end date of the next scheduled meeting, 'No change' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "www.federalreserve.gov",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-29T03:59:00Z",
+    "captured_at": "2026-10-10T20:44:32.057000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.84",
+            "quantity": "295850.63"
+          },
+          {
+            "price": "0.85",
+            "quantity": "909206.72"
+          },
+          {
+            "price": "0.86",
+            "quantity": "11322.81"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.83",
+            "quantity": "67936.43"
+          },
+          {
+            "price": "0.82",
+            "quantity": "191820.81"
+          },
+          {
+            "price": "0.81",
+            "quantity": "22526.32"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.17",
+            "quantity": "67936.43"
+          },
+          {
+            "price": "0.18",
+            "quantity": "191820.81"
+          },
+          {
+            "price": "0.19",
+            "quantity": "22526.32"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.16",
+            "quantity": "295850.63"
+          },
+          {
+            "price": "0.15",
+            "quantity": "909206.72"
+          },
+          {
+            "price": "0.14",
+            "quantity": "11322.81"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:2589813",
+    "venue": "polymarket",
+    "native_id": "2589813",
+    "event_id": "606422",
+    "title": "Will the Fed increase interest rates by 25 bps after the October 2026 meeting?",
+    "outcome_label": "25 bps increase",
+    "rules_text": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for October 27-28, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their October meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "eq",
+      "threshold": "25",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "A change not shown in the brackets is rounded up to the nearest 25 bps.",
+        "If no statement is released by the end date of the next scheduled meeting, 'No change' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "www.federalreserve.gov",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-29T03:59:00Z",
+    "captured_at": "2026-10-10T20:44:25.003000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.16",
+            "quantity": "101479.33"
+          },
+          {
+            "price": "0.17",
+            "quantity": "182815.4"
+          },
+          {
+            "price": "0.18",
+            "quantity": "31256.41"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.15",
+            "quantity": "158069.07"
+          },
+          {
+            "price": "0.14",
+            "quantity": "861545.17"
+          },
+          {
+            "price": "0.13",
+            "quantity": "11803.2"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.85",
+            "quantity": "158069.07"
+          },
+          {
+            "price": "0.86",
+            "quantity": "861545.17"
+          },
+          {
+            "price": "0.87",
+            "quantity": "11803.2"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.84",
+            "quantity": "101479.33"
+          },
+          {
+            "price": "0.83",
+            "quantity": "182815.4"
+          },
+          {
+            "price": "0.82",
+            "quantity": "31256.41"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:2589814",
+    "venue": "polymarket",
+    "native_id": "2589814",
+    "event_id": "606422",
+    "title": "Will the Fed increase interest rates by 50+ bps after the October 2026 meeting?",
+    "outcome_label": "50+ bps increase",
+    "rules_text": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 2026 meeting.\n\nIf the target federal funds rate is changed to a level not expressed in the displayed options, the change will be rounded up to the nearest 25 and will resolve to the relevant bracket. (e.g. if there's a cut/increase of 12.5 bps it will be considered to be 25 bps)\n\nThe resolution source for this market is the FOMC’s statement after its meeting scheduled for October 27-28, 2026 according to the official calendar: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm.\n\nThe level and change of the target federal funds rate is also published at the official website of the Federal Reserve at https://www.federalreserve.gov/monetarypolicy/openmarket.htm.\n\nThis market may resolve as soon as the FOMC’s statement for their October meeting with relevant data is issued. If no statement is released by the end date of the next scheduled meeting, this market will resolve to the \"No change\" bracket.",
+    "terms": {
+      "subject": "FOMC",
+      "measure": "fed_upper_bound_change",
+      "measured_by": "fomc_statement",
+      "observed_on": "2026-10-28",
+      "observed_at": null,
+      "comparison": "ge",
+      "threshold": "50",
+      "upper": null,
+      "unit": "bps",
+      "fallback_rules": [
+        "A change not shown in the brackets is rounded up to the nearest 25 bps.",
+        "If no statement is released by the end date of the next scheduled meeting, 'No change' resolves Yes."
+      ]
+    },
+    "resolution_source": {
+      "name": "www.federalreserve.gov",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-29T03:59:00Z",
+    "captured_at": "2026-10-10T20:44:14.336000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.004",
+            "quantity": "16745.92"
+          },
+          {
+            "price": "0.005",
+            "quantity": "128783.11"
+          },
+          {
+            "price": "0.006",
+            "quantity": "54716.07"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.003",
+            "quantity": "385725.69"
+          },
+          {
+            "price": "0.002",
+            "quantity": "1550619.53"
+          },
+          {
+            "price": "0.001",
+            "quantity": "2348341.81"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.997",
+            "quantity": "385725.69"
+          },
+          {
+            "price": "0.998",
+            "quantity": "1550619.53"
+          },
+          {
+            "price": "0.999",
+            "quantity": "2348341.81"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.996",
+            "quantity": "16745.92"
+          },
+          {
+            "price": "0.995",
+            "quantity": "128783.11"
+          },
+          {
+            "price": "0.994",
+            "quantity": "54716.07"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:5455686",
+    "venue": "polymarket",
+    "native_id": "5455686",
+    "event_id": "1158886",
+    "title": "Will Apple (AAPL) close above $330 on October 12?",
+    "outcome_label": "$330",
+    "rules_text": "This market will resolve to \"Yes\" if the Close price for Apple (AAPL) on October 12, 2026 is higher than the listed price. Otherwise, this market will resolve to \"No.\"\n\nIf the two specified prices are exactly equal, this market will resolve to \"No\".\n\nClosing prices will be used exactly as published by Pyth, without rounding.\n\nIf Apple (AAPL) does not trade at all during the regular session, the market will resolve 50-50.\n\nFor a standard full trading session, the closing price refers to the Pyth \"Close\" value of the 1-minute candle corresponding to the final minute of regular trading hours on the primary exchange.\n\nIf the specified day has no valid Pyth Close value for the 1-minute candle corresponding to the end of regular trading hours on the primary exchange, the market will use the last valid Pyth price achieved during the regular trading hours of the primary exchange as the effective closing price. If no valid Pyth price exists for that trading day due to a system outage, data failure, or other technical disruption, the official closing price published by the primary exchange on which the listed security trades will be used to determine the closing price for that day.\n\nIf the listed date is not a trading day under the applicable trading-hours schedule as listed on Pyth, this market will resolve 50-50.\n\nIn the event of a stock split, reverse stock split, or similar corporate action affecting the listed security during the listed time frame, this market will resolve based on split-adjusted prices as displayed on Pyth. The target price will be adjusted proportionally to reflect any stock splits. Resolution will be based on the historical price data as shown on Pyth after any adjustments have been applied.\n\nThe resolution source for this market will be Pyth, specifically the \"Close\" values for the relevant 1-minute candle available at https://pythdata.app/explore/Equity.US.AAPL%2FUSD.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "pyth_regular_close",
+      "observed_on": "2026-10-12",
+      "observed_at": "2026-10-12T20:00:00Z",
+      "comparison": "gt",
+      "threshold": "330",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If AAPL doesn't trade in the regular session, or the date isn't a trading day, the market resolves 50-50.",
+        "If Pyth has no valid close for the last minute, the last valid Pyth price in regular hours is used; if there is none, the exchange's official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "pythdata.app",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-12T20:00:00Z",
+    "captured_at": "2026-10-10T20:44:27.528000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.04",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.96",
+            "quantity": "15.8"
+          },
+          {
+            "price": "0.97",
+            "quantity": "371.91"
+          },
+          {
+            "price": "0.98",
+            "quantity": "805.57"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.9",
+            "quantity": "5.66"
+          },
+          {
+            "price": "0.89",
+            "quantity": "71"
+          },
+          {
+            "price": "0.88",
+            "quantity": "200"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.1",
+            "quantity": "5.66"
+          },
+          {
+            "price": "0.11",
+            "quantity": "71"
+          },
+          {
+            "price": "0.12",
+            "quantity": "200"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.04",
+            "quantity": "15.8"
+          },
+          {
+            "price": "0.03",
+            "quantity": "371.91"
+          },
+          {
+            "price": "0.02",
+            "quantity": "805.57"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "polymarket:5455687",
+    "venue": "polymarket",
+    "native_id": "5455687",
+    "event_id": "1158886",
+    "title": "Will Apple (AAPL) close above $335 on October 12?",
+    "outcome_label": "$335",
+    "rules_text": "This market will resolve to \"Yes\" if the Close price for Apple (AAPL) on October 12, 2026 is higher than the listed price. Otherwise, this market will resolve to \"No.\"\n\nIf the two specified prices are exactly equal, this market will resolve to \"No\".\n\nClosing prices will be used exactly as published by Pyth, without rounding.\n\nIf Apple (AAPL) does not trade at all during the regular session, the market will resolve 50-50.\n\nFor a standard full trading session, the closing price refers to the Pyth \"Close\" value of the 1-minute candle corresponding to the final minute of regular trading hours on the primary exchange.\n\nIf the specified day has no valid Pyth Close value for the 1-minute candle corresponding to the end of regular trading hours on the primary exchange, the market will use the last valid Pyth price achieved during the regular trading hours of the primary exchange as the effective closing price. If no valid Pyth price exists for that trading day due to a system outage, data failure, or other technical disruption, the official closing price published by the primary exchange on which the listed security trades will be used to determine the closing price for that day.\n\nIf the listed date is not a trading day under the applicable trading-hours schedule as listed on Pyth, this market will resolve 50-50.\n\nIn the event of a stock split, reverse stock split, or similar corporate action affecting the listed security during the listed time frame, this market will resolve based on split-adjusted prices as displayed on Pyth. The target price will be adjusted proportionally to reflect any stock splits. Resolution will be based on the historical price data as shown on Pyth after any adjustments have been applied.\n\nThe resolution source for this market will be Pyth, specifically the \"Close\" values for the relevant 1-minute candle available at https://pythdata.app/explore/Equity.US.AAPL%2FUSD.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "pyth_regular_close",
+      "observed_on": "2026-10-12",
+      "observed_at": "2026-10-12T20:00:00Z",
+      "comparison": "gt",
+      "threshold": "335",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If AAPL doesn't trade in the regular session, or the date isn't a trading day, the market resolves 50-50.",
+        "If Pyth has no valid close for the last minute, the last valid Pyth price in regular hours is used; if there is none, the exchange's official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "pythdata.app",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": "2026-10-12T20:00:00Z",
+    "captured_at": "2026-10-10T20:44:11.949000Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.04",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.64",
+            "quantity": "66"
+          },
+          {
+            "price": "0.65",
+            "quantity": "200"
+          },
+          {
+            "price": "0.69",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.57",
+            "quantity": "5"
+          },
+          {
+            "price": "0.56",
+            "quantity": "66"
+          },
+          {
+            "price": "0.55",
+            "quantity": "200"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.43",
+            "quantity": "5"
+          },
+          {
+            "price": "0.44",
+            "quantity": "66"
+          },
+          {
+            "price": "0.45",
+            "quantity": "200"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.36",
+            "quantity": "66"
+          },
+          {
+            "price": "0.35",
+            "quantity": "200"
+          },
+          {
+            "price": "0.31",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "meridian:AAPL-330-2026-10-12",
+    "venue": "meridian",
+    "native_id": "AAPL-330-2026-10-12",
+    "event_id": "AAPL-2026-10-12",
+    "title": "Will AAPL close at or above $330 on 2026-10-12?",
+    "outcome_label": "$330",
+    "rules_text": "Fit-check market built by hand from Meridian's design (architecture 9.1, venue_facts M1-M5). YES pays 1 devnet USDC if the regular-session close is at or above the strike.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "pyth_regular_close",
+      "observed_on": "2026-10-12",
+      "observed_at": "2026-10-12T20:00:00Z",
+      "comparison": "ge",
+      "threshold": "330",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If Pyth's confidence band straddles the strike, the market is held and an admin settles it on the official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "Pyth",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "devnet USDC",
+      "has_value": false
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-12T20:00:00Z",
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.95",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.93",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.07",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.05",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "meridian:AAPL-320-2026-10-12",
+    "venue": "meridian",
+    "native_id": "AAPL-320-2026-10-12",
+    "event_id": "AAPL-2026-10-12",
+    "title": "Will AAPL close at or above $320 on 2026-10-12?",
+    "outcome_label": "$320",
+    "rules_text": "Fit-check market built by hand from Meridian's design (architecture 9.1, venue_facts M1-M5). YES pays 1 devnet USDC if the regular-session close is at or above the strike.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "pyth_regular_close",
+      "observed_on": "2026-10-12",
+      "observed_at": "2026-10-12T20:00:00Z",
+      "comparison": "ge",
+      "threshold": "320",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If Pyth's confidence band straddles the strike, the market is held and an admin settles it on the official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "Pyth",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "devnet USDC",
+      "has_value": false
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-12T20:00:00Z",
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.97",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.95",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.05",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.03",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "meridian:AAPL-330-2026-10-13",
+    "venue": "meridian",
+    "native_id": "AAPL-330-2026-10-13",
+    "event_id": "AAPL-2026-10-13",
+    "title": "Will AAPL close at or above $330 on 2026-10-13?",
+    "outcome_label": "$330",
+    "rules_text": "Fit-check market built by hand from Meridian's design (architecture 9.1, venue_facts M1-M5). YES pays 1 devnet USDC if the regular-session close is at or above the strike.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "pyth_regular_close",
+      "observed_on": "2026-10-13",
+      "observed_at": "2026-10-13T20:00:00Z",
+      "comparison": "ge",
+      "threshold": "330",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If Pyth's confidence band straddles the strike, the market is held and an admin settles it on the official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "Pyth",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "devnet USDC",
+      "has_value": false
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-13T20:00:00Z",
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.95",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.93",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.07",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.05",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "meridian:AAPL-330-2026-10-12-OC",
+    "venue": "meridian",
+    "native_id": "AAPL-330-2026-10-12-OC",
+    "event_id": "AAPL-2026-10-12",
+    "title": "Will AAPL close at or above $330 on 2026-10-12?",
+    "outcome_label": "$330",
+    "rules_text": "Fit-check market built by hand from Meridian's design (architecture 9.1, venue_facts M1-M5). YES pays 1 devnet USDC if the regular-session close is at or above the strike.",
+    "terms": {
+      "subject": "AAPL",
+      "measure": "close_price",
+      "measured_by": "official_close",
+      "observed_on": "2026-10-12",
+      "observed_at": "2026-10-12T20:00:00Z",
+      "comparison": "ge",
+      "threshold": "330",
+      "upper": null,
+      "unit": "usd",
+      "fallback_rules": [
+        "If Pyth's confidence band straddles the strike, the market is held and an admin settles it on the official close."
+      ]
+    },
+    "resolution_source": {
+      "name": "Pyth",
+      "url": "https://pythdata.app/explore/Equity.US.AAPL%2FUSD"
+    },
+    "collateral": {
+      "asset": "devnet USDC",
+      "has_value": false
+    },
+    "tradable": true,
+    "trading_closes_at": "2026-10-12T20:00:00Z",
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.95",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.93",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.07",
+            "quantity": "5"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.05",
+            "quantity": "5"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {
+      "fit_check": true
+    }
+  },
+  {
+    "market_id": "kalshi:E11",
+    "venue": "kalshi",
+    "native_id": "E11",
+    "event_id": "text-E11",
+    "title": "Will the Fed cut rates by 25 bps in December 2025?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:E11",
+    "venue": "polymarket",
+    "native_id": "E11",
+    "event_id": "text-E11",
+    "title": "Will the Fed cut rates by 50 bps in December 2025?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "kalshi:E12",
+    "venue": "kalshi",
+    "native_id": "E12",
+    "event_id": "text-E12",
+    "title": "Will Trump win Pennsylvania in 2024?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:E12",
+    "venue": "polymarket",
+    "native_id": "E12",
+    "event_id": "text-E12",
+    "title": "Will Trump win Michigan in 2024?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "kalshi:E13",
+    "venue": "kalshi",
+    "native_id": "E13",
+    "event_id": "text-E13",
+    "title": "Will the Fed cut rates at the December 2025 FOMC meeting?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USD",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.07",
+      "exponent": 1,
+      "rounding_step": "0.01"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  },
+  {
+    "market_id": "polymarket:E13",
+    "venue": "polymarket",
+    "native_id": "E13",
+    "event_id": "text-E13",
+    "title": "Fed decreases interest rates after December 2025 meeting?",
+    "outcome_label": "Yes",
+    "rules_text": "Hand-built term-less market for the text fallback (architecture 6.4).",
+    "terms": null,
+    "resolution_source": {
+      "name": "Unknown",
+      "url": null
+    },
+    "collateral": {
+      "asset": "USDC",
+      "has_value": true
+    },
+    "tradable": true,
+    "trading_closes_at": null,
+    "resolves_at": null,
+    "captured_at": "2026-10-10T20:44:29.495262Z",
+    "data_source": "fixture",
+    "fees": {
+      "coefficient": "0.05",
+      "exponent": 1,
+      "rounding_step": "0.00001"
+    },
+    "books": {
+      "YES": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      },
+      "NO": {
+        "asks": [
+          {
+            "price": "0.52",
+            "quantity": "100"
+          }
+        ],
+        "bids": [
+          {
+            "price": "0.48",
+            "quantity": "100"
+          }
+        ],
+        "depth_complete": true
+      }
+    },
+    "venue_metadata": {}
+  }
+]
