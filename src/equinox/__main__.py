@@ -1,4 +1,6 @@
-from equinox.server import main
+import sys
+
+from equinox.cli import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
