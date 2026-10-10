@@ -42,7 +42,7 @@ Follow the project skills in `.claude/skills/`:
 
 ## Checks
 
-The one check is `scripts/gate.py`: ruff lint, ruff format, then pytest. It is the same check in CI on both hosts.
+The one check is `scripts/gate.py`: ruff lint, ruff format, then pytest. GitHub Actions runs it on every push and pull request, and is the CI of record. GitLab runs the same job only when a project runner is registered and `EQUINOX_GITLAB_RUNNER` is set (D40).
 
 - Windows: `.venv\Scripts\python scripts\gate.py`
 - macOS, Linux and CI: `make gate`

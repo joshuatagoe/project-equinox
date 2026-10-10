@@ -1,4 +1,7 @@
-# Same check as GitHub Actions: make gate on merge requests and the default branch.
+# The same gate as GitHub Actions, which is the CI of record (D40). labs.gauntletai.com gives
+# this project no shared runners, so the job runs only once a project runner is registered and
+# the CI/CD variable EQUINOX_GITLAB_RUNNER is set. Without it, no pipeline is created at all,
+# instead of one that waits forever.
 gate:
   image: python:3.12
   cache:
@@ -11,5 +14,5 @@ gate:
     - .venv/bin/pip install -q -r requirements.txt
     - make gate
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $EQUINOX_GITLAB_RUNNER && $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $EQUINOX_GITLAB_RUNNER && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

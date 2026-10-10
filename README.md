@@ -9,7 +9,7 @@ One codebase, two hosts. `scripts/gate.py` (ruff, then pytest) is the check that
 | GitLab ([labs.gauntletai.com](https://labs.gauntletai.com/calebtagoe/project-equinox)) | `origin` | [`.gitlab-ci.yml`](.gitlab-ci.yml) |
 | GitHub ([joshuatagoe/project-equinox](https://github.com/joshuatagoe/project-equinox)) | `github` | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
-CI runs on merge requests and pull requests, and on `main`. Every push goes to both remotes, one explicit command each: `git push origin <branch>` and `git push github <branch>`, or `make push-hosts` for the current branch. On a fresh clone, `scripts/link-hosts.sh <github-url> <gitlab-url>` sets up both remotes.
+GitHub Actions is the CI of record: it runs on pull requests and on `main`. GitLab runs the same job only when a project runner is registered and the CI/CD variable `EQUINOX_GITLAB_RUNNER` is set, because labs.gauntletai.com gives this project no shared runners (D40). Every push goes to both remotes, one explicit command each: `git push origin <branch>` and `git push github <branch>`, or `make push-hosts` for the current branch. On a fresh clone, `scripts/link-hosts.sh <github-url> <gitlab-url>` sets up both remotes.
 
 ## Run locally
 
