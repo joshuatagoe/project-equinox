@@ -74,7 +74,7 @@ From the snapshot `src/equinox/fixtures/snapshot-2026-10-10/` (moved there from 
 | Buy 100 NO | 100 × $0.16 + $0.95 fee = **$16.95** | 100 × $0.17 + $0.7055 fee = **$17.7055** | Kalshi |
 | Buy 5,000 NO | 2 price levels, average $0.1689, $49.14 fee = **$893.7951** | 5,000 × $0.17 + $35.275 fee = **$885.275** | Polymarket |
 
-The 100 NO and 5,000 NO rows have different winners: Kalshi's 16¢ level is too small for 5,000 contracts. Charging the fee on the average price instead of level by level, or ignoring depth, would pick the wrong venue.
+The 100 NO and 5,000 NO rows have different winners: Kalshi's 16¢ level is too small for 5,000 contracts. Ignoring depth would pick the wrong venue: priced at Kalshi's best level alone, 5,000 NO would cost $847.04 and beat Polymarket's $885.275. Charging the fee on the average price happens to give the same $49.14 here; it changes the result when an order spans prices far apart (D5).
 
 ## Where `docs/architectural_review.md` is wrong
 

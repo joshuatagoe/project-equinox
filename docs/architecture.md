@@ -24,7 +24,7 @@ Equinox is a command-line prototype. It does five things:
 | Buy 100 NO | 100 × $0.16 + $0.95 fee = **$16.95** | 100 × $0.17 + $0.7055 fee = **$17.7055** | Kalshi, $0.7555 less |
 | Buy 5,000 NO | walks 2 price levels: average $0.1689, $49.14 fee = **$893.7951** | 5,000 × $0.17 + $35.275 fee = **$885.275** | Polymarket, $8.5201 less |
 
-The last two rows give different answers for the same market. Kalshi's 16¢ price level holds fewer contracts than the order needs, so at 5,000 contracts the order spills onto its 17¢ level. Charging the fee on the average price instead of level by level, or ignoring depth, would pick the wrong venue.
+The last two rows give different answers for the same market. Kalshi's 16¢ price level holds fewer contracts than the order needs, so at 5,000 contracts the order spills onto its 17¢ level. Ignoring depth would pick the wrong venue: priced at Kalshi's best level alone, 5,000 NO would cost $847.04 and beat Polymarket's $885.275. Charging the fee on the average price happens to give the same $49.14 here; it changes the result when an order spans prices far apart (D5).
 
 ### Third-venue check
 

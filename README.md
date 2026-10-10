@@ -1,35 +1,148 @@
 # Project Equinox
 
-Project Equinox compares prediction markets across venues. It reads Kalshi and Polymarket, matches markets that pay out on the same event, and simulates which venue is cheapest for a hypothetical order, explaining each decision. The design is in [docs/architecture.md](docs/architecture.md). The full README, with demo commands, comes with the implementation (feature PRD feat-06).
+Equinox compares prediction markets across venues. It reads Kalshi and Polymarket through their public APIs, turns each venue's markets into one venue-neutral shape, and groups markets that pay out under exactly the same conditions. Then it simulates a hypothetical order on every market in a group and picks the cheapest venue that can fill it, fees and order-book depth included. Every decision comes with a written explanation: why the markets were matched, what each venue would cost, why a venue was excluded, and what could still go wrong.
 
-One codebase, two hosts. `scripts/gate.py` (ruff, then pytest) is the check that has to pass, and it is the same check in CI on both:
+It is an infrastructure prototype, not a trading product. Nothing is bought, sold or stored.
+
+## Run it
+
+Needs Python 3.12.
+
+**Windows** (no `make`; [uv](https://docs.astral.sh/uv/) provides Python 3.12):
+
+```powershell
+uv venv --python 3.12 .venv
+uv pip install --python .venv -r requirements.txt
+.venv\Scripts\python scripts\gate.py
+$env:PYTHONPATH = "src"
+.venv\Scripts\python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 100 --source fixtures
+```
+
+**macOS and Linux** (needs the standard `venv` module; on Debian and Ubuntu that is `python3-venv`):
+
+```bash
+make install
+make gate
+PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 100 --source fixtures
+```
+
+`scripts/gate.py` is the one check: ruff lint, ruff format, then the tests. No test touches the network.
+
+### Commands
+
+| Command | What it prints |
+|---|---|
+| `python -m equinox markets` | Every canonical market: its contract terms in words, whether it is tradable, and the best ask for YES and NO |
+| `python -m equinox match` | Groups of equivalent markets with their risk flags, then the pairs that are only AMBIGUOUS, with reasons |
+| `python -m equinox simulate --market ID --outcome YES\|NO --quantity N [--budget B]` | The routing decision: a quote per venue, the winner, the rationale and every warning |
+
+Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
+
+`--source fixtures` reads a snapshot of both venues saved on 2026-10-10, so the numbers below never change. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded all ten markets and routed the first demo order the same way. The tracked events are the Fed's October 27–28, 2026 meeting (`src/equinox/tracked_events.json`, D28). After that meeting resolves, live runs need the next meeting's event IDs; fixture runs are unaffected. If a venue fails during a live run, its markets come from the snapshot and the output says so (D17).
+
+`python -m equinox.server` still serves a small status page with a `/health` route (`make run` on macOS and Linux).
+
+## Demo
+
+All rows use the snapshot. The running example is "Will the Fed hold rates at its October 27–28, 2026 meeting?": Kalshi `KXFEDDECISION-26OCT-H0` and Polymarket `2589812` ("No change").
+
+<!-- demo:start -->
+| Command | Exit | Result |
+|---|---|---|
+| `python -m equinox markets --source fixtures` | 0 | 10 markets: 5 on Kalshi and 5 on Polymarket |
+| `python -m equinox match --source fixtures` | 0 | 5 clusters, each one Kalshi market and one Polymarket market |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 100 --source fixtures` | 0 | ROUTED to `polymarket:2589812`: $84.672 against $85.90 on Kalshi |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome NO --quantity 100 --source fixtures` | 0 | ROUTED to `kalshi:KXFEDDECISION-26OCT-H0`: $16.95 against $17.7055 on Polymarket |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome NO --quantity 5000 --source fixtures` | 0 | ROUTED to `polymarket:2589812`: $885.275 against $893.7951 on Kalshi, whose order spills onto a second price level |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 100 --budget 80 --source fixtures` | 3 | BUDGET_EXCEEDED: both venues can fill it, for $84.672 and $85.90 |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 5000000 --source fixtures` | 2 | INSUFFICIENT_LIQUIDITY: neither book holds 5,000,000 YES contracts |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-C25 --outcome NO --quantity 100 --source fixtures` | 0 | ROUTED to `polymarket:2589811`: $99.61992, while nobody on Kalshi is selling NO |
+| `python -m equinox simulate --market kalshi:NOPE --outcome YES --quantity 1 --source fixtures` | 1 | MARKET_NOT_FOUND |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 0 --source fixtures` | 4 | INVALID_INPUT |
+<!-- demo:end -->
+
+`tests/test_docs.py` runs every row above and checks the exit code, status, winner and each dollar amount against the code. A number in this table that stops matching fails the gate.
+
+The rows with 100 NO and 5,000 NO pick different venues for the same market. Kalshi's best NO price holds only 534.49 contracts, so a 5,000-contract order walks into its next level, and fees are charged level by level. Priced at Kalshi's best level alone, the order would look like $847.04 and win, which is wrong. [docs/ROUTING.md](docs/ROUTING.md) works through it.
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph IN["Interfaces"]
+        CLI["cli.py<br/>markets, match, simulate"]
+    end
+    subgraph AD["Adapters: the only venue-aware code"]
+        K["kalshi.py"]
+        P["polymarket.py"]
+        F["fetch.py<br/>HTTP fetcher or fixture fetcher"]
+    end
+    subgraph EN["Engines: pure functions, no venue names"]
+        MA["matcher/<br/>terms rules, text fallback"]
+        RO["router/<br/>depth walk, fees, decision"]
+    end
+    subgraph MO["Models: schemas and validation only"]
+        CM["canonical.py, equivalence.py, routing.py, trace.py"]
+    end
+    CLI --> K & P
+    K & P --> F
+    K & P -->|CanonicalMarket list| CLI
+    CLI -->|markets| MA
+    MA -->|EquivalenceCluster| CLI
+    CLI -->|order and cluster| RO
+    RO -->|EquinoxTrace| CLI
+    AD -.-> MO
+    EN -.-> MO
+```
+
+| Module | Owns | Rule it keeps |
+|---|---|---|
+| `models/` | Every shape that crosses a module boundary, and its validation | No I/O and no venue names. Money is `Decimal`, never a float (D3). |
+| `adapters/` | Venue URLs, field names, units, sort orders, and the parsers that turn a venue's wording into contract terms | Everything leaves fully normalized: prices in dollars, both outcomes' books sorted best-first, terms filled in where the event family has a parser. |
+| `matcher/` | Equivalence rules and clusters | Pure. Imports only `models/`. Names no venue. |
+| `router/` | The depth walk, fees, eligibility, the decision, the rationale and the trace | Pure. Imports only `models/`. Names no venue. Time comes in as an argument. |
+| `cli.py` | Arguments, settings, loading adapters, output, exit codes | The only place that wires modules together. |
+
+The brief asks that routing logic contain no venue-specific assumptions. `tests/test_layering.py` checks it on every run: it fails if `matcher/` or `router/` imports anything but the models, the standard library and pydantic, or if the word "kalshi", "polymarket" or "meridian" appears in their code. Venue names reach the output only through each market's own `venue` field.
+
+A new venue is one adapter file, a fixture, an entry in `tracked_events.json` and one line in the CLI's adapter registry. [docs/architecture.md](docs/architecture.md) §9 checks that against a third venue, Meridian, without integrating it: hand-built Meridian-style markets go through the real matcher and router in the test suite.
+
+The full design is [docs/architecture.md](docs/architecture.md).
+
+## Equivalence and routing, in brief
+
+**Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed.
+
+**Routing** ([docs/ROUTING.md](docs/ROUTING.md)). For one order, every market in the group is simulated: walk the order book from the cheapest ask, charge each venue's own fee formula level by level, and record every reason the venue can't take the order. The cheapest venue that can fill the whole order within budget wins (D6, D7). The trace says why, what each venue would have cost, and what the match risks are.
+
+## Why Python
+
+The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools when justified. Equinox is a local, single-process prototype: one command, about 18 HTTP requests, nothing stored (D1). Python's standard library covers the HTTP client, exact decimal arithmetic and time zones, and `pydantic` gives the canonical model its validation. The repository and both CI configurations were already set up for Python 3.12. Clarity of the matching and routing logic mattered more here than the runtime.
+
+## Where the reasoning is
+
+- [docs/DECISIONS.md](docs/DECISIONS.md): every decision with its reason and trade-off, the assumptions A1–A5, and what was cut.
+- [docs/research/venue_facts.md](docs/research/venue_facts.md): what each venue actually does, each fact with a source and a CONFIRMED, SECONDARY or UNCONFIRMED label.
+- [docs/AI_USAGE.md](docs/AI_USAGE.md): how AI was used, and every place it misled us and how that was caught.
+- [docs/features/](docs/features/): the build plan, one PRD per lane, with its acceptance tests.
+
+## Known limitations
+
+Architecture §13 lists them with their reasons. In short:
+
+- One event family has a term parser: Fed rate decisions. Every other market can only be matched by text, so it is never routed.
+- Tracked events are configured, not discovered (D28).
+- Order books are treated as frozen at capture (A2). One order goes to one venue; there is no split routing.
+- Fees are list fees: Polymarket's taker rebates are ignored (A5), and Kalshi fees are rounded up to the cent (A3).
+- Meridian is not integrated; §9 shows that a venue like it would fit.
+
+## Hosts and CI
+
+One codebase on two hosts. Every push goes to both remotes with one explicit command each: `git push origin <branch>` and `git push github <branch>`, or `make push-hosts` for the current branch. On a fresh clone, `scripts/link-hosts.sh <github-url> <gitlab-url>` sets up both remotes.
 
 | Host | Git remote | CI |
 |---|---|---|
 | GitLab ([labs.gauntletai.com](https://labs.gauntletai.com/calebtagoe/project-equinox)) | `origin` | [`.gitlab-ci.yml`](.gitlab-ci.yml) |
 | GitHub ([joshuatagoe/project-equinox](https://github.com/joshuatagoe/project-equinox)) | `github` | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
-GitHub Actions is the CI of record: it runs on pull requests and on `main`. GitLab runs the same job only when a project runner is registered and the CI/CD variable `EQUINOX_GITLAB_RUNNER` is set, because labs.gauntletai.com gives this project no shared runners (D40). Every push goes to both remotes, one explicit command each: `git push origin <branch>` and `git push github <branch>`, or `make push-hosts` for the current branch. On a fresh clone, `scripts/link-hosts.sh <github-url> <gitlab-url>` sets up both remotes.
-
-## Run locally
-
-Requires Python 3.12.
-
-**macOS and Linux** (needs the stdlib `venv` module; `python3-venv` on Debian and Ubuntu):
-
-```bash
-make install
-make gate
-make run
-```
-
-**Windows** (no `make`; uses [uv](https://docs.astral.sh/uv/) to get Python 3.12):
-
-```powershell
-uv venv --python 3.12 .venv
-uv pip install --python .venv -r requirements.txt
-.venv\Scripts\python scripts\gate.py
-$env:PYTHONPATH = "src"; .venv\Scripts\python -m equinox.server
-```
-
-The status page is at http://127.0.0.1:8741, and the JSON check is at http://127.0.0.1:8741/health. `PORT=9001 make run` (or `--port 9001`) changes the port.
+GitHub Actions is the CI of record: it runs `scripts/gate.py` on pull requests and on `main`. GitLab runs the same job only when a project runner is registered and the CI/CD variable `EQUINOX_GITLAB_RUNNER` is set, because labs.gauntletai.com gives this project no shared runners (D40).
