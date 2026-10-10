@@ -15,7 +15,7 @@ Turn Polymarket's Gamma events and CLOB books into canonical markets, with term 
 - **Books:** the YES token's `asks` and `bids` make the YES book; the NO token's make the NO book. Sort explicitly: CLOB returns bids ascending and asks descending, the best price last (P4). Polymarket's own OpenAPI spec says the opposite and is wrong. Never add one token's mirrored bids to the other token's asks (P5).
 - **Terms (`fed_decision`):** parse `groupItemTitle` per §5.3. observed_on is the last day in "scheduled for October 27-28, 2026" in `description`. If that phrase is missing, use `endDate` converted to `America/New_York` and add a warning. A tracked event with any other family → terms None for its markets, plus one warning.
 - **Fees:** `feesEnabled` false → coefficient 0. Otherwise `feeSchedule.rate` and `feeSchedule.exponent`; step 0.00001. Never read `takerBaseFee`; it is not a rate (P7).
-- **captured_at:** the earlier of the two books' `timestamp` values (epoch milliseconds, UTC).
+- **captured_at:** the earlier of the two books' `timestamp` values (epoch milliseconds, UTC). The adapter accepts the `clock` argument (§5.1) and doesn't need it.
 
 ## Acceptance tests (snapshot via `FixtureFetcher`)
 

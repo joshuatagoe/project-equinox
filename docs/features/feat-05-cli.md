@@ -14,8 +14,8 @@ Wire the adapters, matcher and router into the three commands, and prove the who
 - `cli.main(argv) -> int` provides `markets`, `match` and `simulate`, with the flags in §8.2. Settings come from §11: environment variables, overridden by flags.
 - **Loading:**
   - Read `tracked_events.json` and build one adapter per venue that has an adapter. The registry is a dict from venue name to adapter class, so a new venue is one line here.
-  - With `--source fixtures`, every adapter gets a `FixtureFetcher` on the snapshot and `data_source="fixture"`.
-  - With `--source live`, every adapter gets an `HttpFetcher`. If a venue raises `FetchError`, that venue is re-run with its fixture fetcher and a warning (D17).
+  - With `--source fixtures`, every adapter gets a `FixtureFetcher` on the snapshot, `data_source="fixture"`, and a clock that returns the fetcher's `captured_at` (D37).
+  - With `--source live`, every adapter gets an `HttpFetcher` and `datetime.now(UTC)` as its clock. If a venue raises `FetchError`, that venue is re-run with its fixture fetcher, the snapshot's clock and a warning (D17).
 - **simulate:**
   - Validate the input into an `OrderRequest`. A failure → `failure_trace(INVALID_INPUT)`, exit 4.
   - Look up the market's cluster. If the market isn't loaded → MARKET_NOT_FOUND, exit 1. If it is loaded but has no terms → MARKET_NOT_FOUND, with the message "no contract terms: this market can only be matched by text".

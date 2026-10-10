@@ -1,6 +1,6 @@
 # Project Equinox: Architecture
 
-**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
+**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 and D37 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
 
 ---
 
@@ -105,7 +105,7 @@ flowchart LR
 **Stubs and seams.**
 - **Fetching.** Adapters never call HTTP themselves. They get a `Fetcher`, and there are two: a live one (`urllib`) and a fixture one that looks the URL up in a snapshot's `index.json`. An adapter can't tell which one it has.
 - **A new venue** plugs in as one adapter file, plus a fixture and an entry in `tracked_events.json`. Section 9 checks this against Meridian.
-- **Time** is passed in (`now`) so that the staleness check and trace timestamps are deterministic in tests.
+- **Time** is passed in (`now` for the router, a `clock` for adapters) so that the staleness check and trace timestamps are deterministic in tests.
 
 ---
 
@@ -238,6 +238,7 @@ These hold even if an adapter has a bug:
 
 ```python
 Fetcher = Callable[[str], Any]      # URL -> parsed JSON (parse_float=Decimal); raises FetchError
+Clock = Callable[[], datetime]      # the time a response was read, time-zone aware
 
 @dataclass(frozen=True)
 class AdapterResult:
@@ -246,10 +247,13 @@ class AdapterResult:
 
 class VenueAdapter(ABC):
     venue: ClassVar[str]
-    def __init__(self, fetch: Fetcher, tracked: list[TrackedEvent], data_source: Literal["live", "fixture"]): ...
+    def __init__(self, fetch: Fetcher, tracked: list[TrackedEvent],
+                 data_source: Literal["live", "fixture"], clock: Clock): ...
     @abstractmethod
     def fetch_markets(self) -> AdapterResult: ...
 ```
+
+**Read time (D37).** An adapter whose venue puts no timestamp on a response (Kalshi) sets `captured_at` from `clock()`. Live runs pass `datetime.now(UTC)`. Fixture runs pass the snapshot's own capture time, which `FixtureFetcher.captured_at` reads from the snapshot's `index.json`, so fixture data never looks fresh. Tests pass a fixed clock.
 
 `TrackedEvent` holds a venue's event ID (a Kalshi event ticker or a Polymarket slug) and its family. The only family with a term parser is `fed_decision`. Adding a family means adding one parser to each adapter that lists it. The tracked events are configured, not discovered (D28; see §11).
 
@@ -275,7 +279,7 @@ The base URL is `https://external-api.kalshi.com/trade-api/v2` (K1).
 | trading_closes_at, resolves_at | `close_time`, `expected_expiration_time` |
 | fees | coefficient 0.07 × (event `fee_multiplier_override` if set, else series `fee_multiplier`), exponent 1, step 0.01 (K9, A3) |
 | books (K4, K5) | YES asks = `no_dollars` at 1 − p, cheapest first. YES bids = `yes_dollars`, highest first. NO asks = `yes_dollars` at 1 − p. NO bids = `no_dollars`. An empty side is an empty book. |
-| captured_at | When the orderbook response was read; the API gives no timestamp |
+| captured_at | `clock()` when the orderbook response was read; the API gives no timestamp (D37) |
 
 ### 5.3 Polymarket (`adapters/polymarket.py`)
 
@@ -624,6 +628,7 @@ src/equinox/
   router/   depth.py  engine.py  rationale.py
 tests/
   golden/canonical_markets.json   # includes the §9 fit-check markets
+  conftest.py            # loads the golden markets for every test file
   test_models.py  test_layering.py
   test_kalshi.py  test_polymarket.py
   test_matcher.py  test_router.py  test_cli.py
@@ -634,7 +639,7 @@ tests/
 
 | Step | Feature | Owns | Done when |
 |---|---|---|---|
-| 1 | feat-01 models and fixtures | `models/`, `adapters/base.py`, `adapters/fetch.py`, `fixtures/`, `tracked_events.json`, `tests/golden/`, `test_models.py`, `test_layering.py`, `requirements.txt` | `make gate` passes; the golden file validates against the models |
+| 1 | feat-01 models and fixtures | `models/`, `adapters/base.py`, `adapters/fetch.py`, `fixtures/`, `tracked_events.json`, `tests/golden/`, `tests/conftest.py`, `test_models.py`, `test_layering.py`, `requirements.txt` | `make gate` passes; the golden file validates against the models |
 | 2 (parallel) | feat-02a Kalshi | `adapters/kalshi.py`, `test_kalshi.py` | Snapshot facts asserted |
 | 2 | feat-02b Polymarket | `adapters/polymarket.py`, `test_polymarket.py` | Snapshot facts asserted |
 | 2 | feat-03 matcher | `matcher/`, `test_matcher.py` | E1–E13 pass |

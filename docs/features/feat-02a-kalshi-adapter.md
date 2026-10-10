@@ -1,7 +1,7 @@
 # feat-02a: Kalshi adapter
 
 **Lane:** parallel, after feat-01. **Depends on:** feat-01 (models, `base.py`, `fetch.py`, snapshot fixture).
-**Implements:** architecture §5.1, §5.2; venue_facts K1–K10; D4, D11, D13, D14, D22, D25, A3.
+**Implements:** architecture §5.1, §5.2; venue_facts K1–K10; D4, D11, D13, D14, D22, D25, D37, A3.
 **Owns only:** `src/equinox/adapters/kalshi.py`, `tests/test_kalshi.py`.
 
 ## Goal
@@ -16,6 +16,7 @@ Turn Kalshi's series, event and orderbook responses into canonical markets. That
   - **Terms:** for the `fed_decision` family, parse `custom_strike` with the five shapes in §5.2. Any other shape → `terms=None`, plus a warning naming the ticker.
   - **observed_on:** the event's `strike_date`, converted to `America/New_York` with `zoneinfo`.
   - **Fee coefficient:** `Decimal("0.07") * multiplier`. Use the event's `fee_multiplier_override` if present, else the series' `fee_multiplier`.
+  - **captured_at:** `clock()`, called when each orderbook is read. Kalshi's response has no timestamp (D37).
 - A market that fails validation is skipped, with a warning. The other markets still return.
 
 ## Acceptance tests (snapshot via `FixtureFetcher`; write first, see each fail)
@@ -30,6 +31,7 @@ Turn Kalshi's series, event and orderbook responses into canonical markets. That
 | 6 | Other fields | resolution institution `federalreserve.gov`; collateral USD with value; tradable True; trading_closes_at 2026-10-28T17:59Z; resolves_at 18:05Z; data_source as constructed |
 | 7 | A fixture copy with `custom_strike {"Cut": "50"}` in a temp directory | That market has terms None, and a warning names it |
 | 8 | A fixture copy with the event's `fee_multiplier_override: 0.5` | coefficient 0.035 |
+| 9 | `clock` set to the snapshot's `FixtureFetcher.captured_at` | Every market's captured_at is 2026-10-10T20:44:29.495262Z |
 
 ## Done when
 

@@ -2,7 +2,7 @@
 
 Notion is the only status board. It is reached through the Notion MCP server in `.mcp.json`.
 
-**Board:** not created yet. It is created, and its link added here, in the first session after Notion is connected (D35).
+**Board:** [Equinox status board](https://app.notion.com/p/cb823378cdeb408bbb9bb9483de963c4) (data source `collection://3c48e59b-14b5-4067-928b-7035281aa974`), created 2026-10-10 (D35).
 
 Properties:
 - Name.

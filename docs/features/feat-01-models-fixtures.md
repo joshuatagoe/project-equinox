@@ -1,12 +1,12 @@
 # feat-01: Models, fetchers, fixtures and golden data
 
 **Lane:** runs first, alone. **Depends on:** nothing (workflow prep fixes `make gate` on Windows first).
-**Implements:** architecture §4, §5.1, §8.1, §3 (layering guard), §9.3 and §10 (golden file); D3, D11, D13, D14, D17, D22, D24, D25, D26, D29, D30.
+**Implements:** architecture §4, §5.1, §8.1, §3 (layering guard), §9.3 and §10 (golden file); D3, D11, D13, D14, D17, D22, D24, D25, D26, D29, D30, D37.
 **Owns only these files:**
 - `src/equinox/models/*`
 - `src/equinox/adapters/__init__.py`, `adapters/base.py`, `adapters/fetch.py`
 - `src/equinox/fixtures/**`, `src/equinox/tracked_events.json`
-- `tests/golden/canonical_markets.json`, `tests/test_models.py`, `tests/test_layering.py`
+- `tests/golden/canonical_markets.json`, `tests/conftest.py`, `tests/test_models.py`, `tests/test_layering.py`
 - `requirements.txt`
 - The path constants in `docs/research/running_example.py` and `capture_snapshot.py`
 
@@ -20,10 +20,10 @@ Fix every shape the other lanes build against, and the data they test with. Afte
 2. **Models.** Write the models in architecture §4.1–4.4 and §8.1, with exactly those names and fields, and the validation rules in §4.5. `FeeSchedule.fee(fills)` rounds up once with `ROUND_CEILING` to `rounding_step`. Also add:
    - `QuoteReason`, `QuoteWarning`, `RoutingStatus` and `EXIT_CODES` (§7.2), in `models/routing.py`;
    - `EquivalenceStatus`, `MatchResult` and `EquivalenceCluster` (§8.1), in `models/equivalence.py`.
-3. **Adapter base.** `adapters/base.py` holds `Fetcher`, `FetchError`, `TrackedEvent`, `AdapterResult` and `VenueAdapter`, as in §5.1.
+3. **Adapter base.** `adapters/base.py` holds `Fetcher`, `Clock`, `FetchError`, `TrackedEvent`, `AdapterResult` and `VenueAdapter`, as in §5.1. The constructor takes `clock` (D37).
 4. **Fetchers.** `adapters/fetch.py` holds:
    - `HttpFetcher(timeout)`: urllib, a `User-Agent` header, `json.loads(body, parse_float=Decimal)`. Raises `FetchError` on any HTTP or parse error.
-   - `FixtureFetcher(snapshot_dir)`: reads the directory's `index.json` (filename → URL) and serves the file for a URL. Query-parameter order is ignored. Raises `FetchError` for a URL that isn't in the index.
+   - `FixtureFetcher(snapshot_dir)`: reads the directory's `index.json`, whose `files` map is filename → URL, and serves the file for a URL. Query-parameter order is ignored. Raises `FetchError` for a URL that isn't in the index. Its `captured_at` attribute is the index's `captured_at`, as an aware UTC datetime (D37).
 5. **Snapshot fixture.** `git mv docs/research/samples/snapshot-2026-10-10 src/equinox/fixtures/snapshot-2026-10-10`. Do not edit any response file. Update the two research scripts to the new path.
 6. **Tracked events.** `tracked_events.json` lists Kalshi `KXFEDDECISION-26OCT` and Polymarket `fed-decision-in-october-20260617190323537`, both with family `fed_decision`.
 7. **Golden canonical markets.** `tests/golden/canonical_markets.json` holds hand-written `CanonicalMarket` objects, in three groups. The books carry the top 3 levels of every side.
@@ -37,6 +37,7 @@ Fix every shape the other lanes build against, and the data they test with. Afte
      - The E9 variant (AAPL-330 on 2026-10-13) and the E10 variant (an `official_close` copy of AAPL-330).
    - **Six term-less markets** with the titles in architecture §6.4 E11–E13.
 8. **Layering guard.** `tests/test_layering.py` as described in architecture §3. Until the engine folders exist it skips them, but it must fail if a venue name or a forbidden import appears.
+9. **Golden loader.** `tests/conftest.py` provides a `golden_markets` fixture: a dict from `market_id` to `CanonicalMarket`, loaded from the golden file. The matcher and router tests use it instead of writing their own loaders.
 
 ## Acceptance tests (write each first and see it fail)
 
@@ -51,10 +52,11 @@ Fix every shape the other lanes build against, and the data they test with. Afte
 | 7 | `FixtureFetcher` with an unknown URL | `FetchError` |
 | 8 | The golden file loads into `list[CanonicalMarket]` | No errors. Every market has YES and NO books; asks rise and bids fall. |
 | 9 | Layering guard on a temp file containing `import equinox.adapters` or the word "kalshi" | Fails |
+| 10 | `FixtureFetcher(snapshot).captured_at` | 2026-10-10T20:44:29.495262Z, time-zone aware |
 
 ## Done when
 
-`make gate` passes; tests 1–9 pass; `python docs/research/running_example.py` still prints the numbers in architecture §1.
+`make gate` passes; tests 1–10 pass; `python docs/research/running_example.py` still prints the numbers in architecture §1.
 
 ## Out of scope
 
