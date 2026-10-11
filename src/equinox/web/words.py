@@ -71,13 +71,18 @@ def outcome_name(terms: ContractTerms) -> str:
     if move is None:
         return f"{terms.subject} {terms.measure.replace('_', ' ')} {_bound(terms)}"
     direction, size, how = move
-    verb = "Cut" if direction == "cut" else "Hike"
+    verb, points = ("Cut" if direction == "cut" else "Hike"), _points(size)
     return {
         "unchanged": "No change",
-        "exactly": f"{verb} {size} bps",
-        "or more": f"{verb} {size} bps or more",
-        "more than": f"{verb} more than {size} bps",
+        "exactly": f"{verb} {size} bps ({points} percentage points)",
+        "or more": f"{verb} {size} bps or more ({points} percentage points or more)",
+        "more than": f"{verb} more than {size} bps (more than {points} percentage points)",
     }[how]
+
+
+def _points(bps: str) -> str:
+    """Basis points as percentage points, for people who don't use bps: "25" -> "0.25"."""
+    return f"{Decimal(bps) / 100:.2f}"
 
 
 def pays_if(terms: ContractTerms) -> str:

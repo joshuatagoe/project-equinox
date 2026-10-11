@@ -142,13 +142,14 @@ class CanonicalMarket(Frozen):
     captured_at: UtcDatetime  # when the book was read
     data_source: Literal["live", "fixture"]
     fees: FeeSchedule
-    books: dict[Outcome, OutcomeBook]  # both "YES" and "NO" (D14)
+    books: dict[Outcome, OutcomeBook] | None = None  # both "YES" and "NO" once fetched (D14, D49)
+    best_asks: dict[Outcome, Exact | None] = {}  # from the venue's listing, before any book (D49)
     venue_metadata: dict[str, Any] = {}
 
     @model_validator(mode="after")
     def _identity_and_books(self) -> "CanonicalMarket":
         if self.market_id != f"{self.venue}:{self.native_id}":
             raise ValueError("market_id must be '<venue>:<native_id>'")
-        if set(self.books) != {"YES", "NO"}:
+        if self.books is not None and set(self.books) != {"YES", "NO"}:
             raise ValueError("books must hold both YES and NO")
         return self

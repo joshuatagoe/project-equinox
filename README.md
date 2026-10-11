@@ -38,7 +38,9 @@ PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISIO
 
 Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
 
-`--source fixtures` reads a snapshot of both venues saved on 2026-10-10, so the numbers below never change. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded all ten markets and routed the first demo order the same way. The tracked events are the Fed's October 27–28, 2026 meeting (`src/equinox/tracked_events.json`, D28). After that meeting resolves, live runs need the next meeting's event IDs; fixture runs are unaffected. If a venue fails during a live run, its markets come from the snapshot and the output says so (D17).
+Equinox finds the markets itself (D47). For each event family it can read, today Fed rate decisions, it asks each venue for every open event: Kalshi by its `KXFEDDECISION` series, Polymarket by its `fed-rates` tag, keeping only open "Fed Decision in …?" events. On 2026-10-11 that was 11 meetings on Kalshi and 3 on Polymarket, and the three meetings both list (October, December, January) are matched outcome by outcome. Order books are read only for the group being priced (D49).
+
+`--source fixtures` reads a saved snapshot, so the numbers below never change. `--snapshot NAME` picks one: `snapshot-2026-10-10` (the default) holds the October meeting only and predates discovery, so it uses the pinned events in `src/equinox/tracked_events.json` and says so; `snapshot-2026-10-11` holds every meeting discovery found. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded every market and routed the first demo order the same way. If a venue fails during a live run, its markets come from the snapshot and the output says so (D17).
 
 ### The web UI
 
@@ -53,7 +55,7 @@ Then open http://127.0.0.1:8741 (on macOS and Linux, `make run`). Three pages, b
 - **Market board.** Every outcome with both venues' prices side by side, how sure Equinox is that they are the same bet, and the best venue for 100 YES and for 100 NO.
 - **Why these match.** Each venue's rules side by side, with the differences marked, the verdict, its confidence level and every pair that was set aside as unclear.
 
-The pages use the snapshot unless you switch to live prices. They call the same code as the command line, so the two always agree, and a test checks it. `/health` returns the server's status as JSON. Architecture §8.3 has the details (D45).
+The banner lets you pick the data: either snapshot, or live prices. On `snapshot-2026-10-11` or live data the board shows every Fed meeting both venues list, one table per meeting. Outcome names give basis points in percentage points too, e.g. "Cut 25 bps (0.25 percentage points)". They call the same code as the command line, so the two always agree, and a test checks it. `/health` returns the server's status as JSON. Architecture §8.3 has the details (D45).
 
 ## Demo
 
@@ -72,6 +74,9 @@ All rows use the snapshot. The running example is "Will the Fed hold rates at it
 | `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-C25 --outcome NO --quantity 100 --source fixtures` | 0 | ROUTED to `polymarket:2589811`: $99.61992, while nobody on Kalshi is selling NO |
 | `python -m equinox simulate --market kalshi:NOPE --outcome YES --quantity 1 --source fixtures` | 1 | MARKET_NOT_FOUND |
 | `python -m equinox simulate --market kalshi:KXFEDDECISION-26OCT-H0 --outcome YES --quantity 0 --source fixtures` | 4 | INVALID_INPUT |
+| `python -m equinox markets --source fixtures --snapshot snapshot-2026-10-11` | 0 | 70 markets: 55 on Kalshi (11 meetings) and 15 on Polymarket (3 meetings), all found by discovery |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26DEC-H0 --outcome YES --quantity 100 --source fixtures --snapshot snapshot-2026-10-11` | 0 | ROUTED to `polymarket:3215007` (December, no change): $23.8855 against $27.63 on Kalshi, whose 26¢ level holds only 73 contracts |
+| `python -m equinox simulate --market kalshi:KXFEDDECISION-26DEC-H0 --outcome NO --quantity 100 --source fixtures --snapshot snapshot-2026-10-11` | 0 | ROUTED to `kalshi:KXFEDDECISION-26DEC-H0`: $76.9691 against $78.858 on Polymarket |
 <!-- demo:end -->
 
 `tests/test_docs.py` runs every row above and checks the exit code, status, winner and each dollar amount against the code. A number in this table that stops matching fails the gate.
@@ -121,7 +126,7 @@ flowchart LR
 
 The brief asks that routing logic contain no venue-specific assumptions. `tests/test_layering.py` checks it on every run: it fails if `matcher/` or `router/` imports anything but the models, the standard library and pydantic, or if the word "kalshi", "polymarket" or "meridian" appears in their code. Venue names reach the output only through each market's own `venue` field.
 
-A new venue is one adapter file, a fixture, an entry in `tracked_events.json` and one line in the CLI's adapter registry. [docs/architecture.md](docs/architecture.md) §9 checks that against a third venue, Meridian, without integrating it: hand-built Meridian-style markets go through the real matcher and router in the test suite.
+A new venue is one adapter file (how to discover, list and fetch books), a fixture, and one line in the adapter registry in `src/equinox/sources.py`. [docs/architecture.md](docs/architecture.md) §9 checks that against a third venue, Meridian, without integrating it: hand-built Meridian-style markets go through the real matcher and router in the test suite.
 
 The full design is [docs/architecture.md](docs/architecture.md).
 
@@ -165,7 +170,7 @@ The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools 
 Architecture §13 lists them with their reasons. In short:
 
 - One event family has a term parser: Fed rate decisions. Every other market can only be matched by text, so it is never routed.
-- Tracked events are configured, not discovered (D28).
+- Discovery rules are written per venue and family (D47): a venue that renames its series or tag needs a code change, and until then live runs use the pinned events.
 - Order books are treated as frozen at capture (A2). One order goes to one venue; there is no split routing.
 - Fees are list fees: Polymarket's taker rebates are ignored (A5), and Kalshi fees are rounded up to the cent (A3).
 - Meridian is not integrated; §9 shows that a venue like it would fit.

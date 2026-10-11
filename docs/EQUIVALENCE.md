@@ -2,6 +2,15 @@
 
 The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23 and D42.
 
+## How Equinox finds the markets to compare
+
+Equinox doesn't start from a list of pairs. For each event family it can read (today, Fed rate decisions) it asks each venue for every open event of that family, then matches whatever it finds (D47):
+
+- **Kalshi** lists every meeting in the `KXFEDDECISION` series (venue fact K13).
+- **Polymarket** tags its Fed events `fed-rates`. The tag also covers about 34 other Fed and Treasury events, and closed 2025 events with near-identical titles still exist, so only open, neg-risk events titled "Fed Decision in …?" are kept (P12).
+
+On the 2026-10-11 snapshot that finds 11 meetings on Kalshi and 3 on Polymarket. The matcher then pairs the three meetings both venues list (October, December and January), outcome by outcome: 15 groups of two. The other 40 Kalshi markets are groups of one: Equinox can still price them on Kalshi, but there is nothing to compare them with. If discovery can't run, for example on the 2026-10-10 snapshot, which was captured before discovery existed, the pinned events in `tracked_events.json` are used and the output says so.
+
 ## The definition
 
 > Two markets are equivalent if and only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other. (D8)

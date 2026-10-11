@@ -1,12 +1,12 @@
 """The data every page shares: the loaded markets, their clusters, and each outcome's name."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from decimal import Decimal
 
 from equinox.matcher import build_clusters
 from equinox.models import CanonicalMarket, ContractTerms, EquivalenceCluster
-from equinox.sources import Loaded
+from equinox.sources import Loaded, ensure_books
 from equinox.web import pages, words
 
 INCLUSIVE = ("eq", "le", "ge", "between")
@@ -34,6 +34,8 @@ class View:
     clusters: list[EquivalenceCluster]
     outcomes: list[Outcome]
     read_at: datetime
+    param: str = ""  # the `data` query value that keeps links on this source ("" for the default)
+    booked: dict[str, EquivalenceCluster] = field(default_factory=dict)  # books fetched so far
 
     @property
     def markets(self) -> dict[str, CanonicalMarket]:
@@ -49,9 +51,16 @@ class PageContext:
     banner: pages.Banner
 
 
-def build_view(source: str, loaded: Loaded, read_at: datetime) -> View:
+def build_view(source: str, loaded: Loaded, read_at: datetime, param: str = "") -> View:
     clusters = build_clusters(loaded.markets)
-    return View(source, loaded, clusters, _outcomes(clusters), read_at)
+    return View(source, loaded, clusters, _outcomes(clusters), read_at, param)
+
+
+def with_books(view: View, cluster: EquivalenceCluster) -> EquivalenceCluster:
+    """The cluster with its order books, fetched once per view (D49). Raises FetchError."""
+    if cluster.cluster_id not in view.booked:
+        view.booked[cluster.cluster_id] = ensure_books(cluster, view.loaded)
+    return view.booked[cluster.cluster_id]
 
 
 def find(view: View, key: str) -> Outcome | None:
@@ -66,9 +75,7 @@ def favorite(view: View) -> str:
     """The outcome the markets think most likely: the highest price to buy YES."""
 
     def best_yes(outcome: Outcome) -> Decimal:
-        asks = [
-            m.books["YES"].asks[0].price for m in outcome.cluster.markets if m.books["YES"].asks
-        ]
+        asks = [m.best_asks.get("YES") or Decimal(0) for m in outcome.cluster.markets]
         return max(asks, default=Decimal(0))
 
     return max(view.outcomes, key=best_yes).key if view.outcomes else ""
@@ -76,7 +83,7 @@ def favorite(view: View) -> str:
 
 def data_param(view: View) -> str:
     """The `data` query value that keeps a link on the same data source."""
-    return "" if view.source == "snapshot" else view.source
+    return view.param
 
 
 def _outcomes(clusters: list[EquivalenceCluster]) -> list[Outcome]:

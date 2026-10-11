@@ -14,11 +14,10 @@ from urllib.parse import parse_qs
 from equinox import sources
 from equinox.adapters.base import FetchError
 from equinox.adapters.fetch import FixtureFetcher
-from equinox.sources import LiveFetchers, Loaded, Settings
+from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
 from equinox.web import board, match, order, pages
 from equinox.web.view import PageContext, View, build_view
 
-SOURCES = ("snapshot", "live")
 ROUTES = {"/": order.page, "/index.html": order.page, "/board": board.page, "/match": match.page}
 
 
@@ -46,7 +45,10 @@ class App:
         if page is None:
             return None
         params = {k: v[-1] for k, v in parse_qs(query, keep_blank_values=True).items()}
-        source = params.get("data") if params.get("data") in SOURCES else "snapshot"
+        sources_ = [*snapshot_names(), "live"]
+        source = (
+            params.get("data") if params.get("data") in sources_ else self.settings.snapshot.name
+        )
         view = self._view(source)
         ctx = PageContext(
             self._clock(), self.settings.stale_after, self._banner(view, path, params)
@@ -54,8 +56,12 @@ class App:
         return page(view, params, ctx)
 
     def _load_markets(self, source: str) -> Loaded:
-        settings = replace(self.settings, source="fixtures" if source == "snapshot" else "live")
-        return sources.load_markets(settings, self.live_fetcher)
+        """Listings only; each page fetches the books it prices (D49)."""
+        if source == "live":
+            settings = replace(self.settings, source="live")
+        else:
+            settings = replace(self.settings, source="fixtures", snapshot=FIXTURES / source)
+        return sources.load_markets(settings, self.live_fetcher, with_books=False)
 
     def _view(self, source: str) -> View:
         """The snapshot loads once; live data is read again after `live_for`."""
@@ -64,22 +70,23 @@ class App:
             view = self._views.get(source)
             if view and (source == "snapshot" or now - view.read_at < self._live_for):
                 return view
-            view = build_view(source, self._load(source), now)
+            param = "" if source == self.settings.snapshot.name else source
+            view = build_view(source, self._load(source), now, param)
             self._views[source] = view
             return view
 
     def _banner(self, view: View, path: str, params: dict[str, str]) -> pages.Banner:
-        other = "live" if view.source == "snapshot" else "snapshot"
-        switch = pages.href(path, **{**params, "data": other if other == "live" else ""})
-        if view.source == "snapshot":
+        choices = [
+            (name, f"Snapshot {name.removeprefix('snapshot-')}") for name in snapshot_names()
+        ]
+        choices.append(("live", "Live prices"))
+        if view.source == "live":
+            age = int((self._clock() - view.read_at).total_seconds())
+            summary = f"Live prices, read at {view.read_at:%H:%M:%S} UTC ({age} s ago)."
+        else:
             try:
-                taken = FixtureFetcher(self.settings.snapshot).captured_at
+                taken = FixtureFetcher(FIXTURES / view.source).captured_at
                 summary = f"Snapshot taken {taken:%Y-%m-%d %H:%M} UTC."
             except FetchError:
                 summary = "Snapshot data."
-            label = "Use live prices instead"
-        else:
-            age = int((self._clock() - view.read_at).total_seconds())
-            summary = f"Live prices, read at {view.read_at:%H:%M:%S} UTC ({age} s ago)."
-            label = "Use the snapshot instead"
-        return pages.Banner(summary, label, switch, view.loaded.warnings)
+        return pages.Banner(summary, path, view.source, choices, view.loaded.warnings)

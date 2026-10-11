@@ -2,6 +2,7 @@
 
 from decimal import Decimal, InvalidOperation
 
+from equinox.adapters.base import FetchError
 from equinox.matcher import cluster_confidence
 from equinox.models import (
     CanonicalMarket,
@@ -15,7 +16,16 @@ from equinox.models import (
 from equinox.router import simulate
 from equinox.router.rationale import CENT, contracts, dollars, money_step
 from equinox.web import pages, words
-from equinox.web.view import Outcome, PageContext, View, choices, data_param, favorite, find
+from equinox.web.view import (
+    Outcome,
+    PageContext,
+    View,
+    choices,
+    data_param,
+    favorite,
+    find,
+    with_books,
+)
 
 NOT_REAL = {QuoteReason.NOT_TRADABLE, QuoteReason.TEST_MONEY}
 COLUMNS = ["Venue", "Can take it", "Would buy", "Average price", "Fee", "Total", "Why not"]
@@ -28,21 +38,23 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
         side=params.get("side", "YES").strip().upper(),
         quantity=params.get("quantity", "100").strip(),
         budget=params.get("budget", "").strip(),
-        data=view.source,
+        data=data_param(view),
     )
     outcome = find(view, form.outcome)
     quantity, budget = amount(form.quantity), amount(form.budget) if form.budget else None
     form.errors = _errors(form, outcome, quantity, budget)
     result = None
     if not form.errors:
+        try:
+            cluster = with_books(view, outcome.cluster)  # books for this group only (D49)
+        except FetchError as error:
+            form.errors = [f"The order books for this outcome couldn't be read: {error}"]
+    if not form.errors:
+        market_id = cluster.markets[0].market_id
         order = OrderRequest(
-            market_id=outcome.cluster.markets[0].market_id,
-            outcome=form.side,
-            quantity=quantity,
-            max_budget=budget,
+            market_id=market_id, outcome=form.side, quantity=quantity, max_budget=budget
         )
-        trace = simulate(order, outcome.cluster, ctx.now, ctx.stale_after)
-        result = _result(view, outcome, trace)
+        result = _result(view, outcome, simulate(order, cluster, ctx.now, ctx.stale_after))
     body = pages.order_body(form, result, empty=not view.outcomes)
     return pages.layout("Price an order", "/", view.source, ctx.banner, body)
 

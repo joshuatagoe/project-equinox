@@ -1,27 +1,30 @@
-"""Kalshi adapter (architecture section 5.2, venue facts K1-K10).
+"""Kalshi adapter (architecture section 5.2, venue facts K1-K13).
 
-For each tracked event it reads the event with its markets, then the event's series, then one
-orderbook per market, all through the injected fetcher. Kalshi's orderbook holds bids only, in
-ascending order with the best bid last (K4). Buying one outcome means taking the other outcome's
-bids at 1 - p (K5). The orderbook response has no timestamp, so captured_at is clock() at the
-moment each one is read (D37).
+Discovery reads a family's series (K13). Each tracked event is read with its nested markets, which
+carry the best asks (K12), then its series. A market's order book is read only when it is priced
+(D49). Kalshi's orderbook holds bids only, in ascending order with the best bid last (K4); buying
+one outcome means taking the other outcome's bids at 1 - p (K5). The orderbook response has no
+timestamp, so captured_at is clock() at the moment each one is read (D37).
 """
 
 import json
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
+from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
-from pydantic import ValidationError
-
 from equinox.adapters.base import (
-    AdapterResult,
+    BAD_DATA,
     Clock,
     DataSource,
     Fetcher,
+    Listed,
     TrackedEvent,
     VenueAdapter,
+    describe,
+    listed_ask,
+    with_books,
 )
 from equinox.models import (
     CanonicalMarket,
@@ -38,11 +41,8 @@ NEW_YORK = ZoneInfo("America/New_York")
 FEE_RATE = Decimal("0.07")  # times the series multiplier (K9)
 FEE_STEP = Decimal("0.01")  # A3
 
-# A response that isn't shaped as expected: a missing field, a wrong type, a bad number, or a
-# value the models refuse (pydantic's ValidationError is a ValueError). FetchError is not one.
-BAD_DATA = (LookupError, TypeError, ValueError, ArithmeticError)
-
 FED_DECISION = "fed_decision"
+FAMILY_SERIES = {FED_DECISION: "KXFEDDECISION"}  # K13
 # The five custom_strike shapes of a KXFEDDECISION event (K8), as (comparison, bps).
 FED_STRIKES = (
     ({"Cut": ">25"}, "lt", "-25"),
@@ -69,49 +69,76 @@ class KalshiAdapter(VenueAdapter):
         super().__init__(fetch, tracked, data_source, clock)
         self.base_url = base_url
 
-    def fetch_markets(self) -> AdapterResult:
-        result = AdapterResult(markets=[], warnings=[])
+    def discover(self, family: str) -> list[TrackedEvent]:
+        """Every open event in the family's series, by strike date, paged with `cursor`."""
+        series = FAMILY_SERIES.get(family)
+        if series is None:
+            return []
+        events, cursor = [], ""
+        while True:
+            params = {"series_ticker": series, "status": "open"} | (
+                {"cursor": cursor} if cursor else {}
+            )
+            page = self._get(f"/events?{urlencode(params)}")
+            events += page.get("events") or []
+            cursor = page.get("cursor")
+            if not cursor:
+                break
+        events.sort(key=lambda e: (e.get("strike_date") or "", e["event_ticker"]))
+        return [TrackedEvent(e["event_ticker"], family) for e in events]
+
+    def listings(self, read_at: Clock) -> list[Listed]:
+        listed: list[Listed] = []
         for tracked in self.tracked:
             try:
                 event = self._get(f"/events/{tracked.event_id}?with_nested_markets=true")["event"]
                 series = self._get(f"/series/{event['series_ticker']}")["series"]
                 shared = _event_fields(event, series)
-                listed = list(event["markets"])
+                markets = list(event["markets"])
+                listed_at = read_at()
             except BAD_DATA as error:
-                result.warnings.append(
-                    f"kalshi: event {tracked.event_id} skipped: {_describe(error)}"
+                listed.append(
+                    (None, [f"kalshi: event {tracked.event_id} skipped: {describe(error)}"])
                 )
                 continue
             parse_terms = tracked.family == FED_DECISION
             if not parse_terms:
-                result.warnings.append(
+                note = (
                     f"kalshi: event {tracked.event_id} has no term parser for family "
                     f"{tracked.family!r}, so its markets have no terms"
                 )
-            for raw in listed:
-                ticker = raw.get("ticker")
-                try:
-                    market = self._market(raw, event, shared, parse_terms)
-                except BAD_DATA as error:
-                    result.warnings.append(f"kalshi: market {ticker} skipped: {_describe(error)}")
-                    continue
-                result.markets.append(market)
-                if parse_terms and market.terms is None:
-                    result.warnings.append(
-                        f"kalshi: market {ticker} has no terms: no parser for custom_strike "
-                        f"{json.dumps(raw.get('custom_strike'), default=str)}"
-                    )
-        return result
+                listed.append((None, [note]))
+            shared = shared | {"captured_at": listed_at}
+            listed += [self._listed(raw, event, shared, parse_terms) for raw in markets]
+        return listed
+
+    def fetch_books(self, market: CanonicalMarket) -> CanonicalMarket:
+        orderbook = self._get(f"/markets/{market.native_id}/orderbook")["orderbook_fp"]
+        captured_at = self.clock()  # read time: the response carries none (D37)
+        return with_books(market, _books(orderbook), captured_at)
 
     def _get(self, path: str) -> Any:
         return self.fetch(f"{self.base_url}{path}")
+
+    def _listed(
+        self, raw: dict[str, Any], event: dict[str, Any], shared: dict[str, Any], parse_terms: bool
+    ) -> Listed:
+        ticker = raw.get("ticker")
+        try:
+            market = self._market(raw, event, shared, parse_terms)
+        except BAD_DATA as error:
+            return None, [f"kalshi: market {ticker} skipped: {describe(error)}"]
+        if parse_terms and market.terms is None:
+            strike = json.dumps(raw.get("custom_strike"), default=str)
+            return market, [
+                f"kalshi: market {ticker} has no terms: no parser for custom_strike {strike}"
+            ]
+        return market, []
 
     def _market(
         self, raw: dict[str, Any], event: dict[str, Any], shared: dict[str, Any], parse_terms: bool
     ) -> CanonicalMarket:
         ticker = raw["ticker"]
-        orderbook = self._get(f"/markets/{ticker}/orderbook")["orderbook_fp"]
-        captured_at = self.clock()  # read time: the response carries none (D37)
         rules = (raw.get("rules_primary"), raw.get("rules_secondary"))
         return CanonicalMarket(
             market_id=f"{self.venue}:{ticker}",
@@ -125,9 +152,11 @@ class KalshiAdapter(VenueAdapter):
             tradable=raw.get("status") == "active",
             trading_closes_at=_time(raw.get("close_time")),
             resolves_at=_time(raw.get("expected_expiration_time")),
-            captured_at=captured_at,
             data_source=self.data_source,
-            books=_books(orderbook),
+            best_asks={
+                "YES": listed_ask(raw.get("yes_ask_dollars")),
+                "NO": listed_ask(raw.get("no_ask_dollars")),
+            },
             **shared,
         )
 
@@ -207,15 +236,3 @@ def _new_york_date(text: str) -> date:
     if instant.tzinfo is None:
         raise ValueError(f"strike_date {text!r} has no time zone")
     return instant.astimezone(NEW_YORK).date()
-
-
-def _describe(error: Exception) -> str:
-    """One line for a warning."""
-    if isinstance(error, ValidationError):
-        return "; ".join(
-            f"{'.'.join(map(str, item['loc'])) or error.title}: {item['msg']}"
-            for item in error.errors()
-        )
-    if isinstance(error, KeyError):
-        return f"missing field {error}"
-    return str(error) or type(error).__name__

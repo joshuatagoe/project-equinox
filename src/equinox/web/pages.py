@@ -11,8 +11,9 @@ from equinox.web.style import CSS
 @dataclass
 class Banner:
     summary: str
-    switch_label: str
-    switch_href: str
+    path: str  # the page the data selector reloads
+    current: str  # the selected data source
+    sources: Sequence[tuple[str, str]]  # (value, label) for every snapshot and live data
     warnings: Sequence[str] = ()
 
 
@@ -72,9 +73,15 @@ def href(path: str, **params: str) -> str:
     return f"{path}?{query}" if query else path
 
 
+BPS_NOTE = (
+    "bps means basis points: 1 bp is 0.01 percentage point, so 25 bps is a quarter of a point."
+)
+
+
 def layout(title: str, active: str, data: str, banner: Banner, body: str) -> str:
+    """The page frame. `data` is the query value that keeps links on the same data source."""
     nav = "".join(
-        f'<a href="{escape(href(path, data=data if data != "snapshot" else ""))}"'
+        f'<a href="{escape(href(path, data=data))}"'
         f"{' class=active' if path == active else ''}>{escape(label)}</a>"
         for path, label in (
             ("/", "Price an order"),
@@ -94,16 +101,27 @@ def layout(title: str, active: str, data: str, banner: Banner, body: str) -> str
 <body>
 <header><strong>Project Equinox</strong><nav>{nav}</nav></header>
 <main>
-<div class="banner">{escape(banner.summary)}
- <a href="{escape(banner.switch_href)}">{escape(banner.switch_label)}</a>
+<div class="banner">{_data_selector(banner)} {escape(banner.summary)}
  {f"<ul>{warnings}</ul>" if warnings else ""}</div>
 {body}
-<footer>Equinox simulates orders. It doesn't place them. Prices, fees and depth come from each
-venue's public order book; see the README for how decisions are made.</footer>
+<footer>{escape(BPS_NOTE)}<br>Equinox simulates orders. It doesn't place them. Prices, fees and
+depth come from each venue's public order book; see the README for how decisions are made.</footer>
 </main>
 </body>
 </html>
 """
+
+
+def _data_selector(banner: Banner) -> str:
+    options = "".join(
+        f'<option value="{escape(value)}"{" selected" if value == banner.current else ""}>'
+        f"{escape(label)}</option>"
+        for value, label in banner.sources
+    )
+    return (
+        f'<form class="data" method="get" action="{escape(banner.path)}">Data '
+        f'<select name="data">{options}</select> <button type="submit">Show</button></form>'
+    )
 
 
 def order_body(form: OrderForm, result: Result | None, empty: bool) -> str:
@@ -198,10 +216,6 @@ def _order_form(form: OrderForm) -> str:
         f'<option value="{s}"{" selected" if form.side == s else ""}>Buy {s}</option>'
         for s in ("YES", "NO")
     )
-    data = "".join(
-        f'<option value="{v}"{" selected" if form.data == v else ""}>{label}</option>'
-        for v, label in (("snapshot", "Snapshot (2026-10-10)"), ("live", "Live prices"))
-    )
     errors = "".join(f"<p class='errors'>{escape(e)}</p>" for e in form.errors)
     return f"""<form class="order" method="get" action="/">
 <label>Outcome<select name="outcome">{_options(form.choices, form.outcome)}</select></label>
@@ -209,7 +223,7 @@ def _order_form(form: OrderForm) -> str:
 <label>Contracts<input name="quantity" value="{escape(form.quantity)}" inputmode="decimal"></label>
 <label>Budget, optional ($)
 <input name="budget" value="{escape(form.budget)}" inputmode="decimal"></label>
-<label>Data<select name="data">{data}</select></label>
+<input type="hidden" name="data" value="{escape(form.data)}">
 <button type="submit">Find the best venue</button>
 </form>{errors}"""
 

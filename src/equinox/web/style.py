@@ -15,6 +15,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 20px 24px 48px; }
 .banner { background: var(--soft); border: 1px solid var(--line); border-radius: 6px;
           padding: 8px 12px; margin-bottom: 20px; color: var(--muted); }
 .banner ul { margin: 4px 0 0; padding-left: 20px; color: var(--warn); }
+.banner form.data { display: inline; margin-right: 8px; }
+.banner form.data select { font: inherit; }
 h1 { font-size: 22px; margin: 0 0 12px; }
 h2 { font-size: 17px; margin: 28px 0 8px; }
 form.order { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; padding: 14px;

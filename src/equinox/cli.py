@@ -16,7 +16,7 @@ from decimal import Decimal, InvalidOperation
 from pydantic import ValidationError
 
 from equinox import sources
-from equinox.adapters.base import TRACKED_EVENTS
+from equinox.adapters.base import TRACKED_EVENTS, FetchError
 from equinox.matcher import build_clusters, cluster_confidence, cluster_for, text_matches
 from equinox.models import (
     EXIT_CODES,
@@ -54,12 +54,15 @@ def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None
         settings = Settings.from_env(os.environ)
         if args.source:
             settings = replace(settings, source=args.source)
+        if args.snapshot:
+            settings = replace(settings, snapshot=sources.snapshot_path(args.snapshot))
         if settings.source not in ("live", "fixtures"):
             raise _UsageError(f"--source must be live or fixtures, not {settings.source!r}")
     except (_UsageError, SettingsError) as error:
         trace = failure_trace(RoutingStatus.INVALID_INPUT, str(error), now=datetime.now(UTC))
         return _print_trace(trace, as_json)
-    loaded = load_markets(settings, live_fetcher)
+    # Books are fetched later, only for the group being priced (D49).
+    loaded = sources.load_markets(settings, live_fetcher, tracked=TRACKED_EVENTS, with_books=False)
     if args.command == "markets":
         return _markets(loaded, args.json)
     if args.command == "match":
@@ -140,9 +143,19 @@ def _simulate(args: argparse.Namespace, settings: Settings, loaded: Loaded) -> i
         )
         trace = failure_trace(RoutingStatus.MARKET_NOT_FOUND, message, order, now=now)
     else:
-        trace = simulate(order, cluster, now, settings.stale_after)
+        trace = _route(order, cluster, loaded, settings, now)
     trace = trace.model_copy(update={"warnings": (*loaded.warnings, *trace.warnings)})
     return _print_trace(trace, args.json)
+
+
+def _route(order: OrderRequest, cluster, loaded: Loaded, settings: Settings, now) -> EquinoxTrace:
+    """Fetch the group's books, then simulate; a venue whose books can't be read is reported."""
+    try:
+        booked = sources.ensure_books(cluster, loaded)
+    except FetchError as error:
+        message = f"the order books for {order.market_id}'s group couldn't be read ({error})."
+        return failure_trace(RoutingStatus.MARKET_NOT_FOUND, message, order, now=now)
+    return simulate(order, booked, now, settings.stale_after)
 
 
 # Output.
@@ -207,10 +220,7 @@ def _terms(terms: ContractTerms | None) -> str:
 
 
 def _best_asks(market: CanonicalMarket) -> str:
-    asks = []
-    for outcome, book in market.books.items():
-        best = f"{book.asks[0].price}" if book.asks else "none"
-        asks.append(f"{outcome} ask {best}")
+    asks = [f"{side} ask {market.best_asks.get(side) or 'none'}" for side in ("YES", "NO")]
     return ", ".join(asks)
 
 
@@ -240,6 +250,7 @@ def _parser() -> _Parser:
     common.add_argument(
         "--source", choices=("live", "fixtures"), help="default: EQUINOX_SOURCE or live"
     )
+    common.add_argument("--snapshot", help="a folder in src/equinox/fixtures (D51)")
     common.add_argument("--json", action="store_true", help="print JSON instead of a report")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("markets", parents=[common], help="list canonical markets")

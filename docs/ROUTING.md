@@ -42,6 +42,10 @@ The curve isn't a straight line, so the fee on an average price isn't the averag
 
 The last two rows route the same market's NO to different venues. Kalshi is cheaper at the top of the book, but its 16¢ level holds only 534.49 contracts, so a 5,000-contract order spills onto its 17¢ level. A router that priced the whole order at the best ask would quote Kalshi at $847.04 and send the order to the venue that is actually $8.52 more expensive. `python docs/research/running_example.py` reproduces every number from the raw snapshot, independently of the router.
 
+## Books on demand
+
+Reading every market's order book up front would be wasteful: a board of 11 meetings is 70 markets and about 85 book requests, and the router only ever needs one group at a time. So markets load from their venue's listing, which already carries each outcome's best ask (K12, P11), and the full books are fetched only for the group being priced, or for the groups on the board that more than one venue lists (D49). The router refuses a group whose books were not fetched, so a quote can never be built from a listing price alone.
+
 ## Who can take the order
 
 A venue is excluded for any of these reasons, and every reason that applies is recorded:

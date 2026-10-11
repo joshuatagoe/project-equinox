@@ -100,6 +100,9 @@ def simulate(
     """Quote every market in the cluster, pick the cheapest eligible one, and explain it."""
     if order.market_id not in {m.market_id for m in cluster.markets}:
         raise ValueError(f"the order's market {order.market_id} is not in the cluster")
+    unbooked = [m.market_id for m in cluster.markets if m.books is None]
+    if unbooked:  # books are fetched on demand (D49); routing without them would quote nothing
+        raise ValueError(f"order books not loaded for {', '.join(unbooked)}")
     quotes = tuple(quote(m, order, now, stale_after) for m in cluster.markets)
     status, decision = decide(quotes)
     return EquinoxTrace(
