@@ -10,6 +10,9 @@ from equinox.sources import Loaded, ensure_books
 from equinox.web import pages, words
 
 INCLUSIVE = ("eq", "le", "ge", "between")
+LOW_TO_HIGH = {"lt": 0, "le": 1, "eq": 2, "between": 2, "ge": 3, "gt": 4}
+"""At one threshold, "below" outcomes come first and "above" ones last: "Cut more than 25 bps",
+then "Cut 25 bps"; "Hike 25 bps", then "Hike more than 25 bps"."""
 
 
 @dataclass(frozen=True)
@@ -90,7 +93,8 @@ def _outcomes(clusters: list[EquivalenceCluster]) -> list[Outcome]:
     named = []
     for cluster in clusters:
         terms = _representative(cluster)
-        sort = (terms.observed_on, terms.subject, terms.measure, terms.threshold, terms.comparison)
+        order = LOW_TO_HIGH.get(terms.comparison, 2)
+        sort = (terms.observed_on, terms.subject, terms.measure, terms.threshold, order)
         named.append((sort, Outcome(cluster, words.event_name(terms), words.outcome_name(terms))))
     return [outcome for _, outcome in sorted(named, key=lambda pair: pair[0])]
 

@@ -1,6 +1,9 @@
 """The two fetchers: live HTTP, and a saved snapshot. An adapter can't tell which it has."""
 
+import gzip
 import json
+import time
+import urllib.error
 import urllib.request
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -12,22 +15,47 @@ from equinox.adapters.base import FetchError
 
 DEFAULT_SNAPSHOT = Path(__file__).resolve().parents[1] / "fixtures" / "snapshot-2026-10-10"
 USER_AGENT = "project-equinox/0.1 (prototype; read-only)"
+HEADERS = {"User-Agent": USER_AGENT, "Accept": "application/json", "Accept-Encoding": "gzip"}
 
 
 class HttpFetcher:
-    def __init__(self, timeout: float = 10.0) -> None:
-        self.timeout = timeout
+    """GET a URL and parse its JSON, asking for gzip (D55). With `retries`, a timeout, a dropped
+    connection, a 429 or a 5xx is tried again after `pause`, then twice `pause`, and so on; any
+    other failure is raised at once. Interfaces don't retry: a failing venue falls back to the
+    snapshot (D17). The catalog refresh does, so one dropped connection doesn't cost the whole
+    download."""
+
+    def __init__(self, timeout: float = 10.0, retries: int = 0, pause: float = 2.0) -> None:
+        self.timeout, self.retries, self.pause = timeout, retries, pause
 
     def __call__(self, url: str) -> Any:
-        request = urllib.request.Request(
-            url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"}
-        )
+        attempt = 0
+        while True:
+            try:
+                return self._get(url)
+            except FetchError as error:
+                if attempt == self.retries or not _transient(error.__cause__):
+                    raise
+            attempt += 1
+            time.sleep(self.pause * attempt)
+
+    def _get(self, url: str) -> Any:
+        request = urllib.request.Request(url, headers=HEADERS)
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 body = response.read()
+                if response.headers.get("Content-Encoding", "").lower() == "gzip":
+                    body = gzip.decompress(body)  # several times smaller on the wire
             return json.loads(body, parse_float=Decimal)
-        except (OSError, ValueError) as error:  # URLError, HTTPError, timeouts, bad JSON
+        except (OSError, ValueError, EOFError) as error:  # HTTP, timeouts, bad gzip, bad JSON
             raise FetchError(f"{url}: {error}") from error
+
+
+def _transient(error: BaseException | None) -> bool:
+    """Worth trying again: too many requests, a server error, or the network, not a bad request."""
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code == 429 or error.code >= 500
+    return isinstance(error, OSError)  # timeouts, refused or reset connections, TLS handshakes
 
 
 def _url_key(url: str) -> tuple:

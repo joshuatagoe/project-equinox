@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation
 
 from pydantic import ValidationError
 
-from equinox import sources
+from equinox import cli_catalog, sources
 from equinox.adapters.base import TRACKED_EVENTS, FetchError
 from equinox.matcher import build_clusters, cluster_confidence, cluster_for, text_matches
 from equinox.models import (
@@ -61,12 +61,16 @@ def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None
     except (_UsageError, SettingsError) as error:
         trace = failure_trace(RoutingStatus.INVALID_INPUT, str(error), now=datetime.now(UTC))
         return _print_trace(trace, as_json)
+    if args.command == "catalog":
+        if args.action == "refresh":
+            return cli_catalog.refresh(settings, live_fetcher)
+        return cli_catalog.status(settings)
     # Books are fetched later, only for the group being priced (D49).
     loaded = sources.load_markets(settings, live_fetcher, tracked=TRACKED_EVENTS, with_books=False)
     if args.command == "markets":
         return _markets(loaded, args.json)
     if args.command == "match":
-        return _match(loaded, args.json)
+        return _match(loaded, args.json, settings if args.catalog else None)
     return _simulate(args, settings, loaded)
 
 
@@ -91,7 +95,8 @@ def _markets(loaded: Loaded, as_json: bool) -> int:
     return 0
 
 
-def _match(loaded: Loaded, as_json: bool) -> int:
+def _match(loaded: Loaded, as_json: bool, catalog: Settings | None) -> int:
+    """The groups of equivalent markets; with `catalog`, also the catalog's unclear pairs."""
     clusters = build_clusters(loaded.markets)
     ambiguous = _unique([r for c in clusters for r in c.ambiguous])
     ambiguous += [
@@ -103,6 +108,8 @@ def _match(loaded: Loaded, as_json: bool) -> int:
             "ambiguous": [r.model_dump(mode="json") for r in ambiguous],
             "warnings": loaded.warnings,
         }
+        if catalog:
+            report["catalog"] = cli_catalog.as_json(catalog)
         print(json.dumps(report, indent=2))
         return 0
     for cluster in clusters:
@@ -116,6 +123,9 @@ def _match(loaded: Loaded, as_json: bool) -> int:
         for result in ambiguous:
             print(f"  {result.market_a} ~ {result.market_b}: {' '.join(result.reasons)}")
     _print_warnings(loaded.warnings)
+    if catalog:
+        print()
+        return cli_catalog.unclear_pairs(catalog)
     return 0
 
 
@@ -254,7 +264,12 @@ def _parser() -> _Parser:
     common.add_argument("--json", action="store_true", help="print JSON instead of a report")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("markets", parents=[common], help="list canonical markets")
-    commands.add_parser("match", parents=[common], help="group equivalent markets")
+    match = commands.add_parser("match", parents=[common], help="group equivalent markets")
+    match.add_argument("--catalog", action="store_true", help="add the catalog's unclear pairs")
+    every = commands.add_parser("catalog", help="every open market on both venues (D48)")
+    actions = every.add_subparsers(dest="action", required=True)
+    actions.add_parser("refresh", parents=[common], help="read and compare every open market")
+    actions.add_parser("status", parents=[common], help="the saved catalog's age and counts")
     order = commands.add_parser("simulate", parents=[common], help="route a hypothetical order")
     order.add_argument("--market", required=True, help="e.g. kalshi:KXFEDDECISION-26OCT-H0")
     order.add_argument("--outcome", required=True, help="YES or NO")

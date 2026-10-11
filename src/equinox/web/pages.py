@@ -1,4 +1,5 @@
-"""HTML for the three pages. Every string passed in is escaped here; nothing else writes HTML."""
+"""HTML for the pages. Every string passed in is escaped here or, for the All markets page, in
+`markets_html.py`; nothing else writes HTML."""
 
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass, field
@@ -87,6 +88,7 @@ def layout(title: str, active: str, data: str, banner: Banner, body: str) -> str
             ("/", "Price an order"),
             ("/board", "Market board"),
             ("/match", "Why these match"),
+            ("/markets", "All markets"),
         )
     )
     warnings = "".join(f"<li>{escape(w)}</li>" for w in banner.warnings)
@@ -101,7 +103,7 @@ def layout(title: str, active: str, data: str, banner: Banner, body: str) -> str
 <body>
 <header><strong>Project Equinox</strong><nav>{nav}</nav></header>
 <main>
-<div class="banner">{_data_selector(banner)} {escape(banner.summary)}
+<div class="banner">{_data_selector(banner) if banner.sources else ""} {escape(banner.summary)}
  {f"<ul>{warnings}</ul>" if warnings else ""}</div>
 {body}
 <footer>{escape(BPS_NOTE)}<br>Equinox simulates orders. It doesn't place them. Prices, fees and
@@ -149,7 +151,7 @@ def board_body(tables: Sequence[Table], termless: Sequence[str], data: str) -> s
                 [[escape(c) for c in row] for row in table.rows], table.links, strict=True
             )
         ]
-        parts.append(_table([*table.columns, ""], rows, raw=True))
+        parts.append(html_table([*table.columns, ""], rows, raw=True))
     parts.append("<h2>Can't be compared yet</h2>")
     if termless:
         items = "".join(f"<li>{escape(t)}</li>" for t in termless)
@@ -243,7 +245,7 @@ def _options(choices: Sequence[Choice], selected: str) -> str:
 
 def _result(r: Result) -> str:
     rows = [[escape(c) for c in row] for row in r.rows]
-    table = _table(r.columns, rows, raw=True, out=r.excluded, numeric={3, 4, 5})
+    table = html_table(r.columns, rows, raw=True, out=r.excluded, numeric={3, 4, 5})
     risks = "".join(f"<li>{escape(x)}</li>" for x in r.risks)
     warnings = "".join(f"<li>{escape(x)}</li>" for x in r.warnings)
     assumptions = "".join(f"<li>{escape(x)}</li>" for x in r.assumptions)
@@ -257,7 +259,7 @@ def _result(r: Result) -> str:
 <details><summary>Assumptions behind every price</summary><ul>{assumptions}</ul></details>"""
 
 
-def _table(
+def html_table(
     columns: Sequence[str],
     rows: Sequence[Sequence[str]],
     *,

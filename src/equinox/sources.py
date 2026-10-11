@@ -37,6 +37,9 @@ FAMILIES = ("fed_decision",)
 
 FIXTURES = DEFAULT_SNAPSHOT.parent
 
+CACHE_DIR = Path(__file__).resolve().parents[2] / ".cache" / "equinox"
+"""Where the catalog of every open market is saved (D48); git ignores `.cache/`."""
+
 LiveFetchers = Callable[[str], Fetcher]
 """venue -> the fetcher for a live run. Tests inject one; the default is HttpFetcher."""
 
@@ -63,6 +66,7 @@ class Settings:
     timeout: float = 10.0
     snapshot: Path = DEFAULT_SNAPSHOT
     venue_options: dict[str, dict[str, str]] = field(default_factory=dict)
+    cache_dir: Path = CACHE_DIR
 
     @classmethod
     def from_env(cls, env: Mapping[str, str]) -> "Settings":
@@ -72,12 +76,13 @@ class Settings:
             timeout = float(env.get("EQUINOX_HTTP_TIMEOUT_SECONDS", "10"))
         except ValueError as error:
             raise SettingsError(f"bad setting: {error}") from error
-        snapshot = env.get("EQUINOX_SNAPSHOT")
+        snapshot, cache = env.get("EQUINOX_SNAPSHOT"), env.get("EQUINOX_CACHE_DIR")
         return cls(
             source=env.get("EQUINOX_SOURCE", "live"),
             stale_after=stale,
             timeout=timeout,
             snapshot=snapshot_path(snapshot) if snapshot else DEFAULT_SNAPSHOT,
+            cache_dir=Path(cache) if cache else CACHE_DIR,
             venue_options={
                 "kalshi": {"base_url": env.get("KALSHI_BASE_URL", DEFAULT_BASE_URL)},
                 "polymarket": {

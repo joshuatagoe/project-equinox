@@ -9,6 +9,7 @@ market's `feeSchedule`, never from `takerBaseFee` (P7), rounded to 5 decimal pla
 
 import json
 import re
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
@@ -26,7 +27,7 @@ from equinox.adapters.base import (
     listed_ask,
     with_books,
 )
-from equinox.adapters.polymarket_terms import TERM_PARSERS, TermParser, utc
+from equinox.adapters.polymarket_terms import TERM_PARSERS, TermParser, fed_terms, utc
 from equinox.models import (
     CanonicalMarket,
     Collateral,
@@ -35,6 +36,7 @@ from equinox.models import (
     OutcomeBook,
     ResolutionSource,
 )
+from equinox.models.catalog import CatalogEntry, CatalogPage
 
 GAMMA_URL = "https://gamma-api.polymarket.com"
 CLOB_URL = "https://clob.polymarket.com"
@@ -106,6 +108,22 @@ class PolymarketAdapter(VenueAdapter):
         books = {"YES": _book(yes_book), "NO": _book(no_book)}  # never merged (P5)
         return with_books(market, books, _read_time(yes_book, no_book))
 
+    def list_open(
+        self, page_size: int = 100, max_pages: int | None = None
+    ) -> Iterator[CatalogPage]:
+        """Every open market, page by page, paged with `after_cursor`, never by offset (P11)."""
+        params, pages = {"closed": "false", "limit": page_size}, 0
+        while True:
+            page = self.fetch(f"{self.gamma_url}/events/keyset?{urlencode(params)}")
+            listed = [_catalog_entries(event) for event in page.get("events") or []]
+            yield CatalogPage(
+                [e for entries, _ in listed for e in entries], sum(n for _, n in listed)
+            )
+            pages += 1
+            if not page.get("next_cursor") or (max_pages is not None and pages >= max_pages):
+                return
+            params = {**params, "after_cursor": page["next_cursor"]}
+
     def _listed(
         self,
         event: dict[str, Any],
@@ -158,6 +176,45 @@ class PolymarketAdapter(VenueAdapter):
             },
             venue_metadata={"tokens": _token_ids(raw)},
         )
+
+
+def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
+    """An event's open Yes/No markets as catalog entries, and how many were left out."""
+    tag, title = FAMILY_TAGS["fed_decision"]
+    fed = bool(event.get("negRisk")) and bool(title.match(event.get("title") or ""))
+    entries, skipped = [], 0
+    for raw in event.get("markets") or []:
+        if raw.get("closed"):
+            continue
+        try:
+            if _json_list(raw["outcomes"]) != ["Yes", "No"]:
+                raise ValueError("not a Yes/No market")
+            best_bid = listed_ask(raw.get("bestBid"))
+            entries.append(
+                CatalogEntry(
+                    market_id=f"polymarket:{raw['id']}",
+                    venue="polymarket",
+                    event_title=event.get("title") or "",
+                    title=raw["question"],
+                    outcome_label=raw.get("groupItemTitle") or "",
+                    closes_at=_maybe_utc(raw.get("endDate")),
+                    tradable=bool(raw.get("active") and raw.get("acceptingOrders")),
+                    yes_ask=listed_ask(raw.get("bestAsk")),
+                    no_ask=None if best_bid is None else 1 - best_bid,
+                    terms=fed_terms(raw, []) if fed else None,
+                )
+            )
+        except BAD_DATA:
+            skipped += 1
+    return entries, skipped
+
+
+def _maybe_utc(text: str | None) -> datetime | None:
+    """endDate comes in several formats (P3); one we can't read leaves the close date blank."""
+    try:
+        return utc(text) if text else None
+    except ValueError:
+        return None
 
 
 def _json_list(value: Any) -> list:

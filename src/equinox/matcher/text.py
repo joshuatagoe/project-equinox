@@ -15,8 +15,9 @@ import re
 from collections.abc import Iterable
 from decimal import Decimal
 from itertools import combinations
+from typing import Protocol
 
-from equinox.models import CanonicalMarket, EquivalenceStatus, MatchResult
+from equinox.models import CanonicalMarket, ContractTerms, EquivalenceStatus, MatchResult
 
 CANDIDATE_SCORE = Decimal("0.3")
 
@@ -52,6 +53,18 @@ OPPOSITES: tuple[tuple[frozenset[str], frozenset[str]], ...] = (
 )
 """Word pairs that point opposite ways. A title leans to a side if it uses only that side."""
 
+
+class Titled(Protocol):
+    """What the title fallback reads: a canonical market, or a catalog entry (D50)."""
+
+    @property
+    def market_id(self) -> str: ...
+    @property
+    def title(self) -> str: ...
+    @property
+    def terms(self) -> ContractTerms | None: ...
+
+
 _WORD = re.compile(r"[a-z0-9]+")
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
 _YEAR = re.compile(r"(?:19|20)\d\d")
@@ -59,7 +72,7 @@ _YEAR = re.compile(r"(?:19|20)\d\d")
 _STATE = re.compile(r"\b(" + "|".join(sorted(US_STATES, key=len, reverse=True)) + r")\b")
 
 
-def text_match(a: CanonicalMarket, b: CanonicalMarket) -> MatchResult:
+def text_match(a: Titled, b: Titled) -> MatchResult:
     """Compare two markets by title. AMBIGUOUS at most."""
     words_a, words_b = _words(a.title), _words(b.title)
     shared, total = len(words_a & words_b), len(words_a | words_b)
@@ -93,8 +106,8 @@ def text_matches(markets: Iterable[CanonicalMarket]) -> list[MatchResult]:
 
 
 def _result(
-    a: CanonicalMarket,
-    b: CanonicalMarket,
+    a: Titled,
+    b: Titled,
     status: EquivalenceStatus,
     reasons: tuple[str, ...],
     score: Decimal,

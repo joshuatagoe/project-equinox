@@ -1,6 +1,6 @@
 # Equivalence: when two markets are the same bet
 
-The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23 and D42.
+The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50 and D54.
 
 ## How Equinox finds the markets to compare
 
@@ -114,6 +114,35 @@ Markets without terms (any event family that has no parser) reach only a title f
 
 Every other candidate is AMBIGUOUS, with its score. On the three pairs above, the fallback now says DISTINCT (score 0.75, numbers differ), DISTINCT (0.60, states differ) and AMBIGUOUS (0.56). The model refuses a text match marked EQUIVALENT (D39), so nothing the fallback finds is ever routed.
 
+## Comparing every open market
+
+Families are one way in. The catalog is the other: `python -m equinox catalog refresh` reads every open market on both venues and compares every cross-venue pair it can (D48–D50, D54). The recorded refresh ran at 2026-10-11 15:52 UTC:
+
+| Step | Count |
+|---|---|
+| Open markets read | 287,523: 128,798 on Kalshi and 158,725 Yes/No on Polymarket, in 286 requests (151 MiB with gzip, 94 s) |
+| Left out | 120,489 markets that aren't Yes/No or couldn't be read |
+| Cross-venue pairs | about 20.4 billion |
+| Same bet, by contract terms | 15 outcomes: the October, December and January Fed meetings, 5 outcomes each |
+| Title candidates from the index | 981,797: about 1 pair in 20,800 |
+| Different bets | 970,840. Title score under 0.3: 838,863. Numbers differ: 87,658. Months: 41,165. Outcomes: 23,896. States: 4,813. Opposite words: 1,108. A pair can have more than one veto. |
+| Unclear, never routed | 10,957 pairs, involving 3,902 Kalshi and 5,294 Polymarket markets |
+
+Comparing took 56 s, and the whole refresh 158 s at 383 MiB of memory.
+
+**How the candidates are found.** A title (with its outcome label) is reduced to its informative words: stop words go, and so does any word in more than 2% of a venue's titles. Two markets on different venues are a candidate only if they close within 3 days of each other and share at least two informative words. Each candidate then goes through the title fallback above. Markets with terms are matched by terms instead, as in the rest of this document.
+
+**One veto only the catalog can apply.** Listings carry outcome labels. In the first refresh, 25,517 of 34,807 unclear pairs (73%) were two markets that each named a different outcome, such as "Will Keria win Finals MVP at League of Legends Worlds?" (Keria) and "Will Eddie win Worlds 2026 Finals MVP?" (Eddie). Such a pair is now DISTINCT unless one label appears in the other title, so "Will Frank Ocean release a new album in 2026?" (labelled 2026) still matches "Will Frank Ocean release an album in 2026?" (labelled Frank Ocean).
+
+**What "unclear" looks like.** The most similar pairs are very likely the same bet. Both venues list "Will Taylor Swift be Time Person of the Year 2026?", and 20 such pairs score 1.00. Even so, nothing in the titles says how each venue resolves them, and their stated close times are 29 hours apart (Kalshi at 11:59 PM ET on December 31, Polymarket at 00:00 UTC on December 31). Lower down, titles mislead in both directions:
+
+- "Will the rate of core PCE inflation be above 0.5% in September 2026?" and "Will Core PCE MoM be 0.5% or more in September?" read alike (score 0.45). At exactly 0.5%, though, one pays No and the other Yes. That is the tie rule the terms rules flag, which titles can't show.
+- "Joe Burrow: 2+ passing interceptions" and "Joe Burrow: 2+ Touchdowns" score 0.50 and are different bets.
+
+This is why D15 holds at catalog scale: titles find candidates for a person to check, and only terms make a market routable. The All markets page (`/markets`) shows each unclear pair with its score and reasons.
+
+**What the index misses.** A true pair worded with fewer than two shared informative words, or closing more than 3 days apart, is never a candidate (D50). 1,866 Kalshi markets close in 2030 or later, some in "2099" as a placeholder for "eventually", and 1,424 Polymarket markets have no end date at all, so long-dated questions rarely pair.
+
 ## Third venue: the Meridian fit check
 
 Two venues can't show that the design generalizes. Meridian, a planned binary-stock-outcome venue on Solana devnet, is **not integrated** (D26). Instead, architecture §9 maps it onto the canonical model on paper, and hand-built Meridian-style markets go through the real matcher and router in the test suite.
@@ -140,5 +169,6 @@ Meridian settles in devnet USDC, which has no monetary value (M5). That is a rou
 ## Limits
 
 - One event family has a term parser: Fed rate decisions. Every other market is matched by title only and is never routed. Adding a family means one parser per adapter; the matcher doesn't change.
+- The catalog is as fresh as its last refresh, and its title candidates depend on the index's blocking rules: dates within 3 days, two shared informative words (D50).
 - No Kalshi and Polymarket stock or index pair is strictly equivalent today: they differ in comparison, tie rule, price source or underlying (S5).
 - Strictness is a choice. Some pairs a person would call the same bet are AMBIGUOUS here, for example two markets that differ only in whether they state an observation instant. AMBIGUOUS pairs are shown with their reasons, so the cost of strictness is visible.

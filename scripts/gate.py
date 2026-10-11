@@ -10,9 +10,11 @@ check are the same. It uses the interpreter that runs it, so call it with the pr
 import subprocess
 import sys
 
+# No ruff cache: CI starts without one, and a cached result once hid an import-order error that
+# appeared only after the imported module was created (AI_USAGE 19).
 STEPS = [
-    ["ruff", "check", "."],
-    ["ruff", "format", "--check", "."],
+    ["ruff", "check", "--no-cache", "."],
+    ["ruff", "format", "--no-cache", "--check", "."],
     ["pytest"],
 ]
 

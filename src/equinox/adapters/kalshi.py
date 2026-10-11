@@ -8,6 +8,7 @@ timestamp, so captured_at is clock() at the moment each one is read (D37).
 """
 
 import json
+from collections.abc import Iterator
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
@@ -35,12 +36,14 @@ from equinox.models import (
     OutcomeBook,
     ResolutionSource,
 )
+from equinox.models.catalog import CatalogEntry, CatalogPage
 
 DEFAULT_BASE_URL = "https://external-api.kalshi.com/trade-api/v2"  # K1
 NEW_YORK = ZoneInfo("America/New_York")
 FEE_RATE = Decimal("0.07")  # times the series multiplier (K9)
 FEE_STEP = Decimal("0.01")  # A3
 
+CLOSED = frozenset({"closed", "determined", "finalized", "settled"})  # an open event's past markets
 FED_DECISION = "fed_decision"
 FAMILY_SERIES = {FED_DECISION: "KXFEDDECISION"}  # K13
 # The five custom_strike shapes of a KXFEDDECISION event (K8), as (comparison, bps).
@@ -117,6 +120,24 @@ class KalshiAdapter(VenueAdapter):
         captured_at = self.clock()  # read time: the response carries none (D37)
         return with_books(market, _books(orderbook), captured_at)
 
+    def list_open(
+        self, page_size: int = 200, max_pages: int | None = None
+    ) -> Iterator[CatalogPage]:
+        """Every open market, page by page, from the events listing, which has no combos (K12)."""
+        cursor, pages = "", 0
+        while True:
+            params = {"status": "open", "with_nested_markets": "true", "limit": page_size}
+            page = self._get(
+                f"/events?{urlencode(params | ({'cursor': cursor} if cursor else {}))}"
+            )
+            listed = [_catalog_entries(event) for event in page.get("events") or []]
+            yield CatalogPage(
+                [e for entries, _ in listed for e in entries], sum(n for _, n in listed)
+            )
+            pages, cursor = pages + 1, page.get("cursor")
+            if not cursor or (max_pages is not None and pages >= max_pages):
+                return
+
     def _get(self, path: str) -> Any:
         return self.fetch(f"{self.base_url}{path}")
 
@@ -159,6 +180,35 @@ class KalshiAdapter(VenueAdapter):
             },
             **shared,
         )
+
+
+def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
+    """An event's open Yes/No markets as catalog entries, and how many were left out."""
+    fed = event.get("series_ticker") == FAMILY_SERIES[FED_DECISION]
+    entries, skipped = [], 0
+    for raw in event.get("markets") or []:
+        if raw.get("status") in CLOSED:
+            continue
+        try:
+            if raw.get("market_type", "binary") != "binary":
+                raise ValueError("not a Yes/No market")
+            entries.append(
+                CatalogEntry(
+                    market_id=f"kalshi:{raw['ticker']}",
+                    venue="kalshi",
+                    event_title=event.get("title") or "",
+                    title=raw.get("title") or f"{event.get('title', '')} {raw['yes_sub_title']}",
+                    outcome_label=raw.get("yes_sub_title") or "",
+                    closes_at=_time(raw.get("close_time")),
+                    tradable=raw.get("status") == "active",
+                    yes_ask=listed_ask(raw.get("yes_ask_dollars")),
+                    no_ask=listed_ask(raw.get("no_ask_dollars")),
+                    terms=_fed_decision_terms(raw, event) if fed else None,
+                )
+            )
+        except BAD_DATA:
+            skipped += 1
+    return entries, skipped
 
 
 def _event_fields(event: dict[str, Any], series: dict[str, Any]) -> dict[str, Any]:

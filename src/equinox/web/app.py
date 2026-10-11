@@ -15,7 +15,7 @@ from equinox import sources
 from equinox.adapters.base import FetchError
 from equinox.adapters.fetch import FixtureFetcher
 from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
-from equinox.web import board, match, order, pages
+from equinox.web import board, markets, match, order, pages
 from equinox.web.view import PageContext, View, build_view
 
 ROUTES = {"/": order.page, "/index.html": order.page, "/board": board.page, "/match": match.page}
@@ -41,15 +41,15 @@ class App:
 
     def respond(self, path: str, query: str) -> str | None:
         """The page for a GET request, or None for a path the UI doesn't serve."""
+        params = {k: v[-1] for k, v in parse_qs(query, keep_blank_values=True).items()}
+        data = params.get("data", "")
+        data = data if data in [*snapshot_names(), "live"] else ""
+        if path == "/markets":  # the saved catalog, whatever the data source
+            return markets.page(self.settings.cache_dir, params, data, self._clock())
         page = ROUTES.get(path)
         if page is None:
             return None
-        params = {k: v[-1] for k, v in parse_qs(query, keep_blank_values=True).items()}
-        sources_ = [*snapshot_names(), "live"]
-        source = (
-            params.get("data") if params.get("data") in sources_ else self.settings.snapshot.name
-        )
-        view = self._view(source)
+        view = self._view(data or self.settings.snapshot.name)
         ctx = PageContext(
             self._clock(), self.settings.stale_after, self._banner(view, path, params)
         )
