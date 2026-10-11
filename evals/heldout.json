@@ -1,0 +1,452 @@
+[
+ {
+  "name": "Arrest",
+  "label": "same",
+  "why": "Arrested before 2027 on both; what counts as an arrest is worded differently (edge cases).",
+  "a": {
+   "market_id": "kalshi:KXARREST-27JAN-LLYN",
+   "venue": "kalshi",
+   "event_title": "Who will be arrested in 2026?",
+   "title": "Will Loretta Lynch be arrested before Jan 2027?",
+   "outcome_label": "Loretta Lynch",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Loretta Lynch is arrested before Jan 1, 2027, then the market resolves to Yes.\nClarification (9/25/25): The contract states that if an individual \"surrenders at a police station or courthouse with their attorney\" the payout criterion is satisfied. To be clear, voluntarily surrendering to law enforcement pursuant to an indictment without an arrest warrant is sufficient to resolve a market to Yes.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:2116873",
+   "venue": "polymarket",
+   "event_title": "Who will be arrested before 2027?",
+   "title": "Will Loretta Lynch be arrested before 2027?",
+   "outcome_label": "Loretta Lynch",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the listed individual is arrested by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nA qualifying arrest/detention includes:\n* Being taken into physical custody by law enforcement authorities (including federal, state, local, military, or international law enforcement)\n* Voluntarily surrendering to law enforcement authorities in response to an arrest warrant\n* Being formally booked or processed following detention\n* Being handcuffed by a state authority and taken to a police station\n* Surrendering at a police station or courthouse with their attorney\n* Being placed under house arrest or electronic monitoring\n\nThe following scenarios will NOT qualify as an arrest/detention\n* An arrest warrant being issued but not executed\n* Being briefly detained but not arrested (e.g. such as in the South Korean judicial system when an individual is awaiting a judge’s decision on whether to grant a detention warrant)\n* Being questioned or interviewed without arrest\n* Being named in an indictment without arrest\n\nThe primary resolution source for this market will be official information from the arresting government and law enforcement, however a consensus of credible reporting may also be used.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award, other category",
+  "label": "different",
+  "why": "Best Independent Game vs Best Narrative.",
+  "a": {
+   "market_id": "kalshi:KXGAMEAWARDS-BIG-MOU",
+   "venue": "kalshi",
+   "event_title": "Game Awards: Best Independent Game",
+   "title": "Will Mouse: P.I. For Hire win the 2026 Game Award for Best Independent Game?",
+   "outcome_label": "Mouse: P.I. For Hire",
+   "closes_at": "2026-12-31T15:00:00+00:00",
+   "rules": "If Mouse: P.I. For Hire has won Best Independent Game at the 2026 Game Awards, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Game Awards. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:3357451",
+   "venue": "polymarket",
+   "event_title": "The Game Awards: Best Narrative",
+   "title": "Will Mouse: P.I. For Hire win Best Narrative at the 2026 Game Awards?",
+   "outcome_label": "Mouse: P.I. For Hire",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "The Game Awards are presented annually to honor achievements in the video game industry. The 2026 Game Awards are currently scheduled to be presented on December 10, 2026.\n\nThis market will resolve according to the listed video game that wins the 2026 Game Award for Best Narrative.\n\nIf a game is not officially nominated for the 2026 Game Award for Best Narrative when the 2026 nominees are announced, the corresponding market will immediately resolve to \"No\".\n\nIn case of a tie for the winner, this market will resolve in favor of the nominated game whose listed title comes first in alphabetical order.\n\nIf, for any reason, no winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market will be official information from The Game Awards, including data from their website (e.g., https://thegameawards.com/) and the live broadcast of the award ceremony; however, a consensus of credible reporting may also be used.\nResolution source: https://thegameawards.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Half-time score, other game",
+  "label": "different",
+  "why": "Lens vs Sporting on Oct 13 vs Troyes vs Lens on Oct 17.",
+  "a": {
+   "market_id": "kalshi:KXUCL1HSCORE-26OCT13RCLSPO-RCL2SPO0",
+   "venue": "kalshi",
+   "event_title": "Racing Club De Lens vs Sporting CP: 1st Half Correct Score",
+   "title": "Will the 1st half score be Racing Club De Lens wins 2-0?",
+   "outcome_label": "Racing Club De Lens wins 1H 2-0",
+   "closes_at": "2026-10-15T22:45:00+00:00",
+   "rules": "If the score at the end of the 1st Half is Racing Club De Lens 2, Sporting CP 0 in the Racing Club De Lens vs Sporting CP professional Champions League soccer game originally scheduled for Oct 13, 2026, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"0\", \"away_team_id\": \"bbafe881-978e-4eaa-b6d3-21fb6537d0af\", \"home_score\": \"2\", \"home_team_id\": \"037e6593-99d0-464b-a28c-ac1211d6a6f3\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5473680",
+   "venue": "polymarket",
+   "event_title": "ES Troyes AC vs. Racing Club de Lens - 1st Half Exact Score",
+   "title": "1st Half Exact Score: ES Troyes AC 0 - 2 Racing Club de Lens?",
+   "outcome_label": "ES Troyes AC 0 - 2 Racing Club de Lens",
+   "closes_at": "2026-10-17T18:45:00+00:00",
+   "rules": "In the upcoming Ligue 1 game between ES Troyes AC and Racing Club de Lens, scheduled for October 17, 2026 at 2:45 PM ET: This market will resolve based on the halftime score of the ES Troyes AC vs. Racing Club de Lens match originally scheduled for October 17, 2026 at 2:45 PM ET, considering only goals scored within the first 45 minutes of regular play plus first-half stoppage time; second-half goals, extra time, and penalty shoot-outs are excluded. If the actual halftime score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\n\nThis market may resolve only when the listed period of play has concluded and the result can be definitively determined by the listed resolution source(s).",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop, other statistic",
+  "label": "different",
+  "why": "Receptions vs touchdowns.",
+  "a": {
+   "market_id": "kalshi:KXNFLREC-26OCT12BUFLAR-BUFTJOHNSON26-2",
+   "venue": "kalshi",
+   "event_title": "Buffalo vs Los Angeles R: Receptions",
+   "title": "Ty Johnson: 2+ receptions",
+   "outcome_label": "Ty Johnson: 2+",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Ty Johnson records 2+ receptions in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026, then the market resolves to Yes.\nThe following market refers to Ty Johnson in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026. If Ty Johnson is active but never takes a snap, the market settles to the fair market price before game start. Once Ty Johnson takes at least one snap, even if nullified by penalty, the market settles based on receptions recorded.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"1.5\", \"custom_strike\": {\"football_player\": \"a2f1b838-3ddb-43f5-b1ff-aca7c57d9c5d\", \"football_team\": \"f9acd396-ba35-4cae-a431-a44b2af707b0\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5444191",
+   "venue": "polymarket",
+   "event_title": "Bills vs. Rams - Player Props",
+   "title": "Ty Johnson: 2+ Touchdowns",
+   "outcome_label": "Ty Johnson: 2+ Touchdowns",
+   "closes_at": "2026-10-13T00:15:00+00:00",
+   "rules": "In the upcoming NFL football game between Bills and Rams, scheduled for October 12 at 8:15 PM ET: This market will resolve to \"Yes\" if Ty Johnson scores 2 or more rushing or receiving touchdowns in this game. Otherwise, this market will resolve to \"No\". Defensive and special teams touchdowns do not count. Overtime is included if played. All statistics are based on the official NFL game book as published on NFL.com at the conclusion of the game. Stat corrections issued after the game has been completed will not count. If the player is inactive or does not play, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.nfl.com/scores",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award",
+  "label": "same",
+  "why": "Rainbow Six Mobile wins Best Mobile Game at the 2026 Game Awards.",
+  "a": {
+   "market_id": "kalshi:KXGAMEAWARDS-BMOB-TOM",
+   "venue": "kalshi",
+   "event_title": "Game Awards: Best Mobile Game",
+   "title": "Will Tom Clancy's Rainbow Six Mobile win the 2026 Game Award for Best Mobile Game?",
+   "outcome_label": "Tom Clancy's Rainbow Six Mobile",
+   "closes_at": "2026-12-31T15:00:00+00:00",
+   "rules": "If Tom Clancy's Rainbow Six Mobile has won Best Mobile Game at the 2026 Game Awards, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Game Awards. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:3357490",
+   "venue": "polymarket",
+   "event_title": "The Game Awards: Best Mobile Game",
+   "title": "Will Tom Clancy's Rainbow Six Mobile win Best Mobile Game at the 2026 Game Awards?",
+   "outcome_label": "Tom Clancy's Rainbow Six Mobile",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "The Game Awards are presented annually to honor achievements in the video game industry. The 2026 Game Awards are currently scheduled to be presented on December 10, 2026.\n\nThis market will resolve according to the listed video game that wins the 2026 Game Award for Best Mobile Game.\n\nIf a game is not officially nominated for the 2026 Game Award for Best Mobile Game when the 2026 nominees are announced, the corresponding market will immediately resolve to \"No\".\n\nIn case of a tie for the winner, this market will resolve in favor of the nominated game whose listed title comes first in alphabetical order.\n\nIf, for any reason, no winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market will be official information from The Game Awards, including data from their website (e.g., https://thegameawards.com/) and the live broadcast of the award ceremony; however, a consensus of credible reporting may also be used.\nResolution source: https://thegameawards.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop, other statistic",
+  "label": "different",
+  "why": "Goals vs goals plus assists.",
+  "a": {
+   "market_id": "kalshi:KXLALIGAGOAL-26OCT10RVCATH-ATHYBERCH17-1",
+   "venue": "kalshi",
+   "event_title": "Vallecano vs Bilbao: Goalscorer",
+   "title": "Yuri Berchiche: 1+ goals",
+   "outcome_label": "Yuri Berchiche: 1+",
+   "closes_at": "2026-10-12T18:00:00+00:00",
+   "rules": "If Yuri Berchiche records at least 1 goal during the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026, then the market resolves to Yes.\nThe following market refers to a player in the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026. If a player is active but never enters the game, the market settles to the fair market price before game start. Once a player enters the game, the market settles based on the player's goals scored.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"0.5\", \"custom_strike\": {\"soccer_player\": \"acf6d7be-3f13-474e-b537-4e6b0827f01e\", \"soccer_team\": \"8a82e30a-849f-4499-84bc-4efe695d28f1\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5488085",
+   "venue": "polymarket",
+   "event_title": "Rayo Vallecano de Madrid vs. Athletic Club - Player Props",
+   "title": "Yuri Berchiche: 1+ goals + assists",
+   "outcome_label": "Yuri Berchiche: 1+ goals + assists",
+   "closes_at": "2026-10-10T12:00:00+00:00",
+   "rules": "In the upcoming La Liga game between Rayo Vallecano de Madrid and Athletic Club, scheduled for October 10, 2026 at 8:00 AM ET: This market will resolve to \"Yes\" if Yuri Berchiche records more than 0.5 goals + assists within the first 90 minutes of regular play plus stoppage time. This market will resolve to \"No\" if Yuri Berchiche records 0.5 goals + assists or fewer within the first 90 minutes of regular play plus stoppage time. Goals + assists are counted only if credited to Yuri Berchiche in the official match statistics. If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50. If Yuri Berchiche is listed as inactive or otherwise does not play, the market will resolve \"No\". This market refers only to the outcome within the first 90 minutes of regular play plus stoppage time. Extra time and penalty shoot-outs are excluded. The primary resolution source for this market is the official statistics published by the governing body or event organizers. If the governing body or event organizers have not published final statistics within 2 hours of the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used. Revisions to officially published final statistics made after market resolution will not be considered in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\nResolution source: https://www.laliga.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "First vs anytime goalscorer",
+  "label": "different",
+  "why": "First goal of the game vs any goal.",
+  "a": {
+   "market_id": "kalshi:KXLALIGAFIRSTGOAL-26OCT10RVCATH-RVCFLEJEU24",
+   "venue": "kalshi",
+   "event_title": "Vallecano vs Bilbao: First Goalscorer",
+   "title": "Florian Lejeune: First Goalscorer",
+   "outcome_label": "Florian Lejeune",
+   "closes_at": "2026-10-12T18:00:00+00:00",
+   "rules": "If Florian Lejeune records the first goal during the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026, then the market resolves to Yes.\nThe following market refers to a player in the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026. If a player is active but never enters the match, the market will settle to the fair market price before game start. If the first qualifying goal is scored before the player enters the match as a substitute, the market will also settle to the fair market price. If the player enters the match before the first qualifying goal is scored, the market resolves based on the player's goals scored. If the first goal of the match is an own goal, the first qualifying goal will instead be the first non-own goal scored.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"soccer_player\": \"07f59826-a7b4-4c75-9d11-792dd8ab2533\", \"soccer_team\": \"f52bf332-d290-4b44-9a13-4217f88f7c00\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5487797",
+   "venue": "polymarket",
+   "event_title": "Rayo Vallecano de Madrid vs. Athletic Club - Player Props",
+   "title": "Florian Lejeune: Anytime Goalscorer",
+   "outcome_label": "Goalscorer: Florian Lejeune",
+   "closes_at": "2026-10-10T12:00:00+00:00",
+   "rules": "In the upcoming La Liga game between Rayo Vallecano de Madrid and Athletic Club, scheduled for October 10, 2026 at 8:00 AM ET: This market will resolve to \"Yes\" if Florian Lejeune is credited with a goal in the official box score within the first 90 minutes of regular play plus stoppage time. Otherwise, this market will resolve to \"No\". Own goals do not count. If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve \"50-50\". If the player is listed as inactive or otherwise does not play, the market will resolve \"No\". The primary resolution source for this market is the official statistics published by the governing body or event organizers. If the governing body or event organizers have not published final statistics within 2 hours of the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used. Revisions to officially published final statistics made after market resolution will not be considered in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\nResolution source: https://www.laliga.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Nomination run vs any run",
+  "label": "different",
+  "why": "A campaign for the Democratic nomination vs any announced presidential run.",
+  "a": {
+   "market_id": "kalshi:KX2028DRUN-28-JSTE",
+   "venue": "kalshi",
+   "event_title": "Who will run for the Democratic presidential nomination in 2028?",
+   "title": "Who will run for the Democratic presidential nomination in 2028?",
+   "outcome_label": "Jon Stewart",
+   "closes_at": "2028-01-01T15:00:00+00:00",
+   "rules": "If Jon Stewart announces a presidential campaign to contest the presidential nomination of the Democratic party for the 2028 U.S. presidential election before Jan 1, 2028, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Person\": \"Jon Stewart\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:3347362",
+   "venue": "polymarket",
+   "event_title": "Who will announce Presidential run before 2028?",
+   "title": "Will Jon Stewart announce a Presidential run before 2028?",
+   "outcome_label": "Jon Stewart",
+   "closes_at": "2028-01-01T04:59:00+00:00",
+   "rules": "This market will resolve to “Yes” if the listed individual officially announces that they are running for U.S. President in the 2028 United States presidential election by December 31, 2027, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nAn announcement by the listed individual will be sufficient to trigger a \"Yes\" resolution, regardless of whether they actually filed a nomination to run, or whether they actually file a nomination to run in the future.\n\nA qualifying announcement must be explicit and unambiguous. Conditional statements, or statements that are clearly sarcastic, made in jest, or immediately clarified as not being genuine will not count.\n\nThe primary resolution source for this market will be official statements by the listed individual (ex: via speech, social media, etc.), however a consensus of credible reporting may also be used.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop, other statistic",
+  "label": "different",
+  "why": "Goals vs assists.",
+  "a": {
+   "market_id": "kalshi:KXLALIGAGOAL-26OCT10RVCATH-RVCMSADIC15-1",
+   "venue": "kalshi",
+   "event_title": "Vallecano vs Bilbao: Goalscorer",
+   "title": "Mujaid Sadick: 1+ goals",
+   "outcome_label": "Mujaid Sadick: 1+",
+   "closes_at": "2026-10-12T18:00:00+00:00",
+   "rules": "If Mujaid Sadick records at least 1 goal during the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026, then the market resolves to Yes.\nThe following market refers to a player in the entire game (regulation, stoppage and any extra time periods) of the Vallecano vs Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026. If a player is active but never enters the game, the market settles to the fair market price before game start. Once a player enters the game, the market settles based on the player's goals scored.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"0.5\", \"custom_strike\": {\"soccer_player\": \"1200bb04-14e3-4ea5-a5ef-f1db05ff2d5f\", \"soccer_team\": \"f52bf332-d290-4b44-9a13-4217f88f7c00\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5487926",
+   "venue": "polymarket",
+   "event_title": "Rayo Vallecano de Madrid vs. Athletic Club - Player Props",
+   "title": "Mujaid Sadick: 1+ assists",
+   "outcome_label": "Mujaid Sadick: 1+ assists",
+   "closes_at": "2026-10-10T12:00:00+00:00",
+   "rules": "In the upcoming La Liga game between Rayo Vallecano de Madrid and Athletic Club, scheduled for October 10, 2026 at 8:00 AM ET: This market will resolve to \"Yes\" if Mujaid Sadick records more than 0.5 assists within the first 90 minutes of regular play plus stoppage time. This market will resolve to \"No\" if Mujaid Sadick records 0.5 assists or fewer within the first 90 minutes of regular play plus stoppage time. Assists are counted only if credited to Mujaid Sadick in the official match statistics. If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50. If Mujaid Sadick is listed as inactive or otherwise does not play, the market will resolve \"No\". This market refers only to the outcome within the first 90 minutes of regular play plus stoppage time. Extra time and penalty shoot-outs are excluded. The primary resolution source for this market is the official statistics published by the governing body or event organizers. If the governing body or event organizers have not published final statistics within 2 hours of the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used. Revisions to officially published final statistics made after market resolution will not be considered in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\nResolution source: https://www.laliga.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award, other category",
+  "label": "different",
+  "why": "Best Game Direction vs Best Narrative.",
+  "a": {
+   "market_id": "kalshi:KXGAMEAWARDSBGD-2026-BLO",
+   "venue": "kalshi",
+   "event_title": "Game Awards: Best Game Direction",
+   "title": "Will The Blood of Dawnwalker win the 2026 Game Award for Best Game Direction?",
+   "outcome_label": "The Blood of Dawnwalker",
+   "closes_at": "2026-12-31T15:00:00+00:00",
+   "rules": "If The Blood of Dawnwalker has won Best Game Direction at the 2026 Game Awards, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Game Awards. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:3357456",
+   "venue": "polymarket",
+   "event_title": "The Game Awards: Best Narrative",
+   "title": "Will The Blood of Dawnwalker win Best Narrative at the 2026 Game Awards?",
+   "outcome_label": "The Blood of Dawnwalker",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "The Game Awards are presented annually to honor achievements in the video game industry. The 2026 Game Awards are currently scheduled to be presented on December 10, 2026.\n\nThis market will resolve according to the listed video game that wins the 2026 Game Award for Best Narrative.\n\nIf a game is not officially nominated for the 2026 Game Award for Best Narrative when the 2026 nominees are announced, the corresponding market will immediately resolve to \"No\".\n\nIn case of a tie for the winner, this market will resolve in favor of the nominated game whose listed title comes first in alphabetical order.\n\nIf, for any reason, no winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market will be official information from The Game Awards, including data from their website (e.g., https://thegameawards.com/) and the live broadcast of the award ceremony; however, a consensus of credible reporting may also be used.\nResolution source: https://thegameawards.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Presidential nominee",
+  "label": "same",
+  "why": "Wins and accepts the 2028 Republican presidential nomination on both.",
+  "a": {
+   "market_id": "kalshi:KXPRESNOMR-28-JH",
+   "venue": "kalshi",
+   "event_title": "2028 Republican presidential nominee",
+   "title": "Will Josh Hawley be the nominee for the Presidency for the Republican party?",
+   "outcome_label": "Josh Hawley",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If Josh Hawley wins and accepts the nomination for the Presidency for the Republican party in 2028, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Candidate\": \"Josh Hawley\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:561988",
+   "venue": "polymarket",
+   "event_title": "Republican Presidential Nominee 2028",
+   "title": "Will Josh Hawley win the 2028 Republican presidential nomination?",
+   "outcome_label": "Josh Hawley",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Republican Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Republican Party sources.\n\nAny replacement of the Republican nominee before election day will not change the resolution of the market.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Different question",
+  "label": "different",
+  "why": "Released in 2026 vs wins Best Narrative.",
+  "a": {
+   "market_id": "kalshi:KXGAMERELEASE-26-GTA",
+   "venue": "kalshi",
+   "event_title": "Video games released this year",
+   "title": "Will Grand Theft Auto VI release this year?",
+   "outcome_label": "Grand Theft Auto VI",
+   "closes_at": "2027-01-02T15:00:00+00:00",
+   "rules": "If Grand Theft Auto VI is fully released before Jan 1, 2027 on any platform in the United States, then the market resolves to Yes.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:3357452",
+   "venue": "polymarket",
+   "event_title": "The Game Awards: Best Narrative",
+   "title": "Will Grand Theft Auto VI win Best Narrative at the 2026 Game Awards?",
+   "outcome_label": "Grand Theft Auto VI",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "The Game Awards are presented annually to honor achievements in the video game industry. The 2026 Game Awards are currently scheduled to be presented on December 10, 2026.\n\nThis market will resolve according to the listed video game that wins the 2026 Game Award for Best Narrative.\n\nIf a game is not officially nominated for the 2026 Game Award for Best Narrative when the 2026 nominees are announced, the corresponding market will immediately resolve to \"No\".\n\nIn case of a tie for the winner, this market will resolve in favor of the nominated game whose listed title comes first in alphabetical order.\n\nIf, for any reason, no winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market will be official information from The Game Awards, including data from their website (e.g., https://thegameawards.com/) and the live broadcast of the award ceremony; however, a consensus of credible reporting may also be used.\nResolution source: https://thegameawards.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same prop, other game",
+  "label": "different",
+  "why": "An NHL game vs a college football game.",
+  "a": {
+   "market_id": "kalshi:KXNHLOT-26OCT13NJDET-1",
+   "venue": "kalshi",
+   "event_title": "New Jersey vs Detroit: Overtime",
+   "title": "Game goes to overtime",
+   "outcome_label": "Game goes to overtime",
+   "closes_at": "2026-10-15T22:00:00+00:00",
+   "rules": "If at least 1 overtime period is played in the New Jersey vs Detroit NHL game originally scheduled for Oct 13, 2026, then the market resolves to Yes.\nFor the purposes of this market, an overtime period is \"played\" if and only if play in that overtime period commences, meaning that the opening faceoff of that overtime period is taken. An overtime period that is scheduled, announced, or begun but in which no play commences is not considered to be played.\n\nIf the game is postponed but begins within 48 hours of its originally scheduled start time, the market will remain open and resolve based on the official final result. If the game is cancelled or not started within 48 hours of its originally scheduled start, all markets will resolve to a fair price.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"0.5\"}"
+  },
+  "b": {
+   "market_id": "polymarket:5358090",
+   "venue": "polymarket",
+   "event_title": "Akron vs. Miami (OH)",
+   "title": "Akron vs. Miami (OH): Game Goes to Overtime",
+   "outcome_label": "Game Goes to Overtime",
+   "closes_at": "2026-10-17T19:30:00+00:00",
+   "rules": "In the upcoming college football game between Akron and Miami (OH), scheduled for October 17 at 3:30 PM ET: This market will resolve to \"Yes\" if overtime is played in this game. Otherwise, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.ncaa.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Half-time score, other game",
+  "label": "different",
+  "why": "Villarreal vs Napoli on Oct 13 vs Venezia vs Napoli on Oct 17.",
+  "a": {
+   "market_id": "kalshi:KXUCL1HSCORE-26OCT13VILNAP-VIL0NAP1",
+   "venue": "kalshi",
+   "event_title": "Villarreal CF vs SSC Napoli: 1st Half Correct Score",
+   "title": "Will the 1st half score be SSC Napoli wins 1-0?",
+   "outcome_label": "SSC Napoli wins 1H 1-0",
+   "closes_at": "2026-10-16T01:00:00+00:00",
+   "rules": "If the score at the end of the 1st Half is Villarreal CF 0, SSC Napoli 1 in the Villarreal CF vs SSC Napoli professional Champions League soccer game originally scheduled for Oct 13, 2026, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"721bf91f-9827-4be2-8429-86360529a258\", \"home_score\": \"0\", \"home_team_id\": \"e16880b0-2ac2-476a-8b82-6ef29655175c\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5457336",
+   "venue": "polymarket",
+   "event_title": "Venezia FC vs. SSC Napoli - 1st Half Exact Score",
+   "title": "1st Half Exact Score: Venezia FC 1 - 0 SSC Napoli?",
+   "outcome_label": "Venezia FC 1 - 0 SSC Napoli",
+   "closes_at": "2026-10-17T13:00:00+00:00",
+   "rules": "In the upcoming Serie A game between Venezia FC and SSC Napoli, scheduled for October 17, 2026 at 9:00 AM ET: This market will resolve based on the halftime score of the Venezia FC vs. SSC Napoli match originally scheduled for October 17, 2026 at 9:00 AM ET, considering only goals scored within the first 45 minutes of regular play plus first-half stoppage time; second-half goals, extra time, and penalty shoot-outs are excluded. If the actual halftime score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\n\nThis market may resolve only when the listed period of play has concluded and the result can be definitively determined by the listed resolution source(s).",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Different question",
+  "label": "different",
+  "why": "Rams sacks vs an MLS exact score.",
+  "a": {
+   "market_id": "kalshi:KXNFLTEAMSACK-26OCT12BUFLAR-LAR5",
+   "venue": "kalshi",
+   "event_title": "Buffalo vs Los Angeles R: Team Sacks",
+   "title": "Los Angeles R: 5+ sacks",
+   "outcome_label": "Los Angeles R: 5+",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Los Angeles R records 5+ sacks in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026, then the market resolves to Yes.\nThis market resolves based on the number of sacks recorded by Los Angeles R during the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026. Any sacks recorded during a 2-point conversion attempt do not count. If the game is postponed but begins within 48 hours of its originally scheduled start time, the market will remain open and resolve based on the official final result. If the game is not started within 48 hours, the market will resolve to a fair price.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"4.5\", \"custom_strike\": {\"football_team\": \"422d5fd7-ad18-4c96-902d-6f7c50e4660f\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5180003",
+   "venue": "polymarket",
+   "event_title": "Los Angeles Galaxy vs. Portland Timbers - Exact Score",
+   "title": "Exact Score: Los Angeles Galaxy 5 - 5 Portland Timbers?",
+   "outcome_label": "Los Angeles Galaxy 5 - 5 Portland Timbers",
+   "closes_at": "2026-10-15T02:30:00+00:00",
+   "rules": "In the upcoming MLS game between Los Angeles Galaxy and Portland Timbers, scheduled for October 14, 2026 at 10:30 PM ET: This market will resolve based on the final score of the Los Angeles Galaxy vs. Portland Timbers match originally scheduled for October 14, 2026 at 10:30 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award, other player",
+  "label": "different",
+  "why": "ON vs Keria.",
+  "a": {
+   "market_id": "kalshi:KXLOLAWARD-WORLDS26FMVP-ON",
+   "venue": "kalshi",
+   "event_title": "League of Legends Worlds Finals MVP",
+   "title": "Will ON win Finals MVP at League of Legends Worlds?",
+   "outcome_label": "ON",
+   "closes_at": "2026-11-29T15:00:00+00:00",
+   "rules": "If ON wins the League of Legends Worlds Finals MVP for 2026, then the market resolves to Yes.\nIf multiple players shared Finals MVP, Yes holders will be paid 1/N where N is the number of shared participants. No holders will be paid $1 minus the Yes payout.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Person\": \"ON\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:4397250",
+   "venue": "polymarket",
+   "event_title": "Worlds 2026: Finals MVP",
+   "title": "Will Keria win Worlds 2026 Finals MVP?",
+   "outcome_label": "Keria",
+   "closes_at": "2026-11-29T04:59:00+00:00",
+   "rules": "This market will resolve according to the player named Finals MVP (Most Valuable Player of the Grand Final) of the 2026 League of Legends World Championship (Worlds 2026), currently scheduled for October 15 to November 14, 2026, with the Grand Final scheduled for November 14, 2026.\n\nIf this tournament is postponed after November 28, 2026, 11:59 PM ET, canceled, or a Finals MVP has not been declared within this timeframe, this market will resolve to \"Other\".\n\nIf multiple players are declared a Finals MVP (e.g., due to ties or special circumstances), this market will resolve in favor of the player whose listed in-game name comes first alphabetically.\n\nThe resolution source for this market will be official information from the tournament organizer, Riot Games, via the LoL Esports website (https://lolesports.com). However, a consensus of credible reporting (e.g., Liquipedia at https://liquipedia.net/leagueoflegends/World_Championship/2026) may also be used.\nResolution source: https://lolesports.com",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same prop, other fight",
+  "label": "different",
+  "why": "Asher vs Foster on Oct 13 vs Thicknesse vs Chopurov on Oct 24.",
+  "a": {
+   "market_id": "kalshi:KXUFCMOF-26OCT13ASHFOS-SUB",
+   "venue": "kalshi",
+   "event_title": "Jason Asher vs. Greg Foster: Method of Finish",
+   "title": "Fight ends by Submission?",
+   "outcome_label": "Submission",
+   "closes_at": "2026-10-27T23:00:00+00:00",
+   "rules": "If either competitor wins by Submission during the Jason Asher vs. Greg Foster Contender Series fight originally scheduled for Oct 13, 2026, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Method\": \"Submission\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5523388",
+   "venue": "polymarket",
+   "event_title": "UFC 333: Colby Thicknesse vs. Asaf Chopurov (Bantamweight, Early Prelims)",
+   "title": "Will the fight be won by submission?",
+   "outcome_label": "Fight won by submission?",
+   "closes_at": "2026-10-25T03:59:59.999000+00:00",
+   "rules": "This market will resolve to \"Yes\" if the fight between Colby Thicknesse and Asaf Chopurov at UFC 333: Volkanovski vs. Evloev, scheduled for October 24, 2026, ends by submission, including tapout, verbal submission, or technical submission (referee stoppage due to a submission hold). Otherwise, it will resolve to \"No.\"\n\nIf the fight ends in a draw or by disqualification (either fighter), it will resolve \"No.\"\n\nIf the bout is ruled a No Contest, not scored, canceled, or postponed beyond November 7, 2026, this market will resolve \"50-50.\"\n\nThe resolution source for this market will be official information from the UFC.\nResolution source: https://www.ufc.com/events",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, home win",
+  "label": "same",
+  "why": "Rayo Vallecano (home) wins 3-1 over 90 minutes plus stoppage.",
+  "a": {
+   "market_id": "kalshi:KXLALIGASCORE-26OCT10RVCATH-RVC3ATH1",
+   "venue": "kalshi",
+   "event_title": "Rayo Vallecano vs Athletic Bilbao: Correct Score",
+   "title": "Final score Rayo Vallecano wins 3-1?",
+   "outcome_label": "Rayo Vallecano wins 3-1",
+   "closes_at": "2026-10-12T18:00:00+00:00",
+   "rules": "If Rayo Vallecano wins 3-1 in the Rayo Vallecano vs Athletic Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"8a82e30a-849f-4499-84bc-4efe695d28f1\", \"home_score\": \"3\", \"home_team_id\": \"f52bf332-d290-4b44-9a13-4217f88f7c00\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5015164",
+   "venue": "polymarket",
+   "event_title": "Rayo Vallecano de Madrid vs. Athletic Club - Exact Score",
+   "title": "Exact Score: Rayo Vallecano de Madrid 3 - 1 Athletic Club?",
+   "outcome_label": "Rayo Vallecano de Madrid 3 - 1 Athletic Club",
+   "closes_at": "2026-10-10T12:00:00+00:00",
+   "rules": "In the upcoming La Liga game between Rayo Vallecano de Madrid and Athletic Club, scheduled for October 10, 2026 at 8:00 AM ET: This market will resolve based on the final score of the Rayo Vallecano de Madrid vs. Athletic Club match originally scheduled for October 10, 2026 at 8:00 AM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ }
+]

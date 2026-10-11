@@ -17,7 +17,7 @@ Venue names reach the text only through `market.venue`.
 """
 
 from datetime import UTC
-from decimal import Decimal
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from typing import NamedTuple
 
 from equinox.matcher.text import text_match
@@ -45,7 +45,7 @@ _WORDS = {
     "eq": "exactly",
     "between": "between",
 }
-_UNITS = {"usd": "USD", "bps": "bps"}
+_UNITS = {"usd": "USD", "bps": "bps", "percent": "percent", "count": "", "indicator": ""}
 _EVENT_FIELDS = ("subject", "measure", "unit", "observed_on")
 _OUTCOME_FIELDS = ("direction", "threshold", "upper")
 
@@ -81,38 +81,55 @@ def evaluate_pair(a: CanonicalMarket, b: CanonicalMarket) -> MatchResult:
     """Decide whether YES on `a` pays out under exactly the same conditions as YES on `b` (D8)."""
     if a.terms is None or b.terms is None:
         return text_match(a, b)
-    ta, tb = a.terms, b.terms
-    na, nb = _normalize(ta), _normalize(tb)
+    decision = decide(a.terms, b.terms, (_venue(a), _venue(b)))
+    flags = _risk_flags(a, b) if decision.status == EquivalenceStatus.EQUIVALENT else ()
+    return _result(a, b, decision.status, decision.reason, flags)
 
+
+class Decision(NamedTuple):
+    status: EquivalenceStatus
+    reason: str
+    flags: tuple[str, ...] = ()  # what still differs in an EQUIVALENT pair's terms
+
+
+def decide(
+    ta: ContractTerms, tb: ContractTerms, names: tuple[str, str] = ("One market", "the other")
+) -> Decision:
+    """Rules 2-6 on two sets of terms, however they were read: by a parser or by a model (D57).
+
+    `names` say which market is which in the reasons. The flags cover the terms only; a pair of
+    canonical markets also gets the edge-case and resolution-source flags (`evaluate_pair`).
+    """
+    na, nb = _normalize(ta), _normalize(tb)
     event = [field for field in _EVENT_FIELDS if getattr(na, field) != getattr(nb, field)]
     if None not in (na.observed_at, nb.observed_at) and na.observed_at != nb.observed_at:
         event.append("observed_at")
     if event:
         details = "; ".join(f"{f} {getattr(ta, f)} vs {getattr(tb, f)}" for f in event)
-        return _result(a, b, EquivalenceStatus.DISTINCT, f"Different event: {details}.")
+        return Decision(EquivalenceStatus.DISTINCT, f"Different event: {details}.")
     if any(getattr(na, field) != getattr(nb, field) for field in _OUTCOME_FIELDS):
         reason = f"Different outcome: {ta.measure} {_bound(ta)} vs {_bound(tb)}."
-        return _result(a, b, EquivalenceStatus.DISTINCT, reason)
+        return Decision(EquivalenceStatus.DISTINCT, reason)
     if na.measured_by != nb.measured_by:
         reason = (
             f"Measured differently: {ta.measured_by} vs {tb.measured_by}, "
             "so the pair is never routed."
         )
-        return _result(a, b, EquivalenceStatus.AMBIGUOUS, reason)
+        return Decision(EquivalenceStatus.AMBIGUOUS, reason)
     if (na.observed_at is None) != (nb.observed_at is None):
-        stated = a if na.observed_at is not None else b
+        name, stated = (names[0], ta) if na.observed_at is not None else (names[1], tb)
         reason = (
-            f"The observation time is stated by only one market: {_venue(stated)} observes at "
-            f"{stated.terms.observed_at.isoformat()}, so the pair is never routed."
+            f"The observation time is stated by only one market: {name} observes at "
+            f"{stated.observed_at.isoformat()}, so the pair is never routed."
         )
-        return _result(a, b, EquivalenceStatus.AMBIGUOUS, reason)
-
+        return Decision(EquivalenceStatus.AMBIGUOUS, reason)
     bounds = _bound(ta) if _bound(ta) == _bound(tb) else f"{_bound(ta)} vs {_bound(tb)}"
     reason = (
         f"Same event and outcome: {ta.subject} {ta.measure} on {ta.observed_on}, {bounds}, "
         f"measured by {ta.measured_by}."
     )
-    return _result(a, b, EquivalenceStatus.EQUIVALENT, reason, _risk_flags(a, b))
+    flags = (_tie_flag(ta, tb, names), _grid_flag(ta, tb, names))
+    return Decision(EquivalenceStatus.EQUIVALENT, reason, tuple(f for f in flags if f))
 
 
 def _normalize(terms: ContractTerms) -> _Normalized:
@@ -122,6 +139,8 @@ def _normalize(terms: ContractTerms) -> _Normalized:
         comparison, threshold = "le", threshold - grid
     elif grid is not None and comparison == "gt":
         comparison, threshold = "ge", threshold + grid
+    elif terms.unit == "count":  # whole numbers: above 1.5 is at least 2 (D56)
+        comparison, threshold = _whole_count(comparison, threshold)
     return _Normalized(
         subject=terms.subject,
         measure=terms.measure,
@@ -133,6 +152,18 @@ def _normalize(terms: ContractTerms) -> _Normalized:
         upper=None if terms.upper is None else _number(terms.upper),
         unit=terms.unit,
     )
+
+
+def _whole_count(comparison: str, threshold: Decimal) -> tuple[str, Decimal]:
+    """A count's bound as an inclusive whole number: gt 1.5 and gt 1 are ge 2; lt 3 is le 2."""
+    whole = threshold == threshold.to_integral_value()
+    if comparison in ("gt", "ge"):
+        step = 1 if comparison == "gt" and whole else 0
+        return "ge", (threshold + step).to_integral_value(ROUND_CEILING)
+    if comparison in ("lt", "le"):
+        step = 1 if comparison == "lt" and whole else 0
+        return "le", (threshold - step).to_integral_value(ROUND_FLOOR)
+    return comparison, threshold
 
 
 def _result(
@@ -155,37 +186,36 @@ def _result(
 def _risk_flags(a: CanonicalMarket, b: CanonicalMarket) -> tuple[str, ...]:
     """What still differs in an EQUIVALENT pair. The text is the same whichever market is `a`."""
     first, second = sorted((a, b), key=lambda market: market.market_id)
+    names = (_venue(first), _venue(second))
     flags = (
-        _tie_flag(first, second),
-        _grid_flag(first, second),
+        _tie_flag(first.terms, second.terms, names),
+        _grid_flag(first.terms, second.terms, names),
         _edge_case_flag(first, second),
         _source_flag(first, second),
     )
     return tuple(flag for flag in flags if flag)
 
 
-def _tie_flag(a: CanonicalMarket, b: CanonicalMarket) -> str | None:
+def _tie_flag(ta: ContractTerms, tb: ContractTerms, names: tuple[str, str]) -> str | None:
     """Only the strictness differs (gt vs ge, or lt vs le) at the same threshold (D23)."""
-    ta, tb = a.terms, b.terms
     if ta.threshold != tb.threshold or {ta.comparison, tb.comparison} not in _STRICTNESS_PAIRS:
         return None
-    strict, inclusive = (a, b) if ta.comparison in _STRICT else (b, a)
+    strict, inclusive = names if ta.comparison in _STRICT else names[::-1]
     return (
-        f"Tie rule differs: at exactly {_number(ta.threshold)} {_unit(ta)}, "
-        f"{_venue(strict)} pays No and {_venue(inclusive)} pays Yes."
+        f"Tie rule differs: at exactly {_amount(ta.threshold, ta)}, "
+        f"{strict} pays No and {inclusive} pays Yes."
     )
 
 
-def _grid_flag(a: CanonicalMarket, b: CanonicalMarket) -> str | None:
+def _grid_flag(ta: ContractTerms, tb: ContractTerms, names: tuple[str, str]) -> str | None:
     """The terms agree only after normalizing on the measure's grid (D20)."""
-    ta, tb = a.terms, b.terms
     grid = MEASURE_GRIDS.get(ta.measure)
     if grid is None or (ta.comparison, ta.threshold) == (tb.comparison, tb.threshold):
         return None
-    step = f"{_number(grid)} {_unit(ta)}"
+    step = _amount(grid, ta)
     return (
-        f"Equal only on the {step} grid: {_venue(a)} pays Yes {_bound(ta)} and "
-        f"{_venue(b)} {_bound(tb)}, which agree only for moves in {step} steps."
+        f"Equal only on the {step} grid: {names[0]} pays Yes {_bound(ta)} and "
+        f"{names[1]} {_bound(tb)}, which agree only for moves in {step} steps."
     )
 
 
@@ -215,7 +245,11 @@ def _bound(terms: ContractTerms) -> str:
     value = _number(terms.threshold)
     if terms.upper is not None:
         value = f"{value} and {_number(terms.upper)}"
-    return f"{_WORDS[terms.comparison]} {value} {_unit(terms)}"
+    return f"{_WORDS[terms.comparison]} {value} {_unit(terms)}".rstrip()
+
+
+def _amount(value: Decimal, terms: ContractTerms) -> str:
+    return f"{_number(value)} {_unit(terms)}".rstrip()
 
 
 def _instant(terms: ContractTerms) -> str | None:

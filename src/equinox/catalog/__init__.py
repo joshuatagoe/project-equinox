@@ -22,11 +22,20 @@ from equinox.adapters.base import FetchError, VenueAdapter
 from equinox.adapters.fetch import FixtureFetcher, HttpFetcher
 from equinox.catalog import store
 from equinox.catalog.store import Catalog
+from equinox.catalog.texts import TextStage
 from equinox.matcher.compare import compare
 from equinox.models.catalog import CatalogEntry, CatalogPage, CatalogSummary
 from equinox.sources import ADAPTERS, LiveFetchers, Settings
 
-__all__ = ["REFRESH_COMMAND", "Catalog", "CatalogError", "build", "load_latest", "refresh"]
+__all__ = [
+    "REFRESH_COMMAND",
+    "Catalog",
+    "CatalogError",
+    "TextStage",
+    "build",
+    "load_latest",
+    "refresh",
+]
 
 REFRESH_COMMAND = "python -m equinox catalog refresh"
 
@@ -62,7 +71,25 @@ def refresh(
     started, read_at = time.perf_counter(), datetime.now(UTC)
     if settings.source != "live":
         page_size, max_pages = page_size or SAMPLE_PAGE_SIZE, max_pages or SAMPLE_PAGES
-    paging = _Paging(page_size, max_pages)
+        read_at = FixtureFetcher(settings.snapshot).captured_at
+    source = "live" if settings.source == "live" else settings.snapshot.name
+    with TextStage(settings.cache_dir) as stage:
+        paging = _Paging(page_size, max_pages)
+        entries, skipped = _read_venues(settings, live_fetcher, paging, stage, progress)
+        seconds = time.perf_counter() - started
+        return build(
+            entries, skipped, settings.cache_dir, seconds, read_at, source=source, texts=stage
+        )
+
+
+def _read_venues(
+    settings: Settings,
+    live_fetcher: LiveFetchers | None,
+    paging: _Paging,
+    stage: TextStage,
+    progress: Callable[[str], None],
+) -> tuple[list[CatalogEntry], int]:
+    """Every venue's listing, page by page; each page's texts go to the stage on disk."""
     entries: list[CatalogEntry] = []
     skipped = 0
     for venue, pages in _listings(settings, live_fetcher, paging):
@@ -70,6 +97,7 @@ def refresh(
         try:
             for number, page in enumerate(pages, start=1):
                 entries += page.entries
+                stage.add(page.texts)
                 skipped, listed = skipped + page.skipped, listed + len(page.entries)
                 if number % PROGRESS_EVERY == 0:
                     progress(f"{venue}: {number} pages read, {listed:,} markets so far")
@@ -77,11 +105,7 @@ def refresh(
             kept = f"{_hint(settings)} The previous catalog is kept."
             raise CatalogError(f"{venue}: {error}.{kept}") from error
         progress(f"{venue}: {listed:,} markets")
-    if settings.source != "live":
-        read_at = FixtureFetcher(settings.snapshot).captured_at
-    source = "live" if settings.source == "live" else settings.snapshot.name
-    seconds = time.perf_counter() - started
-    return build(entries, skipped, settings.cache_dir, seconds, refreshed_at=read_at, source=source)
+    return entries, skipped
 
 
 def build(
@@ -91,9 +115,11 @@ def build(
     seconds: float,
     refreshed_at: datetime | None = None,
     source: str = "entries",
+    texts: TextStage | None = None,
 ) -> CatalogSummary:
     """Compare the markets and save them as the newest catalog. `seconds` is the time spent
-    reading them. A market listed twice (a listing that shifted while paging) is kept once."""
+    reading them. A market listed twice (a listing that shifted while paging) is kept once.
+    With `texts`, the catalog keeps the rules text of every market in an unclear pair."""
     started = time.perf_counter()
     unique = list({entry.market_id: entry for entry in entries}.values())
     found = compare(unique)
@@ -111,7 +137,7 @@ def build(
         vetoes=dict(found.vetoes.most_common()),
     )
     try:
-        store.save(cache_dir, unique, found, summary)
+        store.save(cache_dir, unique, found, summary, texts)
     except (OSError, sqlite3.Error) as error:
         raise CatalogError(
             f"the catalog couldn't be saved in {cache_dir} ({error}). The previous one is kept."

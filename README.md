@@ -38,6 +38,7 @@ PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISIO
 | `python -m equinox catalog refresh` | Reads every open market on both venues, compares every cross-venue pair it can, and saves the result (see below) |
 | `python -m equinox catalog status` | The saved catalog's age and counts |
 | `python -m equinox match --catalog` | `match`, plus the catalog's summary and its 20 most similar unclear pairs |
+| `python -m equinox catalog read --limit N` | Has a model read the terms of up to N markets in unclear pairs; checks and rules decide them (see below) |
 
 Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
 
@@ -49,7 +50,13 @@ Equinox finds the markets itself (D47). For each event family it can read, today
 
 `python -m equinox catalog refresh` reads every open market on Kalshi and Polymarket, compares them, and saves the result in `.cache/equinox/` (git ignores it; `EQUINOX_CACHE_DIR` moves it). The recorded refresh on 2026-10-11 read 287,523 markets in 286 requests: a 151 MiB download (gzip) and 158 seconds in all. It needs about 400 MB of free memory; that run peaked at 383 MiB, and the saved file was 110 MB. If any request fails after two retries, the refresh stops and the previous catalog is kept (D55). `--source fixtures --snapshot snapshot-2026-10-11` builds one from that snapshot's small sample instead: 840 markets, in under a second. The older default snapshot holds no sample.
 
-Of those 287,523 markets, 15 outcomes are the same bet on both venues (the Fed meetings both list) and can be priced. 10,957 pairs have similar titles but no readable terms: they are shown as unclear and never routed. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has every count and examples of both.
+Of the 287,523 markets in that refresh, 15 outcomes are the same bet on both venues (the Fed meetings both list) and can be priced. 10,957 pairs have similar titles but no readable terms: they are shown as unclear and never routed. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has every count and examples of both.
+
+### Reading terms with a model
+
+Titles alone can't be routed, so `python -m equinox catalog read --limit 100` has a model (`claude-haiku-5-5`) read the markets in unclear pairs into contract terms. Deterministic checks refuse any reading the venue's own text doesn't support, and the same rules that match Fed markets decide (D57). It needs `ANTHROPIC_API_KEY` in the environment or in `.env` at the repository root (git ignores it). 100 markets cost about 47,000 input and 14,000 output tokens; answers are cached, so a re-run pays only for changed text. The command prints what it spent.
+
+`python -m equinox.reader.evals` scores the reader on three gold sets (the Fed meetings, hand-labelled pairs, and held-out pairs). On the recorded run it found 24 of 32 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
 
 ### The web UI
 
@@ -157,6 +164,7 @@ Each module has one job, stated at its top. Where to look for each part of the l
 | Where is the explanation written? | `src/equinox/router/rationale.py` |
 | Where do markets come from: live data or a snapshot? | `src/equinox/sources.py` |
 | How is every open market read and compared? | `src/equinox/catalog/__init__.py` (the refresh), `src/equinox/matcher/index.py` (finding candidates), `src/equinox/matcher/compare.py` (same bet, unclear, no match), `src/equinox/catalog/store.py` (the saved file) |
+| How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets) |
 | How do the command line and the web pages present it? | `src/equinox/cli.py`, `src/equinox/cli_catalog.py`, `src/equinox/web/order.py`, `src/equinox/web/board.py`, `src/equinox/web/match.py`, `src/equinox/web/markets.py` |
 | Which tests pin the rules? | `tests/test_matcher.py` (the labelled pairs), `tests/test_router.py` (every status), `tests/test_index.py` (catalog candidates and statuses), `tests/test_docs.py` (this README's numbers) |
 

@@ -17,6 +17,7 @@ from typing import Any, ClassVar, Literal
 from pydantic import ValidationError
 
 from equinox.models import CanonicalMarket, OutcomeBook
+from equinox.models.catalog import CatalogEntry, CatalogPage, MarketText
 
 Fetcher = Callable[[str], Any]
 """URL -> parsed JSON (parse_float=Decimal). Raises FetchError."""
@@ -139,3 +140,16 @@ def load_tracked_events(path: Path = TRACKED_EVENTS) -> dict[str, list[TrackedEv
     """The pinned events per venue, used when discovery can't run (D47)."""
     raw = json.loads(path.read_text(encoding="utf-8"))
     return {venue: [TrackedEvent(**event) for event in events] for venue, events in raw.items()}
+
+
+CatalogListing = tuple[list[CatalogEntry], int, dict[str, MarketText]]
+"""One event's catalog entries, how many markets were left out, and each entry's texts."""
+
+
+def catalog_page(events: list[CatalogListing]) -> CatalogPage:
+    """One listing page from its events."""
+    return CatalogPage(
+        [entry for entries, _, _ in events for entry in entries],
+        sum(skipped for _, skipped, _ in events),
+        {market: text for _, _, texts in events for market, text in texts.items()},
+    )

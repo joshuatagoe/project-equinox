@@ -1,6 +1,6 @@
 # Equivalence: when two markets are the same bet
 
-The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50 and D54.
+The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50, D54 and D56–D58.
 
 ## How Equinox finds the markets to compare
 
@@ -143,6 +143,35 @@ This is why D15 holds at catalog scale: titles find candidates for a person to c
 
 **What the index misses.** A true pair worded with fewer than two shared informative words, or closing more than 3 days apart, is never a candidate (D50). 1,866 Kalshi markets close in 2030 or later, some in "2099" as a placeholder for "eventually", and 1,424 Polymarket markets have no end date at all, so long-dated questions rarely pair.
 
+## Reading terms with a model
+
+Titles find candidates but can't be routed (D15), and a parser per family doesn't scale. The term reader is the hybrid the brief allows ("rule-based, heuristic, AI-assisted, or hybrid"): a model reads each market in an unclear pair into the same terms shape the Fed parsers fill, deterministic checks refuse any reading the venue's own text doesn't support, and the terms rules above decide (D56–D58). The model never says whether two markets are the same bet.
+
+**What the checks refuse.** A reading is rejected when:
+- its evidence phrase isn't in the market's text;
+- its threshold isn't a number the venue wrote, in the text or Kalshi's strike fields;
+- its comparison disagrees with the evidence's words ("above" is gt, "at least" and "+" are ge);
+- its date falls after the market closes;
+- Kalshi's own strike fields say otherwise.
+
+A rejected market leaves its pair unclear, with the reason.
+
+**What a reading looks like.** Kalshi's "Final score Al Ahli Saudi FC wins 1-0?" (Al Wasl at home) and Polymarket's "Exact Score: Al Wasl FC 0 - 1 Al Ahli Saudi FC?" both read as `al_wasl_fc_vs_al_ahli_saudi_fc`, `final_score_0_1`, an indicator. The rules make them the same bet. Polymarket's "Al Wasl FC 1 - 0 Al Ahli Saudi FC", with the same words, reads as `final_score_1_0`: a different bet. That's the pair titles can't tell apart.
+
+**Evals** (`python -m equinox.reader.evals`; recorded with prompt feat-10.7 and `claude-haiku-5-5`):
+
+| Gold set | Pairs | Same bets labelled | Found | False same-bets | Readings rejected |
+|---|---|---|---|---|---|
+| Fed meetings both venues list, labelled by the parsers' terms | 75 | 15 | 13 | 0 | 0 of 30 |
+| Catalog pairs labelled by hand (the prompt was tuned on these) | 35 | 13 | 8 | 0 | 5 of 70 |
+| Held-out pairs, labelled after tuning and never tuned on | 18 | 4 | 3 | 0 | 1 of 36 |
+
+A false same-bet is the number that matters: it would route money to the wrong contract. A missed same-bet only leaves a pair unclear. The tests replay the recorded answers, so the gate checks these numbers on every run without calling the model.
+
+**What the live sample found.** A 100-market sample of the live catalog read 8 IPO pairs as the same bet while every gold set showed zero false same-bets. Kalshi pays when an IPO is *confirmed* (the S-1 declared effective, the price set, or a ticker assigned, even if trading starts after January 1); Polymarket pays when it is *completed*, by the first sale of shares, by December 31. A company that prices on December 30 and trades on January 2 pays Yes on one and No on the other. The IPO pairs joined the gold set, the prompt now names a measure as narrowly as the rules define it, and the next sample read all 19 IPO pairs as different and 12 Ballon d'Or pairs as the same bet. An eval set is evidence about the families in it, so samples of the live catalog are read by hand too (AI_USAGE 23).
+
+**Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens. Answers are cached by request, so a re-run pays only for markets whose text changed.
+
 ## Third venue: the Meridian fit check
 
 Two venues can't show that the design generalizes. Meridian, a planned binary-stock-outcome venue on Solana devnet, is **not integrated** (D26). Instead, architecture §9 maps it onto the canonical model on paper, and hand-built Meridian-style markets go through the real matcher and router in the test suite.
@@ -168,7 +197,7 @@ Meridian settles in devnet USDC, which has no monetary value (M5). That is a rou
 
 ## Limits
 
-- One event family has a term parser: Fed rate decisions. Every other market is matched by title only and is never routed. Adding a family means one parser per adapter; the matcher doesn't change.
+- One event family has a term parser: Fed rate decisions. Other markets are read by a model when they are in an unclear pair (D57); a model reading is checked against the venue's text but can still name one thing two ways, which leaves the pair unclear.
 - The catalog is as fresh as its last refresh, and its title candidates depend on the index's blocking rules: dates within 3 days, two shared informative words (D50).
 - No Kalshi and Polymarket stock or index pair is strictly equivalent today: they differ in comparison, tie rule, price source or underlying (S5).
 - Strictness is a choice. Some pairs a person would call the same bet are AMBIGUOUS here, for example two markets that differ only in whether they state an observation instant. AMBIGUOUS pairs are shown with their reasons, so the cost of strictness is visible.

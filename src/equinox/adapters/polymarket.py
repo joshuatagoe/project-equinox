@@ -17,12 +17,14 @@ from urllib.parse import urlencode, urlsplit
 
 from equinox.adapters.base import (
     BAD_DATA,
+    CatalogListing,
     Clock,
     DataSource,
     Fetcher,
     Listed,
     TrackedEvent,
     VenueAdapter,
+    catalog_page,
     describe,
     listed_ask,
     with_books,
@@ -36,7 +38,7 @@ from equinox.models import (
     OutcomeBook,
     ResolutionSource,
 )
-from equinox.models.catalog import CatalogEntry, CatalogPage
+from equinox.models.catalog import CatalogEntry, CatalogPage, MarketText
 
 GAMMA_URL = "https://gamma-api.polymarket.com"
 CLOB_URL = "https://clob.polymarket.com"
@@ -115,10 +117,7 @@ class PolymarketAdapter(VenueAdapter):
         params, pages = {"closed": "false", "limit": page_size}, 0
         while True:
             page = self.fetch(f"{self.gamma_url}/events/keyset?{urlencode(params)}")
-            listed = [_catalog_entries(event) for event in page.get("events") or []]
-            yield CatalogPage(
-                [e for entries, _ in listed for e in entries], sum(n for _, n in listed)
-            )
+            yield catalog_page([_catalog_entries(event) for event in page.get("events") or []])
             pages += 1
             if not page.get("next_cursor") or (max_pages is not None and pages >= max_pages):
                 return
@@ -178,11 +177,11 @@ class PolymarketAdapter(VenueAdapter):
         )
 
 
-def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
-    """An event's open Yes/No markets as catalog entries, and how many were left out."""
+def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
+    """An event's open Yes/No markets as catalog entries, how many were left out, and texts."""
     tag, title = FAMILY_TAGS["fed_decision"]
     fed = bool(event.get("negRisk")) and bool(title.match(event.get("title") or ""))
-    entries, skipped = [], 0
+    entries, skipped, texts = [], 0, {}
     for raw in event.get("markets") or []:
         if raw.get("closed"):
             continue
@@ -204,9 +203,15 @@ def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
                     terms=fed_terms(raw, []) if fed else None,
                 )
             )
+            texts[entries[-1].market_id] = MarketText(_rules(raw))
         except BAD_DATA:
             skipped += 1
-    return entries, skipped
+    return entries, skipped, texts
+
+
+def _rules(raw: dict[str, Any]) -> str:
+    source = raw.get("resolutionSource")
+    return (raw.get("description") or "") + (f"\nResolution source: {source}" if source else "")
 
 
 def _maybe_utc(text: str | None) -> datetime | None:

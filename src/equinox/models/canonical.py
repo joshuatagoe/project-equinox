@@ -113,7 +113,7 @@ class ContractTerms(Frozen):
     comparison: Comparison
     threshold: Exact
     upper: Exact | None = None  # required for "between", forbidden otherwise
-    unit: Literal["bps", "usd"]
+    unit: Literal["bps", "usd", "percent", "count", "indicator"]  # indicator: 1 if it happens
     fallback_rules: tuple[str, ...] = ()  # the venue's edge-case rules in plain words
 
     @model_validator(mode="after")

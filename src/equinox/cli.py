@@ -28,6 +28,8 @@ from equinox.models import (
     OrderRequest,
     RoutingStatus,
 )
+from equinox.reader.client import Ask
+from equinox.reader.prompt import MODEL
 from equinox.router import failure_trace, simulate
 from equinox.router.rationale import contracts, dollars, money_step
 from equinox.sources import ADAPTERS, LiveFetchers, Loaded, Settings, SettingsError
@@ -46,7 +48,12 @@ class _Parser(argparse.ArgumentParser):
         raise _UsageError(message)
 
 
-def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None = None) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    *,
+    live_fetcher: LiveFetchers | None = None,
+    ask: Ask | None = None,
+) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     as_json = "--json" in argv
     try:
@@ -62,9 +69,7 @@ def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None
         trace = failure_trace(RoutingStatus.INVALID_INPUT, str(error), now=datetime.now(UTC))
         return _print_trace(trace, as_json)
     if args.command == "catalog":
-        if args.action == "refresh":
-            return cli_catalog.refresh(settings, live_fetcher)
-        return cli_catalog.status(settings)
+        return cli_catalog.command(args, settings, live_fetcher, ask)
     # Books are fetched later, only for the group being priced (D49).
     loaded = sources.load_markets(settings, live_fetcher, tracked=TRACKED_EVENTS, with_books=False)
     if args.command == "markets":
@@ -270,6 +275,10 @@ def _parser() -> _Parser:
     actions = every.add_subparsers(dest="action", required=True)
     actions.add_parser("refresh", parents=[common], help="read and compare every open market")
     actions.add_parser("status", parents=[common], help="the saved catalog's age and counts")
+    read = actions.add_parser("read", parents=[common], help="read unclear pairs' terms (D57)")
+    read.add_argument("--limit", type=int, required=True, help="the most markets to read")
+    read.add_argument("--model", default=MODEL, help=f"default: {MODEL}")
+    read.add_argument("--workers", type=int, default=4, help="requests at once (default: 4)")
     order = commands.add_parser("simulate", parents=[common], help="route a hypothetical order")
     order.add_argument("--market", required=True, help="e.g. kalshi:KXFEDDECISION-26OCT-H0")
     order.add_argument("--outcome", required=True, help="YES or NO")

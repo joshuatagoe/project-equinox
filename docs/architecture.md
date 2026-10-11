@@ -105,6 +105,7 @@ flowchart LR
 | `router/` | Depth walking, fees, eligibility, decision, rationale and trace | Pure. Imports only `models/`. Contains no venue names. The time comes in as an argument. |
 | `sources.py` | Settings, data sources (snapshots and live), discovery with its pinned fallback, loading families, fetching books on demand | Wires adapters, matcher and router together for both interfaces; neither interface imports the other (D52). |
 | `catalog/` | `catalog refresh` (`__init__.py`): pages every open market through the adapters and compares them with `matcher/compare.py`; the catalog file (`store.py`): one SQLite database per refresh, searchable by title words (D53) | A failed refresh keeps the previous catalog (D48). |
+| `reader/` | The term reader (§6.5): the prompt, the model client and its cache, the checks, reading the catalog, and the evals | The model only fills in terms; deterministic checks and the matcher's rules decide (D57). |
 | `cli.py`, `cli_catalog.py` | Arguments, output and exit codes for `markets`, `match`, `simulate` and `catalog` | Calls `sources.py` and `catalog/`; no loading logic of its own. |
 | `server.py`, `web/` | The web UI's pages (§8.3), one module per page, and `/health` | Renders what the matcher and router decide, through `sources.py` and `catalog/`. Adds no matching or routing logic and names no venue. No JSON API (D21, D45). |
 
@@ -383,6 +384,18 @@ Only markets without terms reach it, and the result can never be EQUIVALENT:
 
 `matcher/compare.py` gives every catalog market one status (D54): **same bet** when its terms key equals that of a market on another venue (§6.2), **unclear** when a title candidate is AMBIGUOUS (the most similar one is kept, with its score and reasons), and **no match** otherwise. The catalog records, per refresh, how many pairs were candidates, how many each veto turned DISTINCT, and how many stayed AMBIGUOUS. `docs/EQUIVALENCE.md` reports those counts from a real refresh.
 
+### 6.5 Term reader (`reader/`, D56–D58)
+
+For markets in the catalog's unclear pairs, a model fills in the terms that a parser would:
+
+1. **Group.** The unclear pairs, most similar first, grouped by the event of their first market; each group (up to 20 markets) is one request, so the model names both sides alike.
+2. **Read.** A Messages API request (`claude-haiku-5-5`) forced through one tool whose input is one terms record per market, with the evidence phrase it read them from (`prompt.py`).
+3. **Check.** `checks.py` rejects a record whose evidence isn't in the market's text, whose threshold isn't a number the venue wrote (text or strike fields), whose comparison disagrees with the evidence's words, whose date falls after the market closes, or which Kalshi's strike fields contradict. On a count, only the side must agree (2+ is greater 1.5).
+4. **Decide.** `matcher.terms.decide` applies rules 2–6 of §6.1 to the two accepted readings. EQUIVALENT is the same bet, DISTINCT a different bet, AMBIGUOUS stays unclear.
+5. **Record.** Readings and decisions go into the catalog file. Every request is cached by its content; a pair decided by another prompt version or model is read again.
+
+Only `catalog read --limit N` calls the model, and it prints the tokens it spent. The evals (`reader/evals.py`) score three gold sets; the tests replay their recorded answers. A model-read same bet is routed only when the committed evals show zero false same-bets (D58).
+
 ### 6.4 Labelled pairs (acceptance tests for feat-03)
 
 | # | Pair | Expected |
@@ -558,6 +571,7 @@ The trace uses typed sections instead of the first version's generic "spans" (D3
 |---|---|
 | `markets [--source live\|fixtures] [--snapshot NAME] [--json]` | One line per canonical market of every discovered family: market_id, terms in words, tradable, best asks |
 | `match [--source …] [--snapshot NAME] [--catalog] [--json]` | Clusters with their risk flags and confidence, then AMBIGUOUS pairs with their reasons. `--catalog` adds the saved catalog's summary and its 20 most similar unclear pairs. |
+| `catalog read --limit N [--model M] [--workers W]` | Reads the terms of at most N markets in unclear pairs with a model, checks and decides them (§6.5), and prints the readings accepted and rejected, the pairs decided and the tokens spent. Exit 1 without a key. |
 | `catalog refresh [--source …] [--snapshot NAME]` / `catalog status` | `refresh` pages every open market on both venues (§2), compares them and saves the catalog, printing progress every 10 pages and a summary; from a snapshot it reads the snapshot's small sample. `status` prints the catalog's age and counts. Exit 0, or 1 when there is no catalog or the refresh failed (the previous catalog is kept), or 4 for bad arguments. |
 | `simulate --market ID --outcome YES\|NO --quantity N [--budget B] [--source …] [--json]` | A report: status, the quote table, the decision, the rationale and warnings. `--json` prints the whole trace instead. The exit code is from §7.2. |
 
@@ -664,7 +678,8 @@ The check counts only if it runs, so it is part of the test suite. No Meridian a
 | `EQUINOX_STALE_AFTER_SECONDS` | 300 | §7.1 |
 | `EQUINOX_HTTP_TIMEOUT_SECONDS` | 10 | |
 | `--snapshot` / `EQUINOX_SNAPSHOT` | `snapshot-2026-10-10` | A folder under `src/equinox/fixtures/` (D51) |
-| `EQUINOX_CACHE_DIR` | `.cache/equinox` | Where `catalog refresh` writes the catalog (D48); gitignored |
+| `EQUINOX_CACHE_DIR` | `.cache/equinox` | Where `catalog refresh` writes the catalog (D48), and `catalog read` caches the model's answers; gitignored |
+| `ANTHROPIC_API_KEY` | none | The term reader's key (D57), from the environment or from `.env` at the repository root (gitignored). Only `catalog read` and the live evals use it. |
 | Pinned events | `src/equinox/tracked_events.json` | Used only when discovery can't run (D47): a snapshot captured before discovery, or a failed live discovery request |
 
 ---
@@ -687,6 +702,7 @@ src/equinox/
   models/   canonical.py  catalog.py  equivalence.py  routing.py  trace.py
   adapters/ base.py  fetch.py  kalshi.py  polymarket.py
   matcher/  terms.py  text.py  clusters.py  confidence.py  index.py  compare.py
+  reader/   prompt.py  client.py  checks.py  run.py  evals.py   # the term reader (§6.5)
   router/   depth.py  engine.py  rationale.py
 tests/
   golden/canonical_markets.json   # includes the §9 fit-check markets
@@ -696,6 +712,8 @@ tests/
   test_matcher.py  test_router.py  test_cli.py
   test_confidence.py  test_web.py  test_docs.py  test_quality.py
   test_discovery.py  test_catalog.py  test_index.py  test_web_catalog.py  test_fetch.py
+  test_reader.py  test_reader_evals.py
+evals/      pairs.json  heldout.json  recorded.json  scores.json   # the term reader's gold sets (D58)
   test_equinox.py        # existing status-server tests
 ```
 
@@ -713,6 +731,7 @@ tests/
 | 5 | feat-07 web UI | `server.py`, `web/`, `matcher/confidence.py`, `test_web.py`, `test_confidence.py` | The page and the CLI agree on every demo order; browser check recorded |
 | 6 | chore-01 modularity | `sources.py`, `cli.py`, `web/`, `router/engine.py`, `pyproject.toml`, `test_quality.py`, the README's "Reading the code" | Every existing test passes unchanged; the quality checks pass (D52) |
 | 7 | feat-08 discovery and plain bps | `adapters/`, `models/canonical.py`, `sources.py`, `snapshot-2026-10-11/`, `capture_snapshot.py`, `web/`, `test_discovery.py` | Every discovered Fed meeting is matched and priceable; frozen tests unchanged |
+| 9 | feat-10 term reader | `reader/`, `models/canonical.py` (units), `models/catalog.py`, `adapters/` (texts), `catalog/` (texts and readings), `matcher/terms.py` (`decide`), `cli.py`, `cli_catalog.py`, `web/markets.py`, `test_reader.py`, `test_reader_evals.py`, `evals/` | The evals show zero false same-bets; a 100-market sample is read and recorded |
 | 8 | feat-09 catalog | `models/catalog.py`, `adapters/`, `matcher/index.py`, `matcher/compare.py`, `catalog/`, `cli.py`, `cli_catalog.py`, `sources.py` (the cache folder), `web/markets.py`, `web/markets_html.py`, `test_catalog.py`, `test_index.py`, `test_web_catalog.py`, `test_fetch.py` | A live refresh is recorded; the All markets page searches it |
 
 **If time runs short, cut from the bottom:**

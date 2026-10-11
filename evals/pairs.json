@@ -1,0 +1,877 @@
+[
+ {
+  "name": "Exact score, same result",
+  "label": "same",
+  "why": "Al Ahli (away) wins 1-0 over 90 minutes plus stoppage on both.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12WASAAS-WAS0AAS1",
+   "venue": "kalshi",
+   "event_title": "Al Wasl FC vs Al Ahli Saudi FC: Correct Score",
+   "title": "Final score Al Ahli Saudi FC wins 1-0?",
+   "outcome_label": "Al Ahli Saudi FC wins 1-0",
+   "closes_at": "2026-10-14T22:00:00+00:00",
+   "rules": "If Al Ahli Saudi FC wins 1-0 in the Al Wasl FC vs Al Ahli Saudi FC professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"07ff7ab7-3bf5-4587-bff2-90c49f148e28\", \"home_score\": \"0\", \"home_team_id\": \"04a7c128-b302-4f41-a4fb-d89a471e3e3c\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452180",
+   "venue": "polymarket",
+   "event_title": "Al Wasl FC vs. Al Ahli Saudi FC - Exact Score",
+   "title": "Exact Score: Al Wasl FC 0 - 1 Al Ahli Saudi FC?",
+   "outcome_label": "Al Wasl FC 0 - 1 Al Ahli Saudi FC",
+   "closes_at": "2026-10-12T16:00:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al Wasl FC and Al Ahli Saudi FC, scheduled for October 12, 2026 at 12:00 PM ET: This market will resolve based on the final score of the Al Wasl FC vs. Al Ahli Saudi FC match originally scheduled for October 12, 2026 at 12:00 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, opposite result",
+  "label": "different",
+  "why": "Al Wasl 1 - 0 is a home win; Kalshi's is an away win.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12WASAAS-WAS0AAS1",
+   "venue": "kalshi",
+   "event_title": "Al Wasl FC vs Al Ahli Saudi FC: Correct Score",
+   "title": "Final score Al Ahli Saudi FC wins 1-0?",
+   "outcome_label": "Al Ahli Saudi FC wins 1-0",
+   "closes_at": "2026-10-14T22:00:00+00:00",
+   "rules": "If Al Ahli Saudi FC wins 1-0 in the Al Wasl FC vs Al Ahli Saudi FC professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"07ff7ab7-3bf5-4587-bff2-90c49f148e28\", \"home_score\": \"0\", \"home_team_id\": \"04a7c128-b302-4f41-a4fb-d89a471e3e3c\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452181",
+   "venue": "polymarket",
+   "event_title": "Al Wasl FC vs. Al Ahli Saudi FC - Exact Score",
+   "title": "Exact Score: Al Wasl FC 1 - 0 Al Ahli Saudi FC?",
+   "outcome_label": "Al Wasl FC 1 - 0 Al Ahli Saudi FC",
+   "closes_at": "2026-10-12T16:00:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al Wasl FC and Al Ahli Saudi FC, scheduled for October 12, 2026 at 12:00 PM ET: This market will resolve based on the final score of the Al Wasl FC vs. Al Ahli Saudi FC match originally scheduled for October 12, 2026 at 12:00 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, home win",
+  "label": "same",
+  "why": "Al Gharafa (home) wins 5-1 on both.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12ALGEST-ALG5EST1",
+   "venue": "kalshi",
+   "event_title": "Al Gharafa SC vs Esteghlal FC Tehran: Correct Score",
+   "title": "Final score Al Gharafa SC wins 5-1?",
+   "outcome_label": "Al Gharafa SC wins 5-1",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Al Gharafa SC wins 5-1 in the Al Gharafa SC vs Esteghlal FC Tehran professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"38042bb4-cd42-44ea-8b72-bbdee6185af5\", \"home_score\": \"5\", \"home_team_id\": \"a78ae023-d3fa-4b45-9419-516d475e90e2\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452342",
+   "venue": "polymarket",
+   "event_title": "Al Gharafa SC vs. Esteghlal FC Tehran - Exact Score",
+   "title": "Exact Score: Al Gharafa SC 5 - 1 Esteghlal FC Tehran?",
+   "outcome_label": "Al Gharafa SC 5 - 1 Esteghlal FC Tehran",
+   "closes_at": "2026-10-12T18:15:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al Gharafa SC and Esteghlal FC Tehran, scheduled for October 12, 2026 at 2:15 PM ET: This market will resolve based on the final score of the Al Gharafa SC vs. Esteghlal FC Tehran match originally scheduled for October 12, 2026 at 2:15 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, away win",
+  "label": "same",
+  "why": "Cruzeiro (away) wins 4-2: Bragantino 2 - 4 Cruzeiro.",
+  "a": {
+   "market_id": "kalshi:KXBRASILEIROSCORE-26OCT12RBBCRU-RBB2CRU4",
+   "venue": "kalshi",
+   "event_title": "Red Bull Bragantino SP vs Cruzeiro EC MG: Correct Score",
+   "title": "Final score Cruzeiro EC MG wins 4-2?",
+   "outcome_label": "Cruzeiro EC MG wins 4-2",
+   "closes_at": "2026-10-15T06:00:00+00:00",
+   "rules": "If Cruzeiro EC MG wins 4-2 in the Red Bull Bragantino SP vs Cruzeiro EC MG professional Brasileiro Serie A soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"4\", \"away_team_id\": \"1d7272b0-ff2a-4af9-b351-12886bbb74c2\", \"home_score\": \"2\", \"home_team_id\": \"e44758fe-6799-4b67-a9c4-17f9e431078a\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5137450",
+   "venue": "polymarket",
+   "event_title": "Red Bull Bragantino vs. Cruzeiro EC - Exact Score",
+   "title": "Exact Score: Red Bull Bragantino 2 - 4 Cruzeiro EC?",
+   "outcome_label": "Red Bull Bragantino 2 - 4 Cruzeiro EC",
+   "closes_at": "2026-10-13T00:00:00+00:00",
+   "rules": "In the upcoming Brazil Série A game between Red Bull Bragantino and Cruzeiro EC, scheduled for October 12, 2026 at 8:00 PM ET: This market will resolve based on the final score of the Red Bull Bragantino vs. Cruzeiro EC match originally scheduled for October 12, 2026 at 8:00 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, other winner",
+  "label": "different",
+  "why": "Neftchi wins 3-1 vs Al Nassr 3 - 1 (Al Nassr wins).",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12ALNNEF-ALN1NEF3",
+   "venue": "kalshi",
+   "event_title": "Al Nassr Club vs FK Neftchi Fargona: Correct Score",
+   "title": "Final score FK Neftchi Fargona wins 3-1?",
+   "outcome_label": "FK Neftchi Fargona wins 3-1",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If FK Neftchi Fargona wins 3-1 in the Al Nassr Club vs FK Neftchi Fargona professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"3\", \"away_team_id\": \"73d60b6e-a1e6-45d2-ba8b-c2cee804145f\", \"home_score\": \"1\", \"home_team_id\": \"3f5f29b5-537f-4462-b74d-6adf92df9d8e\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452284",
+   "venue": "polymarket",
+   "event_title": "Al Nassr Club vs. FK Neftchi Fargona - Exact Score",
+   "title": "Exact Score: Al Nassr Club 3 - 1 FK Neftchi Fargona?",
+   "outcome_label": "Al Nassr Club 3 - 1 FK Neftchi Fargona",
+   "closes_at": "2026-10-12T18:15:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al Nassr Club and FK Neftchi Fargona, scheduled for October 12, 2026 at 2:15 PM ET: This market will resolve based on the final score of the Al Nassr Club vs. FK Neftchi Fargona match originally scheduled for October 12, 2026 at 2:15 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, other winner",
+  "label": "different",
+  "why": "Al Nassr wins 4-1 vs Al Nassr 1 - 4 (Neftchi wins).",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12ALNNEF-ALN4NEF1",
+   "venue": "kalshi",
+   "event_title": "Al Nassr Club vs FK Neftchi Fargona: Correct Score",
+   "title": "Final score Al Nassr Club wins 4-1?",
+   "outcome_label": "Al Nassr Club wins 4-1",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Al Nassr Club wins 4-1 in the Al Nassr Club vs FK Neftchi Fargona professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"73d60b6e-a1e6-45d2-ba8b-c2cee804145f\", \"home_score\": \"4\", \"home_team_id\": \"3f5f29b5-537f-4462-b74d-6adf92df9d8e\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452287",
+   "venue": "polymarket",
+   "event_title": "Al Nassr Club vs. FK Neftchi Fargona - Exact Score",
+   "title": "Exact Score: Al Nassr Club 1 - 4 FK Neftchi Fargona?",
+   "outcome_label": "Al Nassr Club 1 - 4 FK Neftchi Fargona",
+   "closes_at": "2026-10-12T18:15:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al Nassr Club and FK Neftchi Fargona, scheduled for October 12, 2026 at 2:15 PM ET: This market will resolve based on the final score of the Al Nassr Club vs. FK Neftchi Fargona match originally scheduled for October 12, 2026 at 2:15 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Exact score, other game",
+  "label": "different",
+  "why": "An AFC game on Oct 13 vs a Saudi league game on Oct 16.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ2SAH0",
+   "venue": "kalshi",
+   "event_title": "Al-Ittihad Club vs Shabab Al Ahli Dubai: Correct Score",
+   "title": "Final score Al-Ittihad Club wins 2-0?",
+   "outcome_label": "Al-Ittihad Club wins 2-0",
+   "closes_at": "2026-10-16T00:15:00+00:00",
+   "rules": "If Al-Ittihad Club wins 2-0 in the Al-Ittihad Club vs Shabab Al Ahli Dubai professional AFC Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"0\", \"away_team_id\": \"7141a77d-2e69-47e7-8a99-411b83104288\", \"home_score\": \"2\", \"home_team_id\": \"179e3160-e127-4321-a80e-e36b0dbcaf43\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5214902",
+   "venue": "polymarket",
+   "event_title": "Al Ittihad Saudi Club vs. Al Shabab Saudi Club - Exact Score",
+   "title": "Exact Score: Al Ittihad Saudi Club 0 - 2 Al Shabab Saudi Club?",
+   "outcome_label": "Al Ittihad Saudi Club 0 - 2 Al Shabab Saudi Club",
+   "closes_at": "2026-10-16T18:00:00+00:00",
+   "rules": "In the upcoming Saudi Professional League game between Al Ittihad Saudi Club and Al Shabab Saudi Club, scheduled for October 16, 2026 at 2:00 PM ET: This market will resolve based on the final score of the Al Ittihad Saudi Club vs. Al Shabab Saudi Club match originally scheduled for October 16, 2026 at 2:00 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Nominee vs vice-presidential nominee",
+  "label": "different",
+  "why": "President vs Vice President.",
+  "a": {
+   "market_id": "kalshi:KXPRESNOMD-28-AOC",
+   "venue": "kalshi",
+   "event_title": "2028 Democratic presidential nominee",
+   "title": "Will Alexandria Ocasio-Cortez be the Democratic Presidential nominee in 2028?",
+   "outcome_label": "Alexandria Ocasio-Cortez",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If Alexandria Ocasio-Cortez wins and accepts the nomination for the Presidency for the Democratic party in 2028, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Candidate\": \"Alexandria Ocasio-Cortez\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:1981568",
+   "venue": "polymarket",
+   "event_title": "Democratic VP Nominee 2028",
+   "title": "Will Alexandria Ocasio-Cortez be the 2028 Democratic Vice-Presidential nominee?",
+   "outcome_label": "Alexandria Ocasio-Cortez",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "This market will resolve according to the first individual to be formally nominated by the Democratic Party for Vice President of the United States in the 2028 Presidential election cycle who accepts the nomination. \n\nThe resolution source for this market will be a consensus of official Democratic Party sources, including https://democrats.org/.\n\nAny replacement of the nominee before election day will not change the resolution of the market.\nResolution source: https://democrats.org/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Presidential nominee",
+  "label": "same",
+  "why": "Both: wins and accepts the 2028 Democratic presidential nomination.",
+  "a": {
+   "market_id": "kalshi:KXPRESNOMD-28-AOC",
+   "venue": "kalshi",
+   "event_title": "2028 Democratic presidential nominee",
+   "title": "Will Alexandria Ocasio-Cortez be the Democratic Presidential nominee in 2028?",
+   "outcome_label": "Alexandria Ocasio-Cortez",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If Alexandria Ocasio-Cortez wins and accepts the nomination for the Presidency for the Democratic party in 2028, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Candidate\": \"Alexandria Ocasio-Cortez\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:559653",
+   "venue": "polymarket",
+   "event_title": "Democratic Presidential Nominee 2028",
+   "title": "Will Alexandria Ocasio-Cortez win the 2028 Democratic presidential nomination?",
+   "outcome_label": "Alexandria Ocasio-Cortez",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.\n\nAny replacement of the democratic nominee before election day will not change the resolution of the market.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Presidential nominee",
+  "label": "same",
+  "why": "Both: wins and accepts the 2028 Democratic presidential nomination.",
+  "a": {
+   "market_id": "kalshi:KXPRESNOMD-28-JBP",
+   "venue": "kalshi",
+   "event_title": "2028 Democratic presidential nominee",
+   "title": "Will J.B. Pritzker be the Democratic Presidential nominee in 2028?",
+   "outcome_label": "J.B. Pritzker",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If J.B. Pritzker wins and accepts the nomination for the Presidency for the Democratic party in 2028, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Candidate\": \"J.B. Pritzker\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:559663",
+   "venue": "polymarket",
+   "event_title": "Democratic Presidential Nominee 2028",
+   "title": "Will J.B. Pritzker win the 2028 Democratic presidential nomination?",
+   "outcome_label": "J.B. Pritzker",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.\n\nAny replacement of the democratic nominee before election day will not change the resolution of the market.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Ticket vs nomination",
+  "label": "different",
+  "why": "A ticket needs both nominees; the nomination needs one.",
+  "a": {
+   "market_id": "kalshi:KXDTICKET-28NOV07-AOCRGAL",
+   "venue": "kalshi",
+   "event_title": "2028 Democratic Presidential ticket",
+   "title": "Will Alexandria Ocasio-Cortez and Ruben Gallego be the 2028 Democratic Presidential ticket?",
+   "outcome_label": "Alexandria Ocasio-Cortez and Ruben Gallego",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If the Democratic presidential nominee is Alexandria Ocasio-Cortez AND the Democratic vice presidential nominee is Ruben Gallego in the 2028 presidential election, then the market resolves to Yes.\nOrder matters: the first person listed is the presidential nominee and the second is the vice presidential nominee.\n\nThis is a combination market requiring ALL specified outcomes to occur for the contract to pay out. If ANY single component resolves to No or becomes impossible, the entire contract immediately resolves to No. Each component is resolved according to its corresponding Kalshi ruleset: Presidential Nominee (PRESNOM), Vice Presidential Nominee (VPRESNOM). The presidential nominee (listed first) is resolved under PRESNOM and the vice presidential nominee (listed second) is resolved under VPRESNOM.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Ticket\": \"Alexandria Ocasio-Cortez + Ruben Gallego\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:559653",
+   "venue": "polymarket",
+   "event_title": "Democratic Presidential Nominee 2028",
+   "title": "Will Alexandria Ocasio-Cortez win the 2028 Democratic presidential nomination?",
+   "outcome_label": "Alexandria Ocasio-Cortez",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "This market will resolve to “Yes” if the named individual wins and accepts the 2028 nomination of the Democratic Party for U.S. president. Otherwise, this market will resolve to “No”.\n\nThe resolution source for this market will be a consensus of official Democratic Party sources.\n\nAny replacement of the democratic nominee before election day will not change the resolution of the market.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Above vs at least",
+  "label": "same",
+  "why": "Above 50 vs at least 50: equivalent with a tie-rule flag at exactly 50 (D23).",
+  "a": {
+   "market_id": "kalshi:KXRT-HUN-50",
+   "venue": "kalshi",
+   "event_title": "The Hunger Games: Sunrise on the Reaping · Rotten Tomatoes score",
+   "title": "The Hunger Games: Sunrise on the Reaping Rotten Tomatoes score?",
+   "outcome_label": "Above 50",
+   "closes_at": "2026-11-23T15:00:00+00:00",
+   "rules": "If The Hunger Games: Sunrise on the Reaping has a Tomatometer score of above 50 on Nov 23, 2026 at 10:00 AM ET, then the market resolves to Yes.\nThe \"Fresh!\" and \"Certified Fresh!\" subtitles are meant for illustrative purposes only. The Tomatometer score must be above the strike value to resolve as YES (for example, a score of 75 would resolve \"Above 75\" as No.) The market will be determined the Monday after wide release at 10:00 AM ET.\n\nThis market and these products have not been endorsed by Rotten Tomatoes. Any references to Rotten Tomatoes or any associated marks are descriptive only and do not indicate an endorsement of this product or any affiliation between Rotten Tomatoes and Kalshi.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": 50}"
+  },
+  "b": {
+   "market_id": "polymarket:5420123",
+   "venue": "polymarket",
+   "event_title": "\"The Hunger Games: Sunrise on the Reaping\" Rotten Tomatoes Score?",
+   "title": "Will \"The Hunger Games: Sunrise on the Reaping\" score at least 50 on the Rotten Tomatoes Tomatometer?",
+   "outcome_label": "50+",
+   "closes_at": "2026-11-23T15:00:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the displayed Rotten Tomatoes \"All Critics\" Tomatometer score for The Hunger Games: Sunrise on the Reaping is at least equal to the specified number at 10:00 AM ET on November 23, 2026. Otherwise, this market will resolve to \"No\".\n\nIf, for any reason, the resolution data is unavailable at this market's specified end time, the resolution source will be checked until the relevant data is available. This market will resolve to \"No\" if no data is available by November 27, 2026, 11:59 PM ET.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Above vs at least",
+  "label": "same",
+  "why": "Above 60 vs at least 60: equivalent with a tie-rule flag at exactly 60 (D23).",
+  "a": {
+   "market_id": "kalshi:KXRT-HUN-60",
+   "venue": "kalshi",
+   "event_title": "The Hunger Games: Sunrise on the Reaping · Rotten Tomatoes score",
+   "title": "The Hunger Games: Sunrise on the Reaping Rotten Tomatoes score?",
+   "outcome_label": "Above 60",
+   "closes_at": "2026-11-23T15:00:00+00:00",
+   "rules": "If The Hunger Games: Sunrise on the Reaping has a Tomatometer score of above 60 on Nov 23, 2026 at 10:00 AM ET, then the market resolves to Yes.\nThe \"Fresh!\" and \"Certified Fresh!\" subtitles are meant for illustrative purposes only. The Tomatometer score must be above the strike value to resolve as YES (for example, a score of 75 would resolve \"Above 75\" as No.) The market will be determined the Monday after wide release at 10:00 AM ET.\n\nThis market and these products have not been endorsed by Rotten Tomatoes. Any references to Rotten Tomatoes or any associated marks are descriptive only and do not indicate an endorsement of this product or any affiliation between Rotten Tomatoes and Kalshi.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": 60}"
+  },
+  "b": {
+   "market_id": "polymarket:5420124",
+   "venue": "polymarket",
+   "event_title": "\"The Hunger Games: Sunrise on the Reaping\" Rotten Tomatoes Score?",
+   "title": "Will \"The Hunger Games: Sunrise on the Reaping\" score at least 60 on the Rotten Tomatoes Tomatometer?",
+   "outcome_label": "60+",
+   "closes_at": "2026-11-23T15:00:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the displayed Rotten Tomatoes \"All Critics\" Tomatometer score for The Hunger Games: Sunrise on the Reaping is at least equal to the specified number at 10:00 AM ET on November 23, 2026. Otherwise, this market will resolve to \"No\".\n\nIf, for any reason, the resolution data is unavailable at this market's specified end time, the resolution source will be checked until the relevant data is available. This market will resolve to \"No\" if no data is available by November 27, 2026, 11:59 PM ET.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Above vs exactly",
+  "label": "different",
+  "why": "Above 0.1% vs exactly 0.1% (single decimal).",
+  "a": {
+   "market_id": "kalshi:KXPCECORE-26SEP-T0.1",
+   "venue": "kalshi",
+   "event_title": "How much will core PCE increase in Sep 2026?",
+   "title": "Will the rate of core PCE inflation be above 0.1% in September 2026?",
+   "outcome_label": "Above 0.1%",
+   "closes_at": "2026-10-29T12:25:00+00:00",
+   "rules": "If the (single-decimal) month-over-month percent change in the Personal Consumption Expenditures Price Index excluding food and energy is above 0.1% in September 2026 according to the Bureau of Economic Analysis, then the market resolves to Yes.\nThe market will close at 8:25 AM ET on the expected release of the data. It will expire at the sooner of the first 10:00 AM ET following the release of the data, or one week after the expected release of the data.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"0.1\"}"
+  },
+  "b": {
+   "market_id": "polymarket:5194675",
+   "venue": "polymarket",
+   "event_title": "Core PCE MoM - September 2026",
+   "title": "Will Core PCE MoM be 0.1% in September?",
+   "outcome_label": "0.1%",
+   "closes_at": "2026-10-29T13:30:00+00:00",
+   "rules": "This is a market about core inflation (excluding food and energy) over the 1-month period ending September 2026, seasonally adjusted, as reported by the Bureau of Economic Analysis.\n\nThis market will resolve to the percentage change in the Personal Consumption Expenditures Price Index excluding food and energy (Core PCE) over the 1-month period ending in September 2026 according to the monthly Bureau of Economic Analysis (BEA) report.\n\nThe resolution source for this market will be the BEA Personal Income and Outlays report for September 2026 (https://www.bea.gov/data/personal-consumption-expenditures-price-index), currently scheduled to be released on October 29, 2026, at 8:30 AM ET. Resolution of this market will take place upon release of the aforementioned data.\n\nNote: the resolution source for this market will be the official monthly BEA Personal Income and Outlays news release, which reports core inflation (all items less food and energy) over 1-month periods to only one decimal point (e.g., 0.2%). Thus, this is the level of precision that will be used when resolving the market. For the avoidance of doubt, this market resolves on the core PCE figure (the PCE price index excluding food and energy), not the headline all-items (total) PCE price index figure.\n\nIf the BEA does not release the relevant figures on the scheduled date, this market may remain open up until the scheduled release time of the next Personal Income and Outlays report (https://www.bea.gov/news/schedule). If the information is not released by that time, this market will resolve according to the figures of the most recent previous month with available data.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Above vs exactly",
+  "label": "different",
+  "why": "Above 0.2% vs exactly 0.2% (single decimal).",
+  "a": {
+   "market_id": "kalshi:KXPCECORE-26SEP-T0.2",
+   "venue": "kalshi",
+   "event_title": "How much will core PCE increase in Sep 2026?",
+   "title": "Will the rate of core PCE inflation be above 0.2% in September 2026?",
+   "outcome_label": "Above 0.2%",
+   "closes_at": "2026-10-29T12:25:00+00:00",
+   "rules": "If the (single-decimal) month-over-month percent change in the Personal Consumption Expenditures Price Index excluding food and energy is above 0.2% in September 2026 according to the Bureau of Economic Analysis, then the market resolves to Yes.\nThe market will close at 8:25 AM ET on the expected release of the data. It will expire at the sooner of the first 10:00 AM ET following the release of the data, or one week after the expected release of the data.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"0.2\"}"
+  },
+  "b": {
+   "market_id": "polymarket:5194676",
+   "venue": "polymarket",
+   "event_title": "Core PCE MoM - September 2026",
+   "title": "Will Core PCE MoM be 0.2% in September?",
+   "outcome_label": "0.2%",
+   "closes_at": "2026-10-29T13:30:00+00:00",
+   "rules": "This is a market about core inflation (excluding food and energy) over the 1-month period ending September 2026, seasonally adjusted, as reported by the Bureau of Economic Analysis.\n\nThis market will resolve to the percentage change in the Personal Consumption Expenditures Price Index excluding food and energy (Core PCE) over the 1-month period ending in September 2026 according to the monthly Bureau of Economic Analysis (BEA) report.\n\nThe resolution source for this market will be the BEA Personal Income and Outlays report for September 2026 (https://www.bea.gov/data/personal-consumption-expenditures-price-index), currently scheduled to be released on October 29, 2026, at 8:30 AM ET. Resolution of this market will take place upon release of the aforementioned data.\n\nNote: the resolution source for this market will be the official monthly BEA Personal Income and Outlays news release, which reports core inflation (all items less food and energy) over 1-month periods to only one decimal point (e.g., 0.2%). Thus, this is the level of precision that will be used when resolving the market. For the avoidance of doubt, this market resolves on the core PCE figure (the PCE price index excluding food and energy), not the headline all-items (total) PCE price index figure.\n\nIf the BEA does not release the relevant figures on the scheduled date, this market may remain open up until the scheduled release time of the next Personal Income and Outlays report (https://www.bea.gov/news/schedule). If the information is not released by that time, this market will resolve according to the figures of the most recent previous month with available data.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop",
+  "label": "different",
+  "why": "Kalshi counts every touchdown the player scores; Polymarket only rushing or receiving touchdowns.",
+  "a": {
+   "market_id": "kalshi:KXNFLTD-26OCT12BUFLAR-LARDADAMS17-2",
+   "venue": "kalshi",
+   "event_title": "Buffalo vs Los Angeles R: Touchdowns",
+   "title": "Davante Adams: 2+ touchdowns",
+   "outcome_label": "Davante Adams: 2+",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Davante Adams scores at least 2+ touchdowns in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026, then the market resolves to Yes.\nThe following market refers to Davante Adams in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026. If Davante Adams is active but never takes a snap, the market settles to the fair market price before game start. Once Davante Adams takes at least one snap, even if nullified by penalty, the market settles based on touchdowns scored.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"1.5\", \"custom_strike\": {\"football_player\": \"224c89e1-8fba-44cd-a337-70b53547c35c\", \"football_team\": \"422d5fd7-ad18-4c96-902d-6f7c50e4660f\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5420391",
+   "venue": "polymarket",
+   "event_title": "Bills vs. Rams - Player Props",
+   "title": "Davante Adams: 2+ Touchdowns",
+   "outcome_label": "Davante Adams: 2+ Touchdowns",
+   "closes_at": "2026-10-13T00:15:00+00:00",
+   "rules": "In the upcoming NFL football game between Bills and Rams, scheduled for October 12 at 8:15 PM ET: This market will resolve to \"Yes\" if Davante Adams scores 2 or more rushing or receiving touchdowns in this game. Otherwise, this market will resolve to \"No\". Defensive and special teams touchdowns do not count. Overtime is included if played. All statistics are based on the official NFL game book as published on NFL.com at the conclusion of the game. Stat corrections issued after the game has been completed will not count. If the player is inactive or does not play, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.nfl.com/scores",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop",
+  "label": "different",
+  "why": "Kalshi counts every touchdown the player scores; Polymarket only rushing or receiving touchdowns.",
+  "a": {
+   "market_id": "kalshi:KXNFLTD-26OCT12BUFLAR-LARDALLEN87-2",
+   "venue": "kalshi",
+   "event_title": "Buffalo vs Los Angeles R: Touchdowns",
+   "title": "Davis Allen: 2+ touchdowns",
+   "outcome_label": "Davis Allen: 2+",
+   "closes_at": "2026-10-15T00:15:00+00:00",
+   "rules": "If Davis Allen scores at least 2+ touchdowns in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026, then the market resolves to Yes.\nThe following market refers to Davis Allen in the Buffalo vs Los Angeles R Pro Football game originally scheduled for Oct 12, 2026. If Davis Allen is active but never takes a snap, the market settles to the fair market price before game start. Once Davis Allen takes at least one snap, even if nullified by penalty, the market settles based on touchdowns scored.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"1.5\", \"custom_strike\": {\"football_player\": \"b9a2ce47-daae-4a85-8faf-ba9392b7ce7f\", \"football_team\": \"422d5fd7-ad18-4c96-902d-6f7c50e4660f\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5444174",
+   "venue": "polymarket",
+   "event_title": "Bills vs. Rams - Player Props",
+   "title": "Davis Allen: 2+ Touchdowns",
+   "outcome_label": "Davis Allen: 2+ Touchdowns",
+   "closes_at": "2026-10-13T00:15:00+00:00",
+   "rules": "In the upcoming NFL football game between Bills and Rams, scheduled for October 12 at 8:15 PM ET: This market will resolve to \"Yes\" if Davis Allen scores 2 or more rushing or receiving touchdowns in this game. Otherwise, this market will resolve to \"No\". Defensive and special teams touchdowns do not count. Overtime is included if played. All statistics are based on the official NFL game book as published on NFL.com at the conclusion of the game. Stat corrections issued after the game has been completed will not count. If the player is inactive or does not play, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.nfl.com/scores",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Player prop, other player",
+  "label": "different",
+  "why": "Theo Wease Jr. vs Marvin Mims Jr.",
+  "a": {
+   "market_id": "kalshi:KXNFLTDPROT-26OCT11DENLAC-LACTWEASE82-2",
+   "venue": "kalshi",
+   "event_title": "Denver vs Los Angeles C: Touchdowns (Protected)",
+   "title": "Theo Wease Jr.: 2+ touchdowns (Protected)",
+   "outcome_label": "Theo Wease Jr.: 2+",
+   "closes_at": "2026-10-13T20:05:00+00:00",
+   "rules": "If Theo Wease Jr. records 2+ touchdowns in the Denver vs Los Angeles C Pro Football game originally scheduled for Oct 11, 2026, then the market resolves to Yes.\nThis Contract is designated as protected. If the individual player participates in at least one play during the first half of the game but does not participate in any play after the conclusion of the first half, including any overtime period, this Contract resolves to the fair price prior to the opening kickoff of the game unless the player records the required number of touchdowns, in which case this Contract settles based on actual statistics. If the player participates in at least one play after the conclusion of the first half, this Contract settles based on actual statistics, regardless of first-half participation. Injury, an injury designation, or being ruled out is not required for protection.\n\nParticipation in a play nullified by penalty counts. Lining up for a play stopped by a penalty before the snap, without participating in a subsequent play, does not count. A player who never participates remains subject to the fair price non-participation rule. The protected designation applies only to full-game contracts with an above or at-least payout criterion. This event uses at least full game touchdowns including overtime. Passing touchdowns do not count as touchdowns scored by the passer. Team defense/special-teams selections settle on actual touchdowns; the player participation exception does not apply to them.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater\", \"floor_strike\": \"1.5\", \"custom_strike\": {\"football_player\": \"5d5cde99-96a2-4765-b001-ca09ec3f1a6b\", \"football_team\": \"611e3786-3bfe-4919-bbd5-bc70fc13d827\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5380395",
+   "venue": "polymarket",
+   "event_title": "Broncos vs. Chargers - Player Props",
+   "title": "Marvin Mims Jr.: 2+ Touchdowns",
+   "outcome_label": "Marvin Mims Jr.: 2+ Touchdowns",
+   "closes_at": "2026-10-11T20:05:00+00:00",
+   "rules": "In the upcoming NFL football game between Broncos and Chargers, scheduled for October 11 at 4:05 PM ET: This market will resolve to \"Yes\" if Marvin Mims Jr. scores 2 or more rushing or receiving touchdowns in this game. Otherwise, this market will resolve to \"No\". Defensive and special teams touchdowns do not count. Overtime is included if played. All statistics are based on the official NFL game book as published on NFL.com at the conclusion of the game. Stat corrections issued after the game has been completed will not count. If the player is inactive or does not play, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.nfl.com/scores",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award",
+  "label": "same",
+  "why": "Taylor Swift named TIME Person of the Year 2026 on both.",
+  "a": {
+   "market_id": "kalshi:KXTIME-26-TS",
+   "venue": "kalshi",
+   "event_title": "Time's Person of the Year for 2026",
+   "title": "Will Taylor Swift be Time Person of the Year in 2026?",
+   "outcome_label": "Taylor Swift",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Taylor Swift is Time Person of the Year for 2026, then the market resolves to Yes.\nThis will count towards the payout criterion: \nIf multiple persons win, all persons that are listed are encompassed within the Payout Criterion. If, for example, the Person of the Year is “Joe Biden and Kamala Harris”, both “Joe Biden” and “Kamala Harris” strikes are encompassed within the Payout Criterion. \nThe person must be explicitly named as the Person of the Year or pictured on the/a relevant cover if they are associated with the group/concept winning (the picture is only relevant for a natural human being winning). Some examples to illustrate this: “Jamal Khasogghi” would resolve to Yes in 2018, when “The Guardians” won, as he is also named and shown on a cover and falls within “The Guardians”. Similarly, “Bill Gates” would resolve to Yes in 2005. \nIf Time uses language that does not specifically refer to a person or organization (examples being 2018’s “The Guardians of Truth” or 2017’s “The Silence Breakers”), Kalshi will resolve markets to the most simple meaning reasonable. In those cases, “Journalists” and “the Me Too movement” would resolve to Yes.\n\nThis does NOT count towards the payout criterion: \nIf there is no Person of the Year (and instead many variations thereof, e.g. Entertainer of the Year, Hero of the Year), that is not encompassed in the Payout Criterion. \nIf “ChatGPT” was the Person of the Year, strikes of “AI” or “LLMs” would resolve to No, since even if they are conceptually linked, they are not synonymous (and thus are not explicitly named), and are not persons, so it would not matter if they were identified in the image. Or if “Sam Altman” was the Person of the Year, and the cover showed a person using ChatGPT on their computer, “ChatGPT” would not resolve to Yes because it is not a person.\n\nThis market and these products have not been endorsed by TIME. Any references to TIME, or any associated marks are descriptive only and do not indicate an endorsement of this product or any affiliation between TIME and Kalshi.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Person\": \"Taylor Swift\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:2363837",
+   "venue": "polymarket",
+   "event_title": "TIME Person of the Year 2026",
+   "title": "Will Taylor Swift be TIME Person of the Year 2026?",
+   "outcome_label": "Taylor Swift",
+   "closes_at": "2026-12-31T00:00:00+00:00",
+   "rules": "This market will resolve to “Yes” if the listed person, group, entity, or thing is TIME Person of the Year for 2026. Otherwise, this market will resolve to “No”.\n\nA listed option will be considered TIME Person of the Year if they/it are explicitly named as Person of the Year. \n\nAdditionally, the following rules apply:\n\nIf multiple people are explicitly named person of the year, both people will be considered TIME Person of the Year.\n\nIf the TIME Person of the Year is a concept, group or thing, a person may still be considered Person of the Year if they are also explicitly named person of the year, or if they are directly associated with the concept, group or thing named as person of the Year and are pictured on any official TIME cover announcing the Person of the Year. For example, in 2025 when TIME Person of the Year was “Architects of AI” the option for Sam Altman would have resolved to “Yes” as he was associated with the concept and is pictured on the Cover. However, if Sam Altman were Person of the Year, and ChatGPT was shown on the cover, this would not qualify for ChatGPT because ChatGPT is not a person.\n\nIf the TIME Person of the Year is a specific concept, group, entity, or thing (e.g. artificial intelligence), listed concepts or entities will be considered Person of the Year only if they are synonymous with the announced TIME Person of the Year. For example, if ChatGPT were Person of the Year, options for AI or LLMs would resolve to “No” because, while they are conceptually linked, they are not synonymous.\n\nIf TIME uses language that does not refer to a specific, commonly-recognized, concept, group, entity, or thing (e.g. 2011’s “The Protester” or 2017’s “The Silence Breakers”), the TIME Person of the Year feature article will be used to determine the meaning of the language defining TIME Person of the Year. In such cases, listed concepts, groups, or things will be considered TIME Person of the Year if they can be reasonably understood as equivalent to the meaning of the language used to define TIME Person of the Year. For example, the option for “The Me Too Movement” would have resolved to “Yes” in 2017. \n\nIf for any reason the TIME's Person of the Year is not announced by June 30, 2027, 11:59 PM ET, this market will resolve to \"No\".\n\nThe resolution source for this market will be the TIME magazine cover or covers announcing the 2026 TIME Person of the Year; however, the TIME Person of the Year Feature article may also be used.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award",
+  "label": "same",
+  "why": "Donald Trump named TIME Person of the Year 2026 on both.",
+  "a": {
+   "market_id": "kalshi:KXTIME-26-DT",
+   "venue": "kalshi",
+   "event_title": "Time's Person of the Year for 2026",
+   "title": "Will Donald Trump be Time Person of the Year in 2026?",
+   "outcome_label": "Donald Trump",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Donald Trump is Time Person of the Year for 2026, then the market resolves to Yes.\nThis will count towards the payout criterion: \nIf multiple persons win, all persons that are listed are encompassed within the Payout Criterion. If, for example, the Person of the Year is “Joe Biden and Kamala Harris”, both “Joe Biden” and “Kamala Harris” strikes are encompassed within the Payout Criterion. \nThe person must be explicitly named as the Person of the Year or pictured on the/a relevant cover if they are associated with the group/concept winning (the picture is only relevant for a natural human being winning). Some examples to illustrate this: “Jamal Khasogghi” would resolve to Yes in 2018, when “The Guardians” won, as he is also named and shown on a cover and falls within “The Guardians”. Similarly, “Bill Gates” would resolve to Yes in 2005. \nIf Time uses language that does not specifically refer to a person or organization (examples being 2018’s “The Guardians of Truth” or 2017’s “The Silence Breakers”), Kalshi will resolve markets to the most simple meaning reasonable. In those cases, “Journalists” and “the Me Too movement” would resolve to Yes.\n\nThis does NOT count towards the payout criterion: \nIf there is no Person of the Year (and instead many variations thereof, e.g. Entertainer of the Year, Hero of the Year), that is not encompassed in the Payout Criterion. \nIf “ChatGPT” was the Person of the Year, strikes of “AI” or “LLMs” would resolve to No, since even if they are conceptually linked, they are not synonymous (and thus are not explicitly named), and are not persons, so it would not matter if they were identified in the image. Or if “Sam Altman” was the Person of the Year, and the cover showed a person using ChatGPT on their computer, “ChatGPT” would not resolve to Yes because it is not a person.\n\nThis market and these products have not been endorsed by TIME. Any references to TIME, or any associated marks are descriptive only and do not indicate an endorsement of this product or any affiliation between TIME and Kalshi.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Person\": \"Donald Trump\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:2363842",
+   "venue": "polymarket",
+   "event_title": "TIME Person of the Year 2026",
+   "title": "Will Donald Trump be TIME Person of the Year 2026?",
+   "outcome_label": "Donald Trump",
+   "closes_at": "2026-12-31T00:00:00+00:00",
+   "rules": "This market will resolve to “Yes” if the listed person, group, entity, or thing is TIME Person of the Year for 2026. Otherwise, this market will resolve to “No”.\n\nA listed option will be considered TIME Person of the Year if they/it are explicitly named as Person of the Year. \n\nAdditionally, the following rules apply:\n\nIf multiple people are explicitly named person of the year, both people will be considered TIME Person of the Year.\n\nIf the TIME Person of the Year is a concept, group or thing, a person may still be considered Person of the Year if they are also explicitly named person of the year, or if they are directly associated with the concept, group or thing named as person of the Year and are pictured on any official TIME cover announcing the Person of the Year. For example, in 2025 when TIME Person of the Year was “Architects of AI” the option for Sam Altman would have resolved to “Yes” as he was associated with the concept and is pictured on the Cover. However, if Sam Altman were Person of the Year, and ChatGPT was shown on the cover, this would not qualify for ChatGPT because ChatGPT is not a person.\n\nIf the TIME Person of the Year is a specific concept, group, entity, or thing (e.g. artificial intelligence), listed concepts or entities will be considered Person of the Year only if they are synonymous with the announced TIME Person of the Year. For example, if ChatGPT were Person of the Year, options for AI or LLMs would resolve to “No” because, while they are conceptually linked, they are not synonymous.\n\nIf TIME uses language that does not refer to a specific, commonly-recognized, concept, group, entity, or thing (e.g. 2011’s “The Protester” or 2017’s “The Silence Breakers”), the TIME Person of the Year feature article will be used to determine the meaning of the language defining TIME Person of the Year. In such cases, listed concepts, groups, or things will be considered TIME Person of the Year if they can be reasonably understood as equivalent to the meaning of the language used to define TIME Person of the Year. For example, the option for “The Me Too Movement” would have resolved to “Yes” in 2017. \n\nIf for any reason the TIME's Person of the Year is not announced by June 30, 2027, 11:59 PM ET, this market will resolve to \"No\".\n\nThe resolution source for this market will be the TIME magazine cover or covers announcing the 2026 TIME Person of the Year; however, the TIME Person of the Year Feature article may also be used.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Ranking",
+  "label": "same",
+  "why": "The Odyssey #1 on Google's 2026 Year in Search global movies list.",
+  "a": {
+   "market_id": "kalshi:KXGOOGLESEARCH-MOV27-ODY",
+   "venue": "kalshi",
+   "event_title": "Google’s Year in Search 2026 Global - Movies: #1 search",
+   "title": "Will The Odyssey be the #1 rank on Google’s Year in Search 2026 Global - Movies list?",
+   "outcome_label": "The Odyssey",
+   "closes_at": "2027-01-01T15:00:00+00:00",
+   "rules": "If The Odyssey is the #1 search on Google’s Year in Search 2026 Global - Movies list in 2026, then the market resolves to Yes.\nIf Google’s Year in Search 2026 Global - Movies is not published during 2026, then all markets will resolve to NO.\n\nThis market resolves based on the individuals ranked in the \"Google’s Year in Search 2026 Global - Movies\" section of Google’s official Year in Search 2026 – Global list. Google’s report includes multiple sections such as Searches, News, Passings, and People — only the \"Google’s Year in Search 2026 Global - Movies\" section applies to this event.\n\nThis market and these products have not been endorsed by Google. Any references Google, or any associated marks are descriptive only and do not indicate an endorsement of this product or any affiliation between Google and Kalshi.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:3251056",
+   "venue": "polymarket",
+   "event_title": "#1 Searched Movie on Google 2026?",
+   "title": "Will The Odyssey be the #1 searched movie on Google this year?",
+   "outcome_label": "The Odyssey",
+   "closes_at": "2026-12-31T23:59:00+00:00",
+   "rules": "This market will resolve according to the movie ranked #1 in Google’s official Year in Search Global “Movies” list for 2026.\n\nThe specified list is expected to be displayed on the Google Trends Year in Search hub, with location selected to Global. The navigation procedure as of market creation involves going to trends.withgoogle.com/year-in-search/ and clicking through Global → Entertainment → Movies. The 2026 page is expected to appear using the same navigation once released (as the 2025 page currently shows the specified ranking). This market will resolve based on the specified list regardless of navigation procedure.\n\nA search term that clearly refers to a term listed in this market (for example, abbreviations, alternate spellings, or closely related phrasing) will count toward the term as listed in this market. If a search term clearly refers to multiple terms listed in this market, this market will resolve according to the term that comes first alphabetically as listed in this market.\n\nThis market may resolve as soon as the specified list for 2026 is released. If Google does not release the specified list by March 31, 2027, 11:59 PM ET, this market will resolve to “Other.”\n\nThe resolution source for this market will be the specified list as published by Google.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "League table",
+  "label": "same",
+  "why": "Sunderland last in the 2026-27 Premier League.",
+  "a": {
+   "market_id": "kalshi:KXEPLLAST-27-SUN",
+   "venue": "kalshi",
+   "event_title": "EPL Last Place Finisher",
+   "title": "Will Sunderland finish in last place in the EPL 2026-27 season?",
+   "outcome_label": "Sunderland",
+   "closes_at": "2027-06-14T02:00:00+00:00",
+   "rules": "If Sunderland finishes in last place in the league table in the 2026-27 EPL season, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"soccer_team\": \"f0a69f43-b3c4-4049-bf6d-4717809000a1\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:3957469",
+   "venue": "polymarket",
+   "event_title": "English Premier League Last Place Finisher (2026-27)",
+   "title": "Will Sunderland finish in last place in the 2026-27 English Premier League season?",
+   "outcome_label": "Sunderland",
+   "closes_at": "2027-06-14T03:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the listed club finishes in last place (20th) in the final standings of the 2026-27 English Premier League (EPL) season. Otherwise, this market will resolve to \"No\".\n\nIf at any point it becomes impossible for the listed club to finish in last place in the 2026-27 English Premier League (EPL) season (e.g., they are mathematically guaranteed to finish above 20th), this market will resolve to \"No\".\n\nIn the event of a tie for last place, this market will resolve based on the club officially recognized by the Premier League as finishing in 20th place. If multiple clubs are officially recognized as finishing in last place, this market will resolve to the club whose listed name comes first alphabetically.\n\nIf the 2026-27 English Premier League (EPL) season is cancelled, postponed after June 13, 2027, 11:59 PM ET, or there is otherwise no last-place club declared within that timeframe, this market will resolve to \"Other\".\n\nThe primary resolution source will be official information from the Premier League; however, a consensus of credible reporting may also be used.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Different question",
+  "label": "different",
+  "why": "Named in Epstein documents vs visiting Lebanon.",
+  "a": {
+   "market_id": "kalshi:KXEPSTEINLIST-27JAN-DJT",
+   "venue": "kalshi",
+   "event_title": "Who will be named in Epstein files released in 2026?",
+   "title": "Who will be named in Epstein documents released in 2026?",
+   "outcome_label": "Donald Trump",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Donald Trump is named in any context in any documents held by the federal government directly regarding Jeffrey Epstein released before Jan 1, 2027, then the market resolves to Yes.\nDonald Trump is considered to appear in the documents when either the exact term, phrase, or name specified appears in the content of the documents, or is present by way of commonly used abbreviation, direct synonym, or unmistakable reference including in any official appendices, footnotes, or tables. \n\nThe documents must be publicly released after Issuance and before the expiration date. If a document is publicly released for the first time after Issuance, it is considered novel in its entirety. For example, a newly released email containing a previously published news article as an attachment counts. However, documents that were already fully public do not count.\n\nDocuments directly issued and officially published by the relevant institution or entity count, leaks of the documents count, and media coverage by Source Agencies count, unless otherwise specified by the Exchange. If the documents are revised after publication, all publicly released versions prior to Expiration will be used. If a correction or update nullifies the appearance of Donald Trump, the market may still resolve to Yes based on original reporting.\n\nThe release time of the documents is noted to be when the documents are made available to the public either directly or through third-party media reports. If the documents are heavily redacted, only visible, legible, and unambiguous references count. \"Documents\" may include, but is not limited to: specific documents or sets of documents, conversations, meetings, or communications, draft documents, proposals, or internal deliberations, court filings, depositions, orders, and exhibits; officially unsealed records from prior sealed proceedings",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Subject\": \"Donald Trump\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:2002700",
+   "venue": "polymarket",
+   "event_title": "Which countries will Donald Trump visit in 2026?",
+   "title": "Will Donald Trump visit Lebanon in 2026?",
+   "outcome_label": "Lebanon",
+   "closes_at": "2026-12-31T23:59:00+00:00",
+   "rules": "If U.S. President Donald Trump visits a listed country between the creation of this market and December 31, 2026 11:59 PM ET, the relevant market will resolve to \"Yes\". Otherwise, this market will resolve to \"No\".\n\nFor the purpose of this market, a \"visit\" is defined as Trump physically entering the terrestrial or maritime territory of the listed country. Whether or not Trump enters the country's airspace during the timeframe of this market will have no bearing on a positive resolution.\n\nThe primary resolution source for this information will be official information from government of the United States of America, official information from Trump or released by his verified social media accounts (e.g. https://twitter.com/POTUS), however, a consensus of credible reporting will also be used.\nResolution source: https://twitter.com/POTUS",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Different question",
+  "label": "different",
+  "why": "Sued vs jailed.",
+  "a": {
+   "market_id": "kalshi:KXSUEPOWELL-26SEP",
+   "venue": "kalshi",
+   "event_title": "Will Trump or the U.S. government sue Jerome Powell in 2026?",
+   "title": "Will Donald Trump or the U.S. government sue Jerome Powell before 2027?",
+   "outcome_label": "Before Jan 2027",
+   "closes_at": "2027-01-01T15:00:00+00:00",
+   "rules": "If Donald Trump or the U.S. government sues Jerome Powell before Jan 1, 2027, then the market resolves to Yes.\nA lawsuit or some other formal adversarial legal process (such as pre-complaint discovery or an arbitration claim) is encompassed by the Payout Criterion. Federal criminal charges filed against Jerome Powell are also encompassed. Criminal investigative steps short of filed charges, such as opening or reopening an investigation, grand jury subpoenas or a target letter, do not count.",
+   "strike": ""
+  },
+  "b": {
+   "market_id": "polymarket:1167867",
+   "venue": "polymarket",
+   "event_title": "Jerome Powell in jail before 2027?",
+   "title": "Jerome Powell in jail before 2027?",
+   "outcome_label": "",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if Jerome Powell serves any time in a federal, state, or local U.S. jail or prison between market creation and December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nThe primary resolution source for this market will be official information from the U.S. Government, however a consensus of credible reporting may also be used.\n",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same name, other team",
+  "label": "different",
+  "why": "Las Vegas Raiders win vs Las Vegas Lights lead at halftime.",
+  "a": {
+   "market_id": "kalshi:KXNFLGAME-26OCT18BUFLV-LV",
+   "venue": "kalshi",
+   "event_title": "BUF Bills vs LV Raiders",
+   "title": "Las Vegas wins",
+   "outcome_label": "Las Vegas",
+   "closes_at": "2026-10-20T20:25:00+00:00",
+   "rules": "If Las Vegas wins the BUF Bills vs LV Raiders Pro Football game originally scheduled for Oct 18, 2026, then the market resolves to Yes.\nThe following market refers to the team who wins the BUF Bills vs LV Raiders Pro Football game originally scheduled for Oct 18, 2026. If the game ends in a tie, the market will resolve to $0.50 for each team. If the game is postponed but begins within 48 hours from its originally scheduled start time, the market will remain open and resolve based on the official final result. If the game is not started within 48 hours, the market will resolve to a fair price.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"football_team\": \"8b1ce23e-7d64-4213-85e9-7d12bc8c4d85\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5574570",
+   "venue": "polymarket",
+   "event_title": "Las Vegas Lights vs. Lexington SC - Halftime Result",
+   "title": "Las Vegas Lights leading at halftime?",
+   "outcome_label": "Las Vegas Lights",
+   "closes_at": "2026-10-18T02:30:00+00:00",
+   "rules": "In the upcoming game, scheduled for October 17, 2026 If Las Vegas Lights wins within the first 45 minutes of regular play plus stoppage time, this market will resolve to \"Yes\". Otherwise, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve \"No\". This market refers only to the outcome within the first 45 minutes of regular play plus stoppage time. The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\n\nThis market may resolve only when the listed period of play has concluded and the result can be definitively determined by the listed resolution source(s).",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Ticket vs endorsement",
+  "label": "different",
+  "why": "A Republican ticket vs a Trump endorsement.",
+  "a": {
+   "market_id": "kalshi:KXRTICKET-28NOV07-DJTMRUB",
+   "venue": "kalshi",
+   "event_title": "2028 Republican Presidential ticket",
+   "title": "Will Donald Trump and Marco Rubio be the 2028 Republican Presidential ticket?",
+   "outcome_label": "Donald Trump and Marco Rubio",
+   "closes_at": "2028-11-07T15:00:00+00:00",
+   "rules": "If the Republican presidential nominee is Donald Trump AND the Republican vice presidential nominee is Marco Rubio in the 2028 presidential election, then the market resolves to Yes.\nOrder matters: the first person listed is the presidential nominee and the second is the vice presidential nominee.\n\nThis is a combination market requiring ALL specified outcomes to occur for the contract to pay out. If ANY single component resolves to No or becomes impossible, the entire contract immediately resolves to No. Each component is resolved according to its corresponding Kalshi ruleset: Presidential Nominee (PRESNOM), Vice Presidential Nominee (VPRESNOM). The presidential nominee (listed first) is resolved under PRESNOM and the vice presidential nominee (listed second) is resolved under VPRESNOM.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Ticket\": \"Donald Trump + Marco Rubio\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:3229223",
+   "venue": "polymarket",
+   "event_title": "Who will Trump endorse first in the 2028 US presidential election?",
+   "title": "Will Donald Trump endorse Person AK in the 2028 U.S. presidential election?",
+   "outcome_label": "Person AK",
+   "closes_at": "2028-11-06T23:59:00+00:00",
+   "rules": "This market will resolve according to the first individual that Donald Trump endorses for President of the United States in the 2028 United States Presidential Election. \n\nAn endorsement is defined as a statement by Donald Trump that i) is made publicly (e.g., through a press release, an on-the-record interview, a speech, a campaign event, a post from a verified account on social media); ii) explicitly and unambiguously expresses unique support for an individual as a candidate for President of the United States in the 2028 United States Presidential election; and iii) is characterized by a consensus of credible reporting as an official endorsement by Donald Trump of the individual for President in the 2028 United States presidential election.\n\nAn endorsement of an individual for the Republican Party’s nomination to the 2028 United States Presidential election will qualify. Endorsements of a candidate for the Democratic Party's nomination without also endorsing that candidate for President in the general election will not qualify.\n\nThe following will not be considered endorsements: positive or favorable comments about a candidate without a clear public statement of direct support; conditional statements giving support only if certain conditions are met; statements equally expressing support for multiple candidates (e.g., “I support Marco and J.D.”); statements expressing opposition to a candidate without endorsing any candidate; private or non-public statements; and statements that are clearly sarcastic, made in jest, or immediately clarified as not reflecting genuine support.\n\nAn endorsement of a ticket comprising a presidential candidate and a vice-presidential candidate constitutes a qualifying endorsement only of the individual endorsed for President. If the endorsement is of a ticket with undefined presidential and vice-presidential roles, or the roles on an endorsed ticket cannot be determined by the statement itself or a consensus of credible reporting, no qualifying endorsement will be deemed to have occurred.\n\nIf Donald Trump issues multiple concurrent statements meeting this standard, directed at different individuals, this will not constitute a qualifying endorsement and this market will remain open and resolve based on the first standalone qualifying endorsement issued. Endorsements will be considered to be issued concurrently only if they are issued in the same written statement (e.g., a public social media post), or in a singular public speaking event (e.g., a press conference, a speech).\n\nEndorsements via social media count only from verified accounts controlled by Donald Trump. Likes, reposts, or shares alone do not constitute a qualifying endorsement.\n\nIf Donald Trump officially files his candidacy for the 2028 United States Presidential election before issuing a qualifying endorsement, this market will resolve to “Donald Trump.” Statements alone will not be sufficient to resolve this market to “Donald Trump.”\n\nOnce a qualifying endorsement has occurred, subsequent retractions, rescissions, or endorsements of other individuals will not affect the determination of the first individual endorsed. If Donald Trump does not issue any qualifying endorsements, or file his own candidacy, by November 6, 2028, 11:59 PM ET, this market will resolve to “Other”.\n\nThe resolution sources for this market will be official statements from Donald Trump and a consensus of credible reporting.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Matchup vs election",
+  "label": "different",
+  "why": "Two nominees vs who wins the election.",
+  "a": {
+   "market_id": "kalshi:KXPRESMATCHUP-28NOV07-PBUTJVAN",
+   "venue": "kalshi",
+   "event_title": "2028 Presidential matchup",
+   "title": "Will Pete Buttigieg and JD Vance be the 2028 Democratic and Republican presidential nominees?",
+   "outcome_label": "Pete Buttigieg v. JD Vance",
+   "closes_at": "2028-11-07T10:00:00+00:00",
+   "rules": "If Pete Buttigieg (D) and JD Vance (R) are the nominees for the 2028 presidential election, then the market resolves to Yes.\nThis is a combination market requiring ALL specified outcomes to occur for the contract to pay out. If ANY single component resolves to No or becomes impossible, the entire contract immediately resolves to No. Each component is resolved according to its corresponding Kalshi ruleset: Democratic Nominee (PRESNOM), Republican Nominee (PRESNOM). All conditions must be satisfied for the 2028 presidential election.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Combo\": \"Pete Buttigieg + JD Vance\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:561229",
+   "venue": "polymarket",
+   "event_title": "Presidential Election Winner 2028",
+   "title": "Will JD Vance win the 2028 US Presidential Election?",
+   "outcome_label": "JD Vance",
+   "closes_at": "2028-11-08T04:59:00+00:00",
+   "rules": "The 2028 US Presidential Election is scheduled to take place on November 7, 2028.\n\nThis market will resolve to the person who wins the 2028 US Presidential Election.\n\nThe resolution source for this market is the Associated Press, Fox News, and NBC. This market will resolve once all three sources call the race for the same candidate. If all three sources haven’t called the race for the same candidate by the inauguration date (January 20, 2029) this market will resolve based on who is inaugurated.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same team, other game",
+  "label": "different",
+  "why": "First goal vs Napoli on Oct 13 vs Elche on Oct 17.",
+  "a": {
+   "market_id": "kalshi:KXUCLFTTS-26OCT13VILNAP-VIL",
+   "venue": "kalshi",
+   "event_title": "Villarreal CF vs SSC Napoli: First Team to Score",
+   "title": "Will Villarreal CF record the first goal of the game?",
+   "outcome_label": "Villarreal CF",
+   "closes_at": "2026-10-16T01:00:00+00:00",
+   "rules": "If Villarreal CF records the first goal during the entire game (regulation, stoppage and any extra time periods) of the Villarreal CF vs SSC Napoli professional Champions League soccer game originally scheduled for Oct 13, 2026, then the market resolves to Yes.\nThe following market refers to a team in the entire game (regulation, stoppage and any extra time periods) of the Villarreal CF vs SSC Napoli professional Champions League soccer game originally scheduled for Oct 13, 2026. If the first goal of the match is an own goal, the market will resolve based on the team awarded the goal.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"soccer_team\": \"e16880b0-2ac2-476a-8b82-6ef29655175c\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5269090",
+   "venue": "polymarket",
+   "event_title": "Villarreal CF vs. Elche CF - First Team to Score",
+   "title": "Villarreal CF to score first vs. Elche CF?",
+   "outcome_label": "Villarreal CF",
+   "closes_at": "2026-10-17T14:15:00+00:00",
+   "rules": "In the upcoming match between Villarreal CF and Elche CF, scheduled for October 17, 2026 at 10:15 AM ET: This market will resolve to \"Villarreal CF\" if Villarreal CF are the first to score within the first 90 minutes of regular play plus stoppage time. This market will resolve to \"Elche CF\" if Elche CF are the first to score within the first 90 minutes of regular play plus stoppage time. If neither team scores within the first 90 minutes of regular play plus stoppage time, this market will resolve \"Neither\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve to \"Neither\". This market refers only to the outcome within the first 90 minutes of regular play plus stoppage time. Extra time and penalty shoot-outs are excluded. The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same prop, other game",
+  "label": "different",
+  "why": "Utah vs Colorado vs Navy vs UTSA.",
+  "a": {
+   "market_id": "kalshi:KXNCAAFOT-26OCT17UTAHCOLO-1",
+   "venue": "kalshi",
+   "event_title": "Utah vs Colorado: Overtime",
+   "title": "Game goes to overtime",
+   "outcome_label": "Game goes to overtime",
+   "closes_at": "2026-10-20T02:15:00+00:00",
+   "rules": "If at least 1 overtime period is played in the Utah vs Colorado college football game originally scheduled for Oct 17, 2026, then the market resolves to Yes.\nAn overtime period is any period of play after regulation ends. From the 3rd overtime onward, the alternating two-point conversion series counts as an overtime period. An overtime period counts as played once it commences, via a legal snap (in the first two overtimes) or a first two-point attempt (in the third overtime and onward). Overtime periods that are scheduled but never start do not count. Once started, an overtime period counts in full, regardless of its duration or whether both teams get a possession or attempt.\n\nIf the game is postponed but begins within 48 hours of its originally scheduled start time, the market will remain open and resolve based on the official final result. If the game is not started within 48 hours, the market will resolve to a fair price.\n\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the NCAA. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"greater_or_equal\", \"floor_strike\": 1}"
+  },
+  "b": {
+   "market_id": "polymarket:5357018",
+   "venue": "polymarket",
+   "event_title": "Navy vs. UTSA",
+   "title": "Navy vs. UTSA: Game Goes to Overtime",
+   "outcome_label": "Game Goes to Overtime",
+   "closes_at": "2026-10-18T00:00:00+00:00",
+   "rules": "In the upcoming college football game between Navy and UTSA, scheduled for October 17 at 8:00 PM ET: This market will resolve to \"Yes\" if overtime is played in this game. Otherwise, this market will resolve to \"No\". If the game is postponed, this market will remain open until the game has been completed. If the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nResolution source: https://www.ncaa.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Same game, other outcome",
+  "label": "different",
+  "why": "First goal vs a draw.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLFTTS-26OCT13ITJSAH-SAH",
+   "venue": "kalshi",
+   "event_title": "Al-Ittihad Club vs Shabab Al Ahli Dubai: First Team to Score",
+   "title": "Will Shabab Al Ahli Dubai record the first goal of the game?",
+   "outcome_label": "Shabab Al Ahli Dubai",
+   "closes_at": "2026-10-16T00:15:00+00:00",
+   "rules": "If Shabab Al Ahli Dubai records the first goal during the entire game (regulation, stoppage and any extra time periods) of the Al-Ittihad Club vs Shabab Al Ahli Dubai professional AFC Champions League soccer game originally scheduled for Oct 13, 2026, then the market resolves to Yes.\nThe following market refers to a team in the entire game (regulation, stoppage and any extra time periods) of the Al-Ittihad Club vs Shabab Al Ahli Dubai professional AFC Champions League soccer game originally scheduled for Oct 13, 2026. If the first goal of the match is an own goal, the market will resolve based on the team awarded the goal.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"soccer_team\": \"7141a77d-2e69-47e7-8a99-411b83104288\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452496",
+   "venue": "polymarket",
+   "event_title": "Al-Ittihad Club vs. Shabab Al Ahli Dubai",
+   "title": "Will Al-Ittihad Club vs. Shabab Al Ahli Dubai end in a draw?",
+   "outcome_label": "Draw (Al-Ittihad Club vs. Shabab Al Ahli Dubai)",
+   "closes_at": "2026-10-13T18:15:00+00:00",
+   "rules": "In the upcoming game, scheduled for October 13, 2026\nIf the game ends in a draw, this market will resolve to \"Yes\".\nOtherwise, this market will resolve to \"No\".\nIf the game is postponed, this market will remain open until the game has been completed.\nIf the game is canceled entirely, with no make-up game, this market will resolve to \"Yes\".\nThis market refers only to the outcome within the first 90 minutes of regular play plus stoppage time.\n\nThe primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\nResolution source: https://www.the-afc.com/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Other country",
+  "label": "different",
+  "why": "Venezuela vs Iran.",
+  "a": {
+   "market_id": "kalshi:KXVENEZDEFACTO-27JAN01-MMAC",
+   "venue": "kalshi",
+   "event_title": "Who will de facto lead Venezuela at the end of 2026?",
+   "title": "Will María Corina Machado de facto hold head of state of Venezuela at the end of 2026?",
+   "outcome_label": "María Corina Machado",
+   "closes_at": "2027-01-02T04:59:00+00:00",
+   "rules": "If María Corina Machado de facto holds the position of head of state of Venezuela at the end of 2026, then the market resolves to Yes.\nFor the purposes of this Contract, \"María Corina Machado de facto holds head of state of Venezuela\" means that, at the end of 2026, María Corina Machado is the individual who primarily exercises the governing authority and core powers customarily attached to head of state of Venezuela, regardless of María Corina Machado's formal title, constitutional designation, formal appointment, domestic legal status, foreign recognition, or international recognition.\n\nThe Source Agency's determination of whether María Corina Machado de facto holds head of state of Venezuela shall be based on objective indicators of governing authority over the functions attached to head of state of Venezuela, which may include, without limitation:\n\nControl over the executive ministries, administrative apparatus, bureaucracy, and state institutions associated with head of state of Venezuela\nIssuance of binding national directives, decrees, orders, or instructions that are observably obeyed and enforced within the relevant jurisdiction\nControl over the official seat of power, capital, headquarters, principal residence, or principal infrastructure associated with head of state of Venezuela\nTreatment by the domestic state institutions associated with head of state of Venezuela as the operative holder of head of state of Venezuela\nTreatment by foreign governments, multilateral institutions, and credentialed media as the operative holder of head of state of Venezuela\n\nThe following alone will NOT qualify as de facto holding head of state of Venezuela:\n\nHolding the formal or constitutional title to head of state of Venezuela without exercising the core powers customarily attached to head of state of Venezuela\nServing in an acting, interim, caretaker, provisional, or temporary capacity that is subordinate to and accountable to a principal who continues to exercise the core powers customarily attached to head of state of Venezuela\nNomination, designation, election, appointment, or confirmation to head of state of Venezuela prior to the effective transfer of governing authority\nStatus as successor, heir apparent, or designated replacement to head of state of Venezuela prior to assumption of governing authority\nSymbolic, ceremonial, or honorary status without exercise of the core powers customarily attached to head of state of Venezuela, except where head of state of Venezuela is itself a primarily ceremonial position and María Corina Machado performs the ceremonial functions associated with head of state of Venezuela without operative displacement\nForeign or international recognition as the holder of head of state of Venezuela without exercise of operative governing authority within the relevant jurisdiction\nLeadership from exile, in detention, or otherwise removed from the operating seat of head of state of Venezuela, where another individual is observably exercising the core powers customarily attached to head of state of Venezuela without subordination to María Corina Machado\nHolding a different role with general political, religious, military, or institutional influence over head of state of Venezuela without personally exercising the core powers customarily attached to head of state of Venezuela\n\nIf, at the end of 2026, the Source Agency does not identify any individual as exercising primary governing authority over the core powers customarily attached to head of state of Venezuela (including where head of state of Venezuela has been abolished, suspended, declared vacant, or where governing authority is genuinely fragmented among multiple individuals such that no individual primarily exercises the powers customarily attached to head of state of Venezuela), the Payout Criterion shall not be satisfied with respect to any listed person.\n\nIf, at the end of 2026, more than one individual claims or is claimed to de facto hold head of state of Venezuela, the Source Agency shall determine the de facto holder by reference to which individual primarily exercises the indicators of governing authority described above; in any such determination, the higher-ranked Source Agencies shall prevail over lower-ranked Source Agencies. If multiple persons are determined to do so equally, all those persons' markets shall resolve to $1/n, rounded down, where n is the number of persons who do so and who have a strike listed.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Person\": \"Mar\\u00eda Corina Machado\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:1469771",
+   "venue": "polymarket",
+   "event_title": "Iran leader end of 2026?",
+   "title": "Will s be head of state in Iran end of 2026?",
+   "outcome_label": "s",
+   "closes_at": "2026-12-31T17:00:00+00:00",
+   "rules": "This market will resolve to the individual who de facto holds and exercises the powers of the head of state of the Islamic Republic of Iran on December 31, 2026 at 12:00 PM ET.\n\nFor the purposes of this market, “de facto holds” refers to the individual who exercises primary governing authority over the Iranian state at that time, including effective control over the armed forces, national institutions, and core executive decision-making, regardless of formal title, constitutional designation, or international recognition.\n\nFormal appointment, recognition by the United Nations, or recognition by foreign governments is not required.\n\nIf more than one individual claims to be head of state, this market will resolve to the individual who demonstrably exercises primary governing control within Iran’s territory at the specified time.\n\nIndicators of de facto authority may include control over the armed forces and security services; control over executive ministries and state administrative institutions; enforcement of national laws; issuance of binding national directives; and effective control over the capital and core state infrastructure.\n\nSymbolic status, foreign recognition without domestic control, nomination without effective authority, or expired prior service will not qualify.\n\nIf no individual exercises effective governing control at the specified time, this market will resolve to “No Head of State”.\n\nThe primary resolution source will be a consensus of credible reporting assessing who exercises effective governing authority at the specified time.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "IPO confirmed vs completed",
+  "label": "different",
+  "why": "Kalshi pays when an IPO is confirmed (S-1 effective, priced or ticker assigned); Polymarket when it is completed (first sale) by Dec 31.",
+  "a": {
+   "market_id": "kalshi:KXIPO-26-VANTA",
+   "venue": "kalshi",
+   "event_title": "Which companies will officially announce an IPO this year?",
+   "title": "Who will IPO before 2027?",
+   "outcome_label": "Vanta",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Vanta confirms an IPO before Jan 1, 2027, then the market resolves to Yes.\nAn IPO is confirmed if 1) the SEC declares the company's Form S-1 effective OR 2) the IPO is priced OR 3) a securities exchange has assigned a ticker to it. As long as any of those events occur, the market will immediately resolve to Yes, even if the company does not start trading until after Jan 1, 2027.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Company\": \"Vanta\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:676783",
+   "venue": "polymarket",
+   "event_title": "IPOs before 2027?",
+   "title": "Vanta IPO before 2027?",
+   "outcome_label": "Vanta",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the listed company completes an Initial Public Offering (IPO) by December 31, 2026, 11:59 PM ET, as confirmed by official company announcements or credible news sources. The IPO refers to the first sale of stock by the listed company to the public on any recognized stock exchange.\n\nIf the listed company merges with another entity, is acquired, or ceases to exist before the market resolves, the market will also resolve to \"No\".\n\nThis market will resolve early if the listed company completes an IPO by December 31, 2026, 11:59 PM ET.\n\nThe resolution source for this market is a consensus of credible reporting.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "IPO confirmed vs completed",
+  "label": "different",
+  "why": "Confirmed vs completed, as above.",
+  "a": {
+   "market_id": "kalshi:KXIPO-26-STRIPE",
+   "venue": "kalshi",
+   "event_title": "Which companies will officially announce an IPO this year?",
+   "title": "Who will IPO before 2027?",
+   "outcome_label": "Stripe",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "If Stripe confirms an IPO before Jan 1, 2027, then the market resolves to Yes.\nAn IPO is confirmed if 1) the SEC declares the company's Form S-1 effective OR 2) the IPO is priced OR 3) a securities exchange has assigned a ticker to it. As long as any of those events occur, the market will immediately resolve to Yes, even if the company does not start trading until after Jan 1, 2027.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Company\": \"Stripe\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:676778",
+   "venue": "polymarket",
+   "event_title": "IPOs before 2027?",
+   "title": "Stripe IPO before 2027?",
+   "outcome_label": "Stripe",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the listed company completes an Initial Public Offering (IPO) by December 31, 2026, 11:59 PM ET, as confirmed by official company announcements or credible news sources. The IPO refers to the first sale of stock by the listed company to the public on any recognized stock exchange.\n\nIf the listed company merges with another entity, is acquired, or ceases to exist before the market resolves, the market will also resolve to \"No\".\n\nThis market will resolve early if the listed company completes an IPO by December 31, 2026, 11:59 PM ET.\n\nThe resolution source for this market is a consensus of credible reporting.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Award winner",
+  "label": "same",
+  "why": "Mbappe wins the 2026 Ballon d'Or; only the no-winner fallback differs (D23).",
+  "a": {
+   "market_id": "kalshi:KXBALLONDOR-26-KMBA",
+   "venue": "kalshi",
+   "event_title": "Who will win the Ballon d'Or in 2026?",
+   "title": "Who will win the Ballon d'Or in 2026?",
+   "outcome_label": "Kylian Mbappe",
+   "closes_at": "2026-12-31T04:59:00+00:00",
+   "rules": "If Kylian Mbappe wins the Ballon d'Or in 2026, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"Player\": \"Kylian Mbappe\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:608540",
+   "venue": "polymarket",
+   "event_title": "Ballon d'Or Winner 2026",
+   "title": "Will Kylian Mbappé win the 2026 Ballon d'Or?",
+   "outcome_label": "Kylian Mbappé",
+   "closes_at": "2027-01-01T04:59:00+00:00",
+   "rules": "This market will resolve according to the winner of the 2026 Ballon d’Or.\n\nIf no 2026 Ballon d’Or winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market is official information from France Football (https://www.francefootball.fr/).\nResolution source: https://www.francefootball.fr/",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Tournament winner",
+  "label": "same",
+  "why": "Palmeiras wins the 2026 Copa Libertadores; only the cancellation fallback differs (D23).",
+  "a": {
+   "market_id": "kalshi:KXCONMEBOLLIB-26-PAL",
+   "venue": "kalshi",
+   "event_title": "Copa Libertadores Champion",
+   "title": "Will Palmeiras win the Copa Libertadores?",
+   "outcome_label": "Palmeiras",
+   "closes_at": "2026-12-14T03:00:00+00:00",
+   "rules": "If Palmeiras is the 2026 Copa Libertadores champion, then the market resolves to Yes.\nKalshi is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Governing League. All trademarks, logos, and brand names are the property of their respective owners.",
+   "strike": "{\"strike_type\": \"structured\", \"custom_strike\": {\"soccer_team\": \"fba1102d-5185-4cdc-ac80-ac1513b43eca\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:1830625",
+   "venue": "polymarket",
+   "event_title": "Copa Libertadores: Winner",
+   "title": "Will Palmeiras win Copa Libertadores?",
+   "outcome_label": "Palmeiras",
+   "closes_at": "2026-12-12T03:59:00+00:00",
+   "rules": "This market will resolve to \"Yes\" if the listed club is determined as the champion of the Copa Libertadores. Otherwise, it will resolve to \"No\".\n\nIf at any point it becomes impossible for a listed participant to be named as the champion of Copa Libertadores per the rules of Copa Libertadores (e.g., participant is eliminated), the corresponding market will resolve to \"No\".\n\nIf multiple teams are declared winners, this market will resolve in favor of the team whose listed name comes first alphabetically.\n\nIf this event is cancelled, postponed after December 12, 2026, 11:59 PM ET, or a champion has not been declared within this timeframe, this market will resolve to \"Other\".\n\nThe resolution source will be official information from the Copa Libertadores; however a consensus of credible reporting may also be used.",
+   "strike": ""
+  }
+ }
+]

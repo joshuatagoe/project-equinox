@@ -1,0 +1,48 @@
+{
+  "model": "claude-haiku-5-5",
+  "prompt": "feat-10.7",
+  "fed": {
+    "cases": 3,
+    "pairs": 75,
+    "same_labelled": 15,
+    "same_found": 13,
+    "false_same": 0,
+    "missed_same": 2,
+    "readings": 30,
+    "rejected": 0,
+    "mistakes": [
+      "Fed 2026-10-28: kalshi:KXFEDDECISION-26OCT-C26 ~ polymarket:2589810 not read as the same bet",
+      "Fed 2026-12-09: kalshi:KXFEDDECISION-26DEC-C26 ~ polymarket:3215005 not read as the same bet"
+    ]
+  },
+  "labelled": {
+    "cases": 35,
+    "pairs": 35,
+    "same_labelled": 13,
+    "same_found": 8,
+    "false_same": 0,
+    "missed_same": 5,
+    "readings": 70,
+    "rejected": 5,
+    "mistakes": [
+      "Presidential nominee: kalshi:KXPRESNOMD-28-AOC ~ polymarket:559653 not read as the same bet",
+      "Above vs at least: kalshi:KXRT-HUN-50 ~ polymarket:5420123 not read as the same bet",
+      "Above vs at least: kalshi:KXRT-HUN-60 ~ polymarket:5420124 not read as the same bet",
+      "Ranking: kalshi:KXGOOGLESEARCH-MOV27-ODY ~ polymarket:3251056 not read as the same bet",
+      "Tournament winner: kalshi:KXCONMEBOLLIB-26-PAL ~ polymarket:1830625 not read as the same bet"
+    ]
+  },
+  "held_out": {
+    "cases": 18,
+    "pairs": 18,
+    "same_labelled": 4,
+    "same_found": 3,
+    "false_same": 0,
+    "missed_same": 1,
+    "readings": 36,
+    "rejected": 1,
+    "mistakes": [
+      "Presidential nominee: kalshi:KXPRESNOMR-28-JH ~ polymarket:561988 not read as the same bet"
+    ]
+  }
+}

@@ -6,7 +6,7 @@ books and no rules text. Terms are filled in only for markets of a family Equino
 summary records what one refresh read and found; a row is one market as the catalog shows it.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
 
@@ -27,12 +27,39 @@ class CatalogEntry:
     terms: ContractTerms | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class MarketText:
+    """What the term reader reads besides the title (D57): the rules, and any strike fields."""
+
+    rules: str
+    strike: str = ""  # the venue's structured strike fields as JSON, "" when it has none
+
+
+@dataclass(frozen=True, slots=True)
+class ReadableMarket:
+    """A catalog market with everything the term reader reads (D57)."""
+
+    market_id: str
+    venue: str
+    event_title: str
+    title: str
+    outcome_label: str
+    closes_at: datetime | None
+    text: MarketText
+
+    @property
+    def full_text(self) -> str:
+        """Everything the venue says about the market, which a reading's evidence must quote."""
+        return "\n".join((self.event_title, self.title, self.outcome_label, self.text.rules))
+
+
 @dataclass(frozen=True)
 class CatalogPage:
     """One page of a venue's listing, as an adapter reads it."""
 
     entries: list[CatalogEntry]
     skipped: int  # markets left out because they aren't Yes/No
+    texts: dict[str, MarketText] = field(default_factory=dict)  # by market ID
 
 
 SAME_BET, UNCLEAR, NO_MATCH = "same bet", "unclear", "no match"
@@ -88,6 +115,7 @@ class CatalogRow:
     partner_title: str | None
     score: Decimal | None  # the title score, for a pair compared by title
     reasons: tuple[str, ...]  # why the pair matches or may match
+    read_by: str | None = None  # the model that read both markets' terms, when one did (D57)
 
 
 def _age(seconds: float) -> str:

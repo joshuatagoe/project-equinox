@@ -18,9 +18,16 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
+from equinox.catalog.texts import TextStage, keep_texts
 from equinox.matcher import terms_key
 from equinox.matcher.compare import Comparison, described_title
-from equinox.models.catalog import STATUSES, CatalogEntry, CatalogRow, CatalogSummary
+from equinox.models.catalog import (
+    STATUSES,
+    CatalogEntry,
+    CatalogRow,
+    CatalogSummary,
+    MarketText,
+)
 
 PATTERN = "catalog-*.sqlite"
 
@@ -31,13 +38,18 @@ CREATE TABLE entries (
     market_id TEXT PRIMARY KEY, venue TEXT NOT NULL, event_title TEXT NOT NULL,
     title TEXT NOT NULL, outcome_label TEXT NOT NULL, described TEXT, closes_at TEXT,
     tradable INTEGER NOT NULL, yes_ask TEXT, no_ask TEXT, terms_key TEXT, status TEXT NOT NULL,
-    rank INTEGER NOT NULL, partner TEXT, score TEXT, reasons TEXT NOT NULL
+    rank INTEGER NOT NULL, partner TEXT, score TEXT, reasons TEXT NOT NULL, read_by TEXT
 );
 CREATE TABLE pairs (
     market_a TEXT NOT NULL, market_b TEXT NOT NULL, status TEXT NOT NULL, score TEXT,
-    reasons TEXT NOT NULL
+    reasons TEXT NOT NULL, read_by TEXT
+);
+CREATE TABLE readings (
+    market_id TEXT NOT NULL, call INTEGER NOT NULL, terms TEXT, problem TEXT NOT NULL,
+    evidence TEXT NOT NULL, model TEXT NOT NULL, prompt TEXT NOT NULL
 );
 CREATE TABLE summary (body TEXT NOT NULL);
+CREATE TABLE texts (market_id TEXT PRIMARY KEY, rules TEXT NOT NULL, strike TEXT NOT NULL);
 CREATE VIRTUAL TABLE words USING fts5(
     title, event_title, outcome_label, content = 'entries', content_rowid = 'rowid'
 );
@@ -50,14 +62,19 @@ CREATE INDEX pairs_order ON pairs (status, score DESC);
 """
 _ROW = """
 SELECT e.market_id, e.venue, e.event_title, e.title, e.outcome_label, e.yes_ask, e.no_ask,
-       e.terms_key, e.status, e.partner, coalesce(p.described, p.title), e.score, e.reasons
+       e.terms_key, e.status, e.partner, coalesce(p.described, p.title), e.score, e.reasons,
+       e.read_by
 FROM entries e LEFT JOIN entries p ON p.market_id = e.partner
 """
 _TOKEN = re.compile(r"\w+")
 
 
 def save(
-    cache_dir: Path, entries: Sequence[CatalogEntry], found: Comparison, summary: CatalogSummary
+    cache_dir: Path,
+    entries: Sequence[CatalogEntry],
+    found: Comparison,
+    summary: CatalogSummary,
+    texts: TextStage | None = None,
 ) -> Path:
     """Write the catalog to a new file in `cache_dir` and return its path. Raises OSError or
     sqlite3.Error, leaving the previous catalog as it was."""
@@ -67,10 +84,12 @@ def save(
     try:
         with closing(sqlite3.connect(temp)) as db:
             db.executescript(_SCHEMA)
-            db.executemany(f"INSERT INTO entries VALUES ({_marks(16)})", _entries(entries, found))
-            db.executemany(f"INSERT INTO pairs VALUES ({_marks(5)})", _pairs(entries, found))
+            db.executemany(f"INSERT INTO entries VALUES ({_marks(17)})", _entries(entries, found))
+            db.executemany(f"INSERT INTO pairs VALUES ({_marks(6)})", _pairs(entries, found))
             db.execute("INSERT INTO summary VALUES (?)", (_dump(summary),))
             db.commit()
+            if texts is not None:
+                keep_texts(db, texts.path)
             db.executescript(_INDEXES)
         os.replace(temp, final)
     finally:
@@ -94,7 +113,7 @@ class Catalog:
 
     def __init__(self, path: Path) -> None:
         self.path = path
-        with self._open() as db:
+        with self.connect() as db:
             self.summary = _load(db.execute("SELECT body FROM summary").fetchone()[0])
 
     def search(
@@ -104,7 +123,7 @@ class Catalog:
         the order the venues listed them, which keeps each event's markets together."""
         where, args = _where(words, venue, status)
         order = "ORDER BY e.rank, e.rowid LIMIT ? OFFSET ?"  # in listing order, by event
-        with self._open() as db:
+        with self.connect() as db:
             found = db.execute(
                 f"{_ROW} {where} {order}", (*args, per_page, (max(page, 1) - 1) * per_page)
             )
@@ -112,22 +131,44 @@ class Catalog:
 
     def count(self, words: str = "", venue: str = "", status: str = "") -> int:
         where, args = _where(words, venue, status)
-        with self._open() as db:
+        with self.connect() as db:
             return db.execute(f"SELECT count(*) FROM entries e {where}", args).fetchone()[0]
 
     def unclear_pairs(self, limit: int) -> list[tuple[str, str, Decimal, list[str]]]:
         """The title pairs most likely to be the same bet: (market, market, score, reasons)."""
         query = "SELECT market_a, market_b, score, reasons FROM pairs WHERE status = ?"
-        with self._open() as db:
+        with self.connect() as db:
             found = db.execute(
                 f"{query} ORDER BY score DESC, market_a LIMIT ?", (STATUSES[1], limit)
             )
             return [(a, b, Decimal(score), json.loads(reasons)) for a, b, score, reasons in found]
 
+    def texts(self) -> dict[str, MarketText]:
+        """The rules text and strike fields of every market in an unclear pair."""
+        with self.connect() as db:
+            found = db.execute("SELECT market_id, rules, strike FROM texts")
+            return {market: MarketText(rules, strike) for market, rules, strike in found}
+
+    def readings(self) -> dict[str, str]:
+        """Why each market's latest reading was rejected, by market; "" when it was accepted."""
+        with self.connect() as db:
+            found = db.execute("SELECT market_id, problem FROM readings ORDER BY rowid")
+            return dict(found.fetchall())
+
+    def pair_counts(self) -> dict[tuple[str, bool], int]:
+        """How many pairs have each status, split by whether a model read them."""
+        with self.connect() as db:
+            query = "SELECT status, read_by IS NOT NULL, count(*) FROM pairs GROUP BY 1, 2"
+            found = db.execute(query)
+            return {(status, bool(read)): n for status, read, n in found}
+
     def venues(self) -> list[str]:
         return sorted(self.summary.entries)
 
-    def _open(self) -> closing[sqlite3.Connection]:
+    def connect(self, write: bool = False) -> closing[sqlite3.Connection]:
+        """A connection to the file: read-only unless `write`, which only `catalog read` uses."""
+        if write:
+            return closing(sqlite3.connect(self.path))
         return closing(sqlite3.connect(f"{self.path.as_uri()}?mode=ro", uri=True))
 
 
@@ -152,13 +193,14 @@ def _entries(entries: Sequence[CatalogEntry], found: Comparison):
             None if partner is None else entries[partner].market_id,
             _text(pair.score) if pair else None,
             json.dumps(list(pair.reasons) if pair else []),
+            None,  # read_by: set when a model reads the pair (D57)
         )
 
 
 def _pairs(entries: Sequence[CatalogEntry], found: Comparison):
     for pair in found.pairs:
         ids = (entries[pair.a].market_id, entries[pair.b].market_id)
-        yield (*ids, pair.status, _text(pair.score), json.dumps(list(pair.reasons)))
+        yield (*ids, pair.status, _text(pair.score), json.dumps(list(pair.reasons)), None)
 
 
 def _where(words: str, venue: str, status: str) -> tuple[str, list]:
@@ -177,7 +219,9 @@ def _where(words: str, venue: str, status: str) -> tuple[str, list]:
 
 
 def _row(values: tuple) -> CatalogRow:
-    market_id, venue, event, title, label, yes, no, key, status, partner, named, score, why = values
+    market_id, venue, event, title, label, yes, no, key, status, partner, named, score, why, by = (
+        values
+    )
     return CatalogRow(
         market_id,
         venue,
@@ -192,6 +236,7 @@ def _row(values: tuple) -> CatalogRow:
         named,
         _decimal(score),
         tuple(json.loads(why)),
+        by,
     )
 
 

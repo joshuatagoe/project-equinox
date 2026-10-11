@@ -9,52 +9,47 @@ timestamp, so captured_at is clock() at the moment each one is read (D37).
 
 import json
 from collections.abc import Iterator
-from datetime import date, datetime
+from datetime import datetime
 from decimal import Decimal
 from typing import Any
 from urllib.parse import urlencode
-from zoneinfo import ZoneInfo
 
 from equinox.adapters.base import (
     BAD_DATA,
+    CatalogListing,
     Clock,
     DataSource,
     Fetcher,
     Listed,
     TrackedEvent,
     VenueAdapter,
+    catalog_page,
     describe,
     listed_ask,
     with_books,
 )
+from equinox.adapters.kalshi_terms import (
+    FAMILY_SERIES,
+    FED_DECISION,
+    fed_decision_terms,
+    rules_text,
+    strike_text,
+)
 from equinox.models import (
     CanonicalMarket,
     Collateral,
-    ContractTerms,
     FeeSchedule,
     OrderBookLevel,
     OutcomeBook,
     ResolutionSource,
 )
-from equinox.models.catalog import CatalogEntry, CatalogPage
+from equinox.models.catalog import CatalogEntry, CatalogPage, MarketText
 
 DEFAULT_BASE_URL = "https://external-api.kalshi.com/trade-api/v2"  # K1
-NEW_YORK = ZoneInfo("America/New_York")
 FEE_RATE = Decimal("0.07")  # times the series multiplier (K9)
 FEE_STEP = Decimal("0.01")  # A3
 
 CLOSED = frozenset({"closed", "determined", "finalized", "settled"})  # an open event's past markets
-FED_DECISION = "fed_decision"
-FAMILY_SERIES = {FED_DECISION: "KXFEDDECISION"}  # K13
-# The five custom_strike shapes of a KXFEDDECISION event (K8), as (comparison, bps).
-FED_STRIKES = (
-    ({"Cut": ">25"}, "lt", "-25"),
-    ({"Cut": "25"}, "eq", "-25"),
-    ({"Hike": "0"}, "eq", "0"),
-    ({"Hike": "25"}, "eq", "25"),
-    ({"Hike": ">25"}, "gt", "25"),
-)
-FED_FALLBACK = ("If the meeting is cancelled, 'Fed maintains rate' resolves Yes.",)
 
 
 class KalshiAdapter(VenueAdapter):
@@ -130,10 +125,7 @@ class KalshiAdapter(VenueAdapter):
             page = self._get(
                 f"/events?{urlencode(params | ({'cursor': cursor} if cursor else {}))}"
             )
-            listed = [_catalog_entries(event) for event in page.get("events") or []]
-            yield CatalogPage(
-                [e for entries, _ in listed for e in entries], sum(n for _, n in listed)
-            )
+            yield catalog_page([_catalog_entries(event) for event in page.get("events") or []])
             pages, cursor = pages + 1, page.get("cursor")
             if not cursor or (max_pages is not None and pages >= max_pages):
                 return
@@ -169,7 +161,7 @@ class KalshiAdapter(VenueAdapter):
             title=raw.get("title") or f"{event['title']} {raw['yes_sub_title']}",
             outcome_label=raw["yes_sub_title"],
             rules_text="\n\n".join(part for part in rules if part),
-            terms=_fed_decision_terms(raw, event) if parse_terms else None,
+            terms=fed_decision_terms(raw, event) if parse_terms else None,
             tradable=raw.get("status") == "active",
             trading_closes_at=_time(raw.get("close_time")),
             resolves_at=_time(raw.get("expected_expiration_time")),
@@ -182,10 +174,10 @@ class KalshiAdapter(VenueAdapter):
         )
 
 
-def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
-    """An event's open Yes/No markets as catalog entries, and how many were left out."""
+def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
+    """An event's open Yes/No markets as catalog entries, how many were left out, and texts."""
     fed = event.get("series_ticker") == FAMILY_SERIES[FED_DECISION]
-    entries, skipped = [], 0
+    entries, skipped, texts = [], 0, {}
     for raw in event.get("markets") or []:
         if raw.get("status") in CLOSED:
             continue
@@ -203,12 +195,13 @@ def _catalog_entries(event: dict[str, Any]) -> tuple[list[CatalogEntry], int]:
                     tradable=raw.get("status") == "active",
                     yes_ask=listed_ask(raw.get("yes_ask_dollars")),
                     no_ask=listed_ask(raw.get("no_ask_dollars")),
-                    terms=_fed_decision_terms(raw, event) if fed else None,
+                    terms=fed_decision_terms(raw, event) if fed else None,
                 )
             )
+            texts[entries[-1].market_id] = MarketText(rules_text(raw), strike_text(raw))
         except BAD_DATA:
             skipped += 1
-    return entries, skipped
+    return entries, skipped, texts
 
 
 def _event_fields(event: dict[str, Any], series: dict[str, Any]) -> dict[str, Any]:
@@ -223,23 +216,6 @@ def _event_fields(event: dict[str, Any], series: dict[str, Any]) -> dict[str, An
             coefficient=FEE_RATE * _exact(multiplier), exponent=1, rounding_step=FEE_STEP
         ),
     }
-
-
-def _fed_decision_terms(raw: dict[str, Any], event: dict[str, Any]) -> ContractTerms | None:
-    """Terms from custom_strike in one of the five known shapes; None for any other shape."""
-    for shape, comparison, threshold in FED_STRIKES:
-        if raw.get("custom_strike") == shape:
-            return ContractTerms(
-                subject="FOMC",
-                measure="fed_upper_bound_change",
-                measured_by="fomc_statement",
-                observed_on=_new_york_date(event["strike_date"]),
-                comparison=comparison,
-                threshold=Decimal(threshold),
-                unit="bps",
-                fallback_rules=FED_FALLBACK,
-            )
-    return None
 
 
 def _books(orderbook: dict[str, Any]) -> dict[str, OutcomeBook]:
@@ -279,10 +255,3 @@ def _exact(value: Any) -> Decimal:
 
 def _time(text: str | None) -> datetime | None:
     return datetime.fromisoformat(text) if text else None
-
-
-def _new_york_date(text: str) -> date:
-    instant = datetime.fromisoformat(text)
-    if instant.tzinfo is None:
-        raise ValueError(f"strike_date {text!r} has no time zone")
-    return instant.astimezone(NEW_YORK).date()

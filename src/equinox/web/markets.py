@@ -48,7 +48,7 @@ def page(cache_dir: Path, params: dict[str, str], data: str, now: datetime) -> s
         [_match(row, summary.source) for row in rows],
         total,
         PER_PAGE,
-        _counts(summary.same_bet_groups, summary.ambiguous),
+        _counts(summary.same_bet_groups, found.pair_counts()),
     )
     banner = (
         f"Catalog of every open market: {summary.describe(now)}. "
@@ -71,7 +71,7 @@ def _cells(row: CatalogRow) -> list[str]:
         words.venue(row.venue),
         _price(row.yes_ask),
         _price(row.no_ask),
-        STATUS_LABELS[row.status],
+        "Same bet, read by a model" if _model_read(row) else STATUS_LABELS[row.status],
     ]
 
 
@@ -82,6 +82,9 @@ def _match(row: CatalogRow, source: str) -> Match | None:
         return None
     venue = words.venue(row.partner.split(":", 1)[0])  # IDs read "<venue>:<native ID>"
     title = f"{row.partner_title} on {venue}"
+    if _model_read(row):
+        note = f"Confidence: Medium at most. The terms were read by {row.read_by} and checked."
+        return Match(title, note, row.reasons, None)
     if row.status == SAME_BET:
         price = pages.href("/", outcome=row.terms_key or "", data=source)
         note = "Same contract terms. Price an order to see the confidence and the rule differences."
@@ -98,12 +101,22 @@ def _match(row: CatalogRow, source: str) -> Match | None:
     return Match(title, f"Confidence: {level.level}. {level.reason}", row.reasons, None)
 
 
-def _counts(same_bet_groups: int, unclear_pairs: int) -> str:
+def _counts(same_bet_groups: int, pairs: dict[tuple[str, bool], int]) -> str:
+    """`pairs`: how many pairs have each status, split by whether a model read them."""
+    read = pairs.get((SAME_BET, True), 0)
+    unclear = sum(n for (status, _), n in pairs.items() if status == UNCLEAR)
     return (
-        f"{same_bet_groups:,} outcomes are the same bet on two venues and can be priced. "
-        f"{unclear_pairs:,} pairs of markets have similar titles but no readable terms: they are "
-        "shown as unclear and never routed. Every other market has no match found."
+        f"{same_bet_groups:,} outcomes are the same bet on two venues by their contract terms "
+        f"and can be priced. {read:,} {'outcome is' if read == 1 else 'outcomes are'} the same "
+        "bet as read by a model, checked against both venues' texts. "
+        f"{unclear:,} pairs of markets have similar titles but no terms that decide them: they "
+        "are shown as unclear and never routed. Every other market has no match found."
     )
+
+
+def _model_read(row: CatalogRow) -> bool:
+    """A same bet whose terms a model read: shown apart from one the parsers' terms decided."""
+    return row.status == SAME_BET and row.read_by is not None
 
 
 def _page_number(text: str) -> int:
