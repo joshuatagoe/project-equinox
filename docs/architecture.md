@@ -1,14 +1,14 @@
 # Project Equinox: Architecture
 
-**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 and D37–D46 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
+**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 and D37–D52 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
 
 ---
 
 ## 1. Summary
 
-Equinox is a command-line prototype. It does five things:
+Equinox is a prototype with a command line and a local web UI. It looks at everything open on two venues, matches only what it can prove is the same bet, and explains what it can't. It does five things:
 
-1. **Reads** prediction markets from two venues, Kalshi and Polymarket, through their live public APIs or a saved snapshot.
+1. **Reads** prediction markets from two venues, Kalshi and Polymarket, through their live public APIs or a saved snapshot: every open market into a **catalog**, and in full the events of each **family** whose terms it can read, found automatically (D47–D49).
 2. **Normalizes** each venue's response into one venue-neutral shape, the **canonical market**.
 3. **Groups** markets that pay out under exactly the same conditions. It decides this by comparing their **contract terms**, not by how similar their titles are.
 4. **Simulates** a buy order on every market in the group. For each one it walks the order book and adds that venue's fees, then picks the cheapest venue that can fill the whole order.
@@ -50,12 +50,15 @@ Meridian, the user's binary-stock-outcome project, is **not integrated**. Sectio
 
 ## 2. Scale and availability
 
-One person runs one command on one machine. Nothing runs in the background and nothing is stored. Scale is therefore just the number of requests per run. A live run reads the tracked Fed event in **18 requests**:
+One person runs one command or one local web page on one machine. Markets load in three tiers, because reading everything in full is not practical (D49):
 
-- Kalshi: 1 series, 1 event and 5 order books.
-- Polymarket: 1 event and 10 order books (two tokens per market, 5 markets).
+| Tier | What | Requests | When |
+|---|---|---|---|
+| Catalog | Every open market on both venues as a lean entry: title, dates, best YES and NO ask, terms where a parser exists. Kalshi from `/events?status=open&with_nested_markets=true` (no combo markets, K12); Polymarket from `/events/keyset?closed=false` paged with `after_cursor` (P11). | About 290 (71 Kalshi, 220 Polymarket); about 1.9 GB and 3–4 minutes (measured 2026-10-10) | `python -m equinox catalog refresh`, cached in `.cache/equinox/` (D48) |
+| Families | The discovered events of each family Equinox can read (Fed decisions: K13, P12), loaded from their listings without books | A few: one discovery request and one listing per venue | Every live command and page load |
+| Books | Order books for the markets being priced, and for the cross-venue groups on the board | 1 per Kalshi market, 2 per Polymarket market | On demand |
 
-The requests are made one at a time, each with a 10-second timeout. We did not research rate limits because 18 requests per run is too few to matter. The research snapshot also captured Polymarket's AAPL event, 29 requests in all, for the §9 test data. A future need for more events goes to batch endpoints: Kalshi `GET /markets/orderbooks`, and Polymarket's batch books endpoint.
+The requests are made one at a time, 150 ms apart, each with a 10-second timeout. The measurement crawls made about 700 requests at that pace without a rate-limit error. A catalog refresh streams page by page, so it never holds more than one page of raw JSON. The research snapshot also captured Polymarket's AAPL event for the §9 test data.
 
 **Availability.** If a venue fails, its markets come from the snapshot and the trace says so (D17). We run no load test, because there is no concurrency to test.
 
@@ -67,8 +70,9 @@ The requests are made one at a time, each with a 10-second timeout. We did not r
 flowchart LR
     subgraph IN["Interfaces"]
         CLI["cli.py<br/>markets, match, simulate"]
-        UI["server.py and web/<br/>order, board, match pages"]
+        UI["server.py and web/<br/>order, board, match, all-markets pages"]
     end
+    SRC["sources.py and catalog.py<br/>data sources, discovery, books on demand,<br/>catalog refresh and cache"]
     subgraph AD["Adapters: the only venue-aware code"]
         K["kalshi.py"]
         P["polymarket.py"]
@@ -81,14 +85,14 @@ flowchart LR
     subgraph MO["Models: schemas and validation only"]
         CM["canonical.py, equivalence.py, routing.py, trace.py"]
     end
-    CLI --> K & P
-    UI -->|same functions as the CLI| MA & RO
+    CLI & UI --> SRC
+    SRC -->|discover, list, fetch books| K & P
     K & P --> F
-    K & P -->|CanonicalMarket list| CLI
-    CLI -->|markets| MA
-    MA -->|EquivalenceCluster| CLI
-    CLI -->|order and cluster| RO
-    RO -->|EquinoxTrace| CLI
+    K & P -->|canonical markets and catalog entries| SRC
+    SRC -->|markets| MA
+    MA -->|clusters and candidates| SRC
+    SRC -->|order and booked cluster| RO
+    RO -->|EquinoxTrace| SRC
     AD -.-> MO
     EN -.-> MO
 ```
@@ -96,17 +100,21 @@ flowchart LR
 | Module | Owns | Rule it keeps |
 |---|---|---|
 | `models/` | Every shape that crosses a module boundary, plus its validation | No I/O and no venue names. Imports only the standard library and `pydantic`. |
-| `adapters/` | Venue URLs, field names, units, sort orders, and the term parsers for each event family | Returns canonical markets that are fully normalized: prices in dollars between 0 and 1, both outcomes' books sorted best-first, terms filled in where the family is supported. Nothing downstream ever sees a venue field. |
-| `matcher/` | Equivalence rules and clusters | Pure. Imports only `models/`. Contains no venue names. |
+| `adapters/` | Venue URLs, field names, units, sort orders, paging, and the discovery rules and term parsers for each family | Returns canonical markets and catalog entries that are fully normalized: prices in dollars between 0 and 1, books (when fetched) sorted best-first, terms filled in where the family is supported. Nothing downstream ever sees a venue field. |
+| `matcher/` | Equivalence rules, clusters, confidence, and the title index for the catalog (`index.py`, D50) | Pure. Imports only `models/`. Contains no venue names. |
 | `router/` | Depth walking, fees, eligibility, decision, rationale and trace | Pure. Imports only `models/`. Contains no venue names. The time comes in as an argument. |
-| `cli.py` | Arguments, configuration, loading adapters, output, exit codes | The only place that wires modules together. |
-| `server.py`, `web/` | The web UI's three pages (§8.3) and `/health` | Renders what the matcher and router decide, through the same functions as the CLI. Adds no matching or routing logic and names no venue. No JSON API (D21, D45). |
+| `sources.py` | Settings, data sources (snapshots and live), discovery with its pinned fallback, loading families, fetching books on demand | Wires adapters, matcher and router together for both interfaces; neither interface imports the other (D52). |
+| `catalog.py` | `catalog refresh`: pages every open market through the adapters, finds title candidates with the index, writes the cache atomically; loads the cache | A failed refresh keeps the previous catalog (D48). |
+| `cli.py` | Arguments, output and exit codes for `markets`, `match`, `simulate` and `catalog` | Calls `sources.py` and `catalog.py`; no loading logic of its own. |
+| `server.py`, `web/` | The web UI's pages (§8.3), one module per page, and `/health` | Renders what the matcher and router decide, through `sources.py` and `catalog.py`. Adds no matching or routing logic and names no venue. No JSON API (D21, D45). |
+
+**Quality gate (D52).** Ruff's C901 rule caps function complexity at 10, and `tests/test_quality.py` caps modules at 300 lines and functions at 40, checks that the interfaces don't import each other, and checks the README's map of the code.
 
 **Guard.** `tests/test_layering.py` parses the source of `matcher/` and `router/`. It fails if either imports anything outside `equinox.models`, the standard library or `pydantic`, or if the words "kalshi", "polymarket" or "meridian" appear in their code. This is how the brief's rule "routing logic should not contain venue-specific assumptions" is checked on every run.
 
 **Stubs and seams.**
 - **Fetching.** Adapters never call HTTP themselves. They get a `Fetcher`, and there are two: a live one (`urllib`) and a fixture one that looks the URL up in a snapshot's `index.json`. An adapter can't tell which one it has.
-- **A new venue** plugs in as one adapter file, plus a fixture and an entry in `tracked_events.json`. Section 9 checks this against Meridian.
+- **A new venue** plugs in as one adapter (discovery, listing, books), a fixture, and one line in the adapter registry. Section 9 checks this against Meridian.
 - **Time** is passed in (`now` for the router, a `clock` for adapters) so that the staleness check and trace timestamps are deterministic in tests.
 
 ---
@@ -257,12 +265,21 @@ class VenueAdapter(ABC):
     def __init__(self, fetch: Fetcher, tracked: list[TrackedEvent],
                  data_source: Literal["live", "fixture"], clock: Clock): ...
     @abstractmethod
-    def fetch_markets(self) -> AdapterResult: ...
+    def discover(self, family: str) -> list[TrackedEvent]: ...    # D47; raises FetchError
+    @abstractmethod
+    def list_markets(self) -> AdapterResult: ...                   # the tracked events, no books (D49)
+    @abstractmethod
+    def fetch_books(self, market: CanonicalMarket) -> CanonicalMarket: ...   # the same market, with books
+    @abstractmethod
+    def list_open(self) -> Iterator[list[CatalogEntry]]: ...       # every open market, page by page
+    def fetch_markets(self) -> AdapterResult: ...                  # list_markets, then fetch_books for each
 ```
+
+`CanonicalMarket.books` is optional (D49): a market from a listing carries `best_asks` (the best price to buy YES and NO, from the listing fields in K12 and P11) and no books until `fetch_books` adds them. The router refuses a market without books. `CatalogEntry` (`models/catalog.py`) is the catalog's lean record: market ID, venue, event, title, outcome label, close and resolve times, tradable, best asks, and terms where a parser exists.
 
 **Read time (D37).** An adapter whose venue puts no timestamp on a response (Kalshi) sets `captured_at` from `clock()`. Live runs pass `datetime.now(UTC)`. Fixture runs pass the snapshot's own capture time, which `FixtureFetcher.captured_at` reads from the snapshot's `index.json`, so fixture data never looks fresh. Tests pass a fixed clock.
 
-`TrackedEvent` holds a venue's event ID (a Kalshi event ticker or a Polymarket slug) and its family. The only family with a term parser is `fed_decision`. Adding a family means adding one parser to each adapter that lists it. The tracked events are configured, not discovered (D28; see §11).
+`TrackedEvent` holds a venue's event ID (a Kalshi event ticker or a Polymarket slug) and its family. The only family with a term parser is `fed_decision`. Adding a family means adding a discovery rule and a parser to each adapter that lists it. Events are discovered (D47): Kalshi by series (K13), Polymarket by tag, open, neg-risk and title (P12). `tracked_events.json` is the pinned fallback when discovery can't run: a snapshot captured before discovery, or a failed live discovery request, in which case the events and books still come from the live API.
 
 **Failures.** One market that fails validation is skipped, and a warning names it. A request that fails makes the CLI retry that whole venue with the fixture fetcher, and say so (D17). If the fixture is missing too, that venue contributes no markets and a warning.
 
@@ -358,7 +375,13 @@ Only markets without terms reach it, and the result can never be EQUIVALENT:
   - a known entity differs: US state names, month names, or a "cut" vs "hike" style pair from a small list.
 - Every other candidate → AMBIGUOUS, with its score.
 
-This part can be cut from the bottom of the build order (§12).
+**At catalog scale (D50).** The catalog compares 133,002 Kalshi markets with 207,646 Polymarket Yes/No markets (K12, P11), which is about 28 billion pairs, so candidates come from `matcher/index.py` first:
+- Each title (with the outcome label) is reduced to its informative words: stop words removed, and words common enough across the catalog to say little are dropped.
+- An inverted index maps each informative word to the markets that use it.
+- A cross-venue pair becomes a candidate only if its close dates are within 3 days of each other and it shares at least two informative words.
+- Each candidate then goes through the rules above. Markets of a family with a parser are matched by terms instead, as in §6.1.
+
+The catalog records, per refresh, how many pairs were candidates, how many each veto turned DISTINCT, and how many stayed AMBIGUOUS. `docs/EQUIVALENCE.md` reports those counts from a real refresh.
 
 ### 6.4 Labelled pairs (acceptance tests for feat-03)
 
@@ -533,27 +556,31 @@ The trace uses typed sections instead of the first version's generic "spans" (D3
 
 | Command | Prints |
 |---|---|
-| `markets [--source live\|fixtures] [--json]` | One line per canonical market: market_id, terms in words, tradable, best asks |
-| `match [--source …] [--json]` | Clusters with their risk flags, then AMBIGUOUS pairs with their reasons |
+| `markets [--source live\|fixtures] [--snapshot NAME] [--json]` | One line per canonical market of every discovered family: market_id, terms in words, tradable, best asks |
+| `match [--source …] [--snapshot NAME] [--catalog] [--json]` | Clusters with their risk flags and confidence, then AMBIGUOUS pairs with their reasons. `--catalog` adds the title candidates from the cached catalog. |
+| `catalog refresh` / `catalog status` | `refresh` pages every open market on both venues (§2), finds candidates and writes the cache, printing progress; `status` prints the cache's age and counts |
 | `simulate --market ID --outcome YES\|NO --quantity N [--budget B] [--source …] [--json]` | A report: status, the quote table, the decision, the rationale and warnings. `--json` prints the whole trace instead. The exit code is from §7.2. |
 
-The default source is `live`. The demo commands in the README use `--source fixtures` so that their numbers match this document. `match` also prints each cluster's confidence (D46).
+The default source is `live`. `--snapshot` picks a snapshot folder under `src/equinox/fixtures/`; the default is `snapshot-2026-10-10`, the frozen baseline (D51). The demo commands in the README use `--source fixtures` so that their numbers match this document. `match` also prints each cluster's confidence (D46). `simulate` fetches books only for the requested market's group (D49).
 
 ### 8.3 Web UI (`python -m equinox.server`, feat-07)
 
-Three server-rendered pages for the two people in `user/users.md` (D45). AutoTrader, a program, uses `--json`.
+Server-rendered pages for the two people in `user/users.md` (D45). AutoTrader, a program, uses `--json`.
 
 | Page | For | Shows |
 |---|---|---|
 | `/`, Price an order | Jordan | A form (outcome in plain words, buy YES or NO, contracts, optional budget, snapshot or live). The recommendation is the headline: which venue, the total including fees, the saving over the runner-up. Then the router's rationale, each venue's fills, fee and total or why it can't take the order, the match verdict and confidence, risk flags, data warnings and assumptions. |
 | `/board`, Market board | Jordan | Per event, one row per outcome: each venue's price to buy YES and NO, the verdict and confidence, and the best venue for 100 YES and for 100 NO. Markets without terms are listed apart. |
 | `/match`, Why these match | Morgan | One column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules), differing rows marked; the verdict with confidence and flags; every AMBIGUOUS pair set aside, with reasons. |
+| `/markets`, All markets | Jordan and Morgan | Search the cached catalog by words, filtered by venue and by status (same bet, unclear, only on one venue). Each result shows its best YES and NO ask, its match status and confidence, and, for an unclear pair, the reasons and title score. It shows the catalog's age; with no catalog it says how to build one. |
 
 Rules the pages keep:
 - Every order goes through `simulate`, and every match through the matcher. A test checks that the page and `cli.main --json` show the same totals.
 - Plain-language names ("No change", "Cut 50 bps or more", "Pays YES if the Fed leaves its target rate unchanged") are written from the contract terms, keyed by measure, never by venue.
 - Every string that came from a venue is HTML-escaped.
-- The snapshot is the default and loads once. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
+- The data selector lists every snapshot folder and live data (D51). `snapshot-2026-10-10` is the default; newer snapshots and live data show every discovered meeting, one board table per meeting. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
+- Books are fetched on demand: for the outcome being priced, and for the cross-venue groups on the board (D49).
+- Basis points are explained in words wherever they appear: "Cut 25 bps (0.25 percentage points)", with a one-line note that 1 bp is 0.01 percentage point.
 - The server listens on 127.0.0.1 unless `--host` says otherwise.
 
 ---
@@ -636,7 +663,9 @@ The check counts only if it runs, so it is part of the test suite. No Meridian a
 | `POLYMARKET_GAMMA_URL`, `POLYMARKET_CLOB_URL` | `https://gamma-api.polymarket.com`, `https://clob.polymarket.com` | |
 | `EQUINOX_STALE_AFTER_SECONDS` | 300 | §7.1 |
 | `EQUINOX_HTTP_TIMEOUT_SECONDS` | 10 | |
-| Tracked events | `src/equinox/tracked_events.json` | Per venue: event IDs and their family (D28). The defaults are the snapshot's events. |
+| `--snapshot` / `EQUINOX_SNAPSHOT` | `snapshot-2026-10-10` | A folder under `src/equinox/fixtures/` (D51) |
+| `EQUINOX_CACHE_DIR` | `.cache/equinox` | Where `catalog refresh` writes the catalog (D48); gitignored |
+| Pinned events | `src/equinox/tracked_events.json` | Used only when discovery can't run (D47): a snapshot captured before discovery, or a failed live discovery request |
 
 ---
 
@@ -645,15 +674,18 @@ The check counts only if it runs, so it is part of the test suite. No Meridian a
 ```
 src/equinox/
   __main__.py            # python -m equinox -> cli.main
-  cli.py
-  server.py              # the web UI's pages and /health (§8.3)
-  web/      app.py  pages.py  words.py
+  cli.py                 # arguments and output only
+  sources.py             # settings, data sources, discovery, books on demand (D49, D51)
+  catalog.py             # catalog refresh and cache (D48)
+  server.py              # the web UI's routes and /health (§8.3)
+  web/      app.py  order.py  board.py  match.py  markets.py  pages.py  words.py
   tracked_events.json
   fixtures/
-    snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json (moved from docs/research/samples)
-  models/   canonical.py  equivalence.py  routing.py  trace.py
+    snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json; the frozen baseline
+    snapshot-2026-10-11/ # adds discovery responses, every discovered Fed meeting, a small catalog sample
+  models/   canonical.py  catalog.py  equivalence.py  routing.py  trace.py
   adapters/ base.py  fetch.py  kalshi.py  polymarket.py
-  matcher/  terms.py  text.py  clusters.py
+  matcher/  terms.py  text.py  clusters.py  confidence.py  index.py
   router/   depth.py  engine.py  rationale.py
 tests/
   golden/canonical_markets.json   # includes the §9 fit-check markets
@@ -661,7 +693,8 @@ tests/
   test_models.py  test_layering.py
   test_kalshi.py  test_polymarket.py
   test_matcher.py  test_router.py  test_cli.py
-  test_confidence.py  test_web.py  test_docs.py
+  test_confidence.py  test_web.py  test_docs.py  test_quality.py
+  test_discovery.py  test_catalog.py  test_index.py  test_web_catalog.py
   test_equinox.py        # existing status-server tests
 ```
 
@@ -677,17 +710,22 @@ tests/
 | 3 | feat-05 CLI | `cli.py`, `__main__.py`, `test_cli.py` | Every row of §7.4 |
 | 4 | feat-06 written deliverables | `README.md`, `docs/EQUIVALENCE.md`, `docs/ROUTING.md`, a final pass on `docs/AI_USAGE.md` | Every README command runs as written; the numbers match a fresh run |
 | 5 | feat-07 web UI | `server.py`, `web/`, `matcher/confidence.py`, `test_web.py`, `test_confidence.py` | The page and the CLI agree on every demo order; browser check recorded |
+| 6 | chore-01 modularity | `sources.py`, `cli.py`, `web/`, `router/engine.py`, `pyproject.toml`, `test_quality.py`, the README's "Reading the code" | Every existing test passes unchanged; the quality checks pass (D52) |
+| 7 | feat-08 discovery and plain bps | `adapters/`, `models/canonical.py`, `sources.py`, `snapshot-2026-10-11/`, `capture_snapshot.py`, `web/`, `test_discovery.py` | Every discovered Fed meeting is matched and priceable; frozen tests unchanged |
+| 8 | feat-09 catalog | `models/catalog.py`, `adapters/`, `matcher/index.py`, `catalog.py`, `cli.py`, `web/markets.py`, `test_catalog.py`, `test_index.py`, `test_web_catalog.py` | A live refresh is recorded; the All markets page searches it |
 
 **If time runs short, cut from the bottom:**
-1. The text fallback (§6.3): pairs without terms are simply unmatched.
-2. Live mode (fixtures only). The brief asks for API integration, so this is the last cut.
+1. feat-09, the catalog: Equinox then reads only the families it can discover, and `EQUIVALENCE.md` describes the catalog as the next step.
+2. The text fallback (§6.3): pairs without terms are simply unmatched.
+3. Live mode (fixtures only). The brief asks for API integration, so this is the last cut.
 
 ---
 
 ## 13. Known limitations
 
-- **Tracked events are configured, not discovered (D28).** After 2026-10-28, live runs need the next Fed meeting's event IDs in `tracked_events.json`. Fixture runs are unaffected.
-- **One event family has a term parser:** Fed rate decisions. Every other market is matched by text and is never routed. §9 shows that a second family, stock close-above, fits the same terms shape.
+- **One event family has a term parser:** Fed rate decisions, found automatically on both venues (D47). Every other market in the catalog is compared by title only, so it is at best "unclear" and never routed. §9 shows that a second family, stock close-above, fits the same terms shape.
+- **The catalog is as fresh as its last refresh** (D48), and title candidates are limited by the index's blocking rules (D50): a true pair worded with no shared informative words, or dated days apart, is missed.
+- **Discovery rules are per venue** (D47). A venue that renames its series or tag needs a code change; until then, live runs fall back to the pinned events.
 - **Fees are list fees.** Polymarket's taker rebates (up to 50%) and builder fees are ignored (A5).
 - **Kalshi fees are rounded to the cent (A3).** Polymarket's rounding mode and per-fill granularity are unconfirmed (P8). In both cases the effect is under 1¢ per order.
 - **Books are frozen at capture (A2).** There is no latency, no queue position and no market impact.
