@@ -28,7 +28,7 @@ from equinox.adapters.base import (
 from equinox.adapters.fetch import DEFAULT_SNAPSHOT, FixtureFetcher, HttpFetcher
 from equinox.adapters.kalshi import DEFAULT_BASE_URL, KalshiAdapter
 from equinox.adapters.polymarket import CLOB_URL, GAMMA_URL, PolymarketAdapter
-from equinox.matcher import build_clusters, cluster_for, text_matches
+from equinox.matcher import build_clusters, cluster_confidence, cluster_for, text_matches
 from equinox.models import (
     EXIT_CODES,
     CanonicalMarket,
@@ -195,6 +195,8 @@ def _match(loaded: Loaded, as_json: bool) -> int:
         return 0
     for cluster in clusters:
         print(f"{cluster.cluster_id}: {', '.join(m.market_id for m in cluster.markets)}")
+        level = cluster_confidence(cluster)
+        print(f"  Confidence: {level.level or 'none'}. {level.reason}")
         for flag in cluster.risk_flags:
             print(f"  Risk: {flag}")
     if ambiguous:

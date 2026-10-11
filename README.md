@@ -40,7 +40,20 @@ Each command takes `--source live` (the default) or `--source fixtures`, and `--
 
 `--source fixtures` reads a snapshot of both venues saved on 2026-10-10, so the numbers below never change. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded all ten markets and routed the first demo order the same way. The tracked events are the Fed's October 27–28, 2026 meeting (`src/equinox/tracked_events.json`, D28). After that meeting resolves, live runs need the next meeting's event IDs; fixture runs are unaffected. If a venue fails during a live run, its markets come from the snapshot and the output says so (D17).
 
-`python -m equinox.server` still serves a small status page with a `/health` route (`make run` on macOS and Linux).
+### The web UI
+
+```powershell
+$env:PYTHONPATH = "src"
+.venv\Scripts\python -m equinox.server
+```
+
+Then open http://127.0.0.1:8741 (on macOS and Linux, `make run`). Three pages, built from the user stories in [user/users.md](user/users.md):
+
+- **Price an order.** Pick an outcome, buy YES or NO, the number of contracts and an optional budget. The answer comes first: which venue, what it costs including fees, how much it saves. Below it: why, what each venue would cost or why it can't take the order, and whether the venues are really offering the same bet.
+- **Market board.** Every outcome with both venues' prices side by side, how sure Equinox is that they are the same bet, and the best venue for 100 YES and for 100 NO.
+- **Why these match.** Each venue's rules side by side, with the differences marked, the verdict, its confidence level and every pair that was set aside as unclear.
+
+The pages use the snapshot unless you switch to live prices. They call the same code as the command line, so the two always agree, and a test checks it. `/health` returns the server's status as JSON. Architecture §8.3 has the details (D45).
 
 ## Demo
 
@@ -71,6 +84,7 @@ The rows with 100 NO and 5,000 NO pick different venues for the same market. Kal
 flowchart LR
     subgraph IN["Interfaces"]
         CLI["cli.py<br/>markets, match, simulate"]
+        UI["server.py and web/<br/>order, board, match pages"]
     end
     subgraph AD["Adapters: the only venue-aware code"]
         K["kalshi.py"]
@@ -85,6 +99,7 @@ flowchart LR
         CM["canonical.py, equivalence.py, routing.py, trace.py"]
     end
     CLI --> K & P
+    UI -->|same functions as the CLI| MA & RO
     K & P --> F
     K & P -->|CanonicalMarket list| CLI
     CLI -->|markets| MA
@@ -101,7 +116,8 @@ flowchart LR
 | `adapters/` | Venue URLs, field names, units, sort orders, and the parsers that turn a venue's wording into contract terms | Everything leaves fully normalized: prices in dollars, both outcomes' books sorted best-first, terms filled in where the event family has a parser. |
 | `matcher/` | Equivalence rules and clusters | Pure. Imports only `models/`. Names no venue. |
 | `router/` | The depth walk, fees, eligibility, the decision, the rationale and the trace | Pure. Imports only `models/`. Names no venue. Time comes in as an argument. |
-| `cli.py` | Arguments, settings, loading adapters, output, exit codes | The only place that wires modules together. |
+| `cli.py` | Arguments, settings, loading adapters, output, exit codes | Wires the modules together for the command line. |
+| `server.py`, `web/` | The web UI's three pages and `/health` | Renders what the matcher and router decide, through the CLI's own functions. No matching or routing logic of its own. |
 
 The brief asks that routing logic contain no venue-specific assumptions. `tests/test_layering.py` checks it on every run: it fails if `matcher/` or `router/` imports anything but the models, the standard library and pydantic, or if the word "kalshi", "polymarket" or "meridian" appears in their code. Venue names reach the output only through each market's own `venue` field.
 

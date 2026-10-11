@@ -1,6 +1,6 @@
 # Project Equinox: Architecture
 
-**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 and D37 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
+**Revised 2026-10-10.** This replaces the first version written in the Antigravity session. The decisions behind it are D1–D30 and D37–D46 in [DECISIONS.md](DECISIONS.md). The venue facts it relies on, each with a source and a label, are in [research/venue_facts.md](research/venue_facts.md). Each feature PRD in `docs/features/` names the sections it implements. When a PRD and this document disagree, this document wins, and the disagreement is a bug in the PRD.
 
 ---
 
@@ -67,6 +67,7 @@ The requests are made one at a time, each with a 10-second timeout. We did not r
 flowchart LR
     subgraph IN["Interfaces"]
         CLI["cli.py<br/>markets, match, simulate"]
+        UI["server.py and web/<br/>order, board, match pages"]
     end
     subgraph AD["Adapters: the only venue-aware code"]
         K["kalshi.py"]
@@ -81,6 +82,7 @@ flowchart LR
         CM["canonical.py, equivalence.py, routing.py, trace.py"]
     end
     CLI --> K & P
+    UI -->|same functions as the CLI| MA & RO
     K & P --> F
     K & P -->|CanonicalMarket list| CLI
     CLI -->|markets| MA
@@ -98,7 +100,7 @@ flowchart LR
 | `matcher/` | Equivalence rules and clusters | Pure. Imports only `models/`. Contains no venue names. |
 | `router/` | Depth walking, fees, eligibility, decision, rationale and trace | Pure. Imports only `models/`. Contains no venue names. The time comes in as an argument. |
 | `cli.py` | Arguments, configuration, loading adapters, output, exit codes | The only place that wires modules together. |
-| `server.py` | The existing status page and `/health` | Unchanged (D21). |
+| `server.py`, `web/` | The web UI's three pages (§8.3) and `/health` | Renders what the matcher and router decide, through the same functions as the CLI. Adds no matching or routing logic and names no venue. No JSON API (D21, D45). |
 
 **Guard.** `tests/test_layering.py` parses the source of `matcher/` and `router/`. It fails if either imports anything outside `equinox.models`, the standard library or `pydantic`, or if the words "kalshi", "polymarket" or "meridian" appear in their code. This is how the brief's rule "routing logic should not contain venue-specific assumptions" is checked on every run.
 
@@ -535,7 +537,24 @@ The trace uses typed sections instead of the first version's generic "spans" (D3
 | `match [--source …] [--json]` | Clusters with their risk flags, then AMBIGUOUS pairs with their reasons |
 | `simulate --market ID --outcome YES\|NO --quantity N [--budget B] [--source …] [--json]` | A report: status, the quote table, the decision, the rationale and warnings. `--json` prints the whole trace instead. The exit code is from §7.2. |
 
-The default source is `live`. The demo commands in the README use `--source fixtures` so that their numbers match this document. `python -m equinox.server` keeps serving the status page.
+The default source is `live`. The demo commands in the README use `--source fixtures` so that their numbers match this document. `match` also prints each cluster's confidence (D46).
+
+### 8.3 Web UI (`python -m equinox.server`, feat-07)
+
+Three server-rendered pages for the two people in `user/users.md` (D45). AutoTrader, a program, uses `--json`.
+
+| Page | For | Shows |
+|---|---|---|
+| `/`, Price an order | Jordan | A form (outcome in plain words, buy YES or NO, contracts, optional budget, snapshot or live). The recommendation is the headline: which venue, the total including fees, the saving over the runner-up. Then the router's rationale, each venue's fills, fee and total or why it can't take the order, the match verdict and confidence, risk flags, data warnings and assumptions. |
+| `/board`, Market board | Jordan | Per event, one row per outcome: each venue's price to buy YES and NO, the verdict and confidence, and the best venue for 100 YES and for 100 NO. Markets without terms are listed apart. |
+| `/match`, Why these match | Morgan | One column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules), differing rows marked; the verdict with confidence and flags; every AMBIGUOUS pair set aside, with reasons. |
+
+Rules the pages keep:
+- Every order goes through `simulate`, and every match through the matcher. A test checks that the page and `cli.main --json` show the same totals.
+- Plain-language names ("No change", "Cut 50 bps or more", "Pays YES if the Fed leaves its target rate unchanged") are written from the contract terms, keyed by measure, never by venue.
+- Every string that came from a venue is HTML-escaped.
+- The snapshot is the default and loads once. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
+- The server listens on 127.0.0.1 unless `--host` says otherwise.
 
 ---
 
@@ -604,7 +623,7 @@ The check counts only if it runs, so it is part of the test suite. No Meridian a
 
 **Golden canonical markets.** `tests/golden/canonical_markets.json` holds hand-written canonical markets: the Fed pairs (E1–E6), the §9 fit-check markets (E7–E10), and the router cases. The books are trimmed to the top levels from the snapshot. The matcher and router lanes test against this file, so they don't wait for the adapters (D19).
 
-**Gate.** `make gate` = `ruff check`, `ruff format --check`, `pytest`. It must pass on Windows (the Makefile currently uses `.venv/bin`, which workflow prep fixes) and in both CIs. No test touches the network.
+**Gate.** `scripts/gate.py` runs `ruff check`, `ruff format --check` and `pytest`; `make gate` calls it. It must pass on Windows and in GitHub Actions, the CI of record (D31, D40). No test touches the network beyond the local web server the UI tests start.
 
 ---
 
@@ -627,7 +646,8 @@ The check counts only if it runs, so it is part of the test suite. No Meridian a
 src/equinox/
   __main__.py            # python -m equinox -> cli.main
   cli.py
-  server.py              # unchanged
+  server.py              # the web UI's pages and /health (§8.3)
+  web/      app.py  pages.py  words.py
   tracked_events.json
   fixtures/
     snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json (moved from docs/research/samples)
@@ -641,6 +661,7 @@ tests/
   test_models.py  test_layering.py
   test_kalshi.py  test_polymarket.py
   test_matcher.py  test_router.py  test_cli.py
+  test_confidence.py  test_web.py  test_docs.py
   test_equinox.py        # existing status-server tests
 ```
 
@@ -655,6 +676,7 @@ tests/
 | 2 | feat-04 router | `router/`, `test_router.py` | Every reason, status and rationale case passes, including §9's |
 | 3 | feat-05 CLI | `cli.py`, `__main__.py`, `test_cli.py` | Every row of §7.4 |
 | 4 | feat-06 written deliverables | `README.md`, `docs/EQUIVALENCE.md`, `docs/ROUTING.md`, a final pass on `docs/AI_USAGE.md` | Every README command runs as written; the numbers match a fresh run |
+| 5 | feat-07 web UI | `server.py`, `web/`, `matcher/confidence.py`, `test_web.py`, `test_confidence.py` | The page and the CLI agree on every demo order; browser check recorded |
 
 **If time runs short, cut from the bottom:**
 1. The text fallback (§6.3): pairs without terms are simply unmatched.

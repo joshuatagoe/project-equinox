@@ -70,6 +70,19 @@ A **cluster** is every market with the same normalized terms. Its ID is those te
 
 On the snapshot, `python -m equinox match --source fixtures` finds five clusters, one per Fed outcome, each pairing one Kalshi market with one Polymarket market. All five carry the edge-case flag; the two "more than 25 bps" pairs also carry the grid flag.
 
+## Confidence
+
+Every match result also carries a confidence level and its reason (D46). The level is read from the verdict and its flags; it never changes a verdict, and routing still takes EQUIVALENT pairs only.
+
+| Level | When | Example |
+|---|---|---|
+| High | EQUIVALENT, and only the venues' rare-event rules differ, or nothing does | Kalshi "Fed maintains rate" and Polymarket "No change" |
+| Medium | EQUIVALENT, but the payout can still differ in one stated case | Kalshi "Cut >25bps" and Polymarket "50+ bps decrease", which agree only for moves in 25 bps steps |
+| Low | AMBIGUOUS, so never routed. A pair compared by title alone also shows its title score | The E13 titles, score 0.56 |
+| none | DISTINCT | "No change" and "25 bps increase" |
+
+`python -m equinox match` prints each cluster's level, and the web UI shows it on every page (architecture §8.3).
+
 ## Why not title similarity
 
 The first design matched markets by how similar their titles were, with a numeric veto. Running that code on realistic titles before building on it showed three failures (AI_USAGE items 2–4):

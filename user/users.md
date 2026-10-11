@@ -27,6 +27,7 @@ Instead of looking at software developers or evaluators, we look at the people a
 * **Their Problem:** They want to buy 100 YES contracts on an event, but don't want to manually calculate exchange fees, convert pennies to USDC, or check whether Kalshi or Polymarket is cheaper.
 * **What they need from Equinox:** 
   * "Tell me which venue gives me the best net price for my order, and explain why."
+  * In the web UI: **Price an order** and the **Market board** (architecture §8.3).
 
 ### User 2: The Automated Client / Trading Algorithm ("AutoTrader")
 * **Who they are:** A programmatic client or broker API that needs to execute orders automatically across multiple platforms.
@@ -40,7 +41,8 @@ Instead of looking at software developers or evaluators, we look at the people a
 * **Their Problem:** Two markets might sound similar in their titles, but resolve on different rules (e.g. one follows an official government report, while the other follows a media consensus). If they are treated as identical, a trader could lose everything.
 * **What they need from Equinox:**
   * A clear, explainable audit trail showing *why* the system declared two markets equivalent.
-  * Explicit confidence scores and risk warnings for ambiguous markets.
+  * An explicit confidence level with its reason for every match, risk warnings, and the pairs set aside as ambiguous, with the title score where only titles could be compared (D46). Matches are decided by rules, not by a score (D15).
+  * In the web UI: the **Why these match** page (architecture §8.3).
 
 ---
 

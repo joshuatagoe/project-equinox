@@ -1,28 +1,52 @@
-"""Local status server for Project Equinox."""
+"""The local web server: the UI's pages (feat-07) and the /health check."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import threading
+import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
 
 from equinox import health
+from equinox.cli import Settings
+from equinox.web import App
 
-PAGE = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
+_default: App | None = None
+_default_lock = threading.Lock()
+
+
+def default_app() -> App:
+    """One App per process, with settings from the environment (architecture section 11)."""
+    global _default
+    with _default_lock:
+        if _default is None:
+            _default = App(Settings.from_env(os.environ))
+        return _default
 
 
 class Handler(BaseHTTPRequestHandler):
+    app: App | None = None
+
     def do_GET(self) -> None:  # noqa: N802
-        path = self.path.split("?", 1)[0]
+        path, _, query = self.path.partition("?")
         if path == "/health":
             body = json.dumps(health()).encode()
             self._send(200, "application/json; charset=utf-8", body)
             return
-        if path in ("/", "/index.html"):
-            self._send(200, "text/html; charset=utf-8", PAGE.encode())
+        try:
+            page = (type(self).app or default_app()).respond(path, query)
+        except Exception:  # show a plain error page; the details go to the console only
+            traceback.print_exc()
+            self._send(
+                500, "text/plain; charset=utf-8", b"Something went wrong. See the server log.\n"
+            )
             return
-        self._send(404, "text/plain; charset=utf-8", b"not found\n")
+        if page is None:
+            self._send(404, "text/plain; charset=utf-8", b"not found\n")
+            return
+        self._send(200, "text/html; charset=utf-8", page.encode("utf-8"))
 
     def _send(self, status: int, content_type: str, body: bytes) -> None:
         self.send_response(status)
@@ -35,13 +59,18 @@ class Handler(BaseHTTPRequestHandler):
         print(f"{self.address_string()} {fmt % args}")
 
 
+def make_handler(app: App) -> type[Handler]:
+    """A handler class bound to one App, for tests and embedding."""
+    return type("EquinoxHandler", (Handler,), {"app": app})
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Serve the Project Equinox status page")
-    parser.add_argument("--host", default="0.0.0.0")
+    parser = argparse.ArgumentParser(description="Serve the Project Equinox web UI")
+    parser.add_argument("--host", default="127.0.0.1", help="default: this computer only")
     parser.add_argument("--port", type=int, default=8741)
     args = parser.parse_args()
     server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f"Project Equinox listening on http://{args.host}:{args.port}")
+    print(f"Project Equinox is running. Open http://{args.host}:{args.port} in a browser.")
     server.serve_forever()
 
 
