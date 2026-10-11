@@ -1,33 +1,22 @@
-"""The command line: markets, match and simulate (architecture sections 8.2 and 11).
+"""The command line: markets, match and simulate (architecture section 8.2).
 
-The only module that wires adapters, the matcher and the router together. Settings come from
-environment variables, overridden by flags. Exit codes follow the routing status (D27).
+Arguments, output and exit codes only. Markets are loaded by `equinox.sources`, which the web UI
+uses too. Exit codes follow the routing status (D27).
 """
 
 import argparse
 import json
 import os
 import sys
-from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field, replace
-from datetime import UTC, datetime, timedelta
+from collections.abc import Sequence
+from dataclasses import replace
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 
 from pydantic import ValidationError
 
-from equinox.adapters.base import (
-    TRACKED_EVENTS,
-    AdapterResult,
-    Fetcher,
-    FetchError,
-    TrackedEvent,
-    VenueAdapter,
-    load_tracked_events,
-)
-from equinox.adapters.fetch import DEFAULT_SNAPSHOT, FixtureFetcher, HttpFetcher
-from equinox.adapters.kalshi import DEFAULT_BASE_URL, KalshiAdapter
-from equinox.adapters.polymarket import CLOB_URL, GAMMA_URL, PolymarketAdapter
+from equinox import sources
+from equinox.adapters.base import TRACKED_EVENTS
 from equinox.matcher import build_clusters, cluster_confidence, cluster_for, text_matches
 from equinox.models import (
     EXIT_CODES,
@@ -41,53 +30,11 @@ from equinox.models import (
 )
 from equinox.router import failure_trace, simulate
 from equinox.router.rationale import contracts, dollars, money_step
+from equinox.sources import ADAPTERS, LiveFetchers, Loaded, Settings, SettingsError
 
-ADAPTERS: dict[str, type[VenueAdapter]] = {
-    "kalshi": KalshiAdapter,
-    "polymarket": PolymarketAdapter,
-}
-"""One line per venue: a new venue is an adapter class here plus its tracked events."""
-
-LiveFetchers = Callable[[str], Fetcher]
-"""venue -> the fetcher for a live run. Tests inject one; the default is HttpFetcher."""
+__all__ = ["ADAPTERS", "Loaded", "LiveFetchers", "Settings", "load_markets", "main"]
 
 _WORDS = {"gt": "above", "ge": "at or above", "lt": "below", "le": "at or below", "eq": "exactly"}
-
-
-@dataclass(frozen=True)
-class Settings:
-    source: str = "live"
-    stale_after: timedelta = timedelta(seconds=300)
-    timeout: float = 10.0
-    snapshot: Path = DEFAULT_SNAPSHOT
-    venue_options: dict[str, dict[str, str]] = field(default_factory=dict)
-
-    @classmethod
-    def from_env(cls, env: Mapping[str, str]) -> "Settings":
-        """Architecture section 11. A bad value is an input error, reported as INVALID_INPUT."""
-        try:
-            stale = timedelta(seconds=float(env.get("EQUINOX_STALE_AFTER_SECONDS", "300")))
-            timeout = float(env.get("EQUINOX_HTTP_TIMEOUT_SECONDS", "10"))
-        except ValueError as error:
-            raise _UsageError(f"bad setting: {error}") from error
-        return cls(
-            source=env.get("EQUINOX_SOURCE", "live"),
-            stale_after=stale,
-            timeout=timeout,
-            venue_options={
-                "kalshi": {"base_url": env.get("KALSHI_BASE_URL", DEFAULT_BASE_URL)},
-                "polymarket": {
-                    "gamma_url": env.get("POLYMARKET_GAMMA_URL", GAMMA_URL),
-                    "clob_url": env.get("POLYMARKET_CLOB_URL", CLOB_URL),
-                },
-            },
-        )
-
-
-@dataclass
-class Loaded:
-    markets: list[CanonicalMarket]
-    warnings: list[str]
 
 
 class _UsageError(Exception):
@@ -109,7 +56,7 @@ def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None
             settings = replace(settings, source=args.source)
         if settings.source not in ("live", "fixtures"):
             raise _UsageError(f"--source must be live or fixtures, not {settings.source!r}")
-    except _UsageError as error:
+    except (_UsageError, SettingsError) as error:
         trace = failure_trace(RoutingStatus.INVALID_INPUT, str(error), now=datetime.now(UTC))
         return _print_trace(trace, as_json)
     loaded = load_markets(settings, live_fetcher)
@@ -121,46 +68,8 @@ def main(argv: Sequence[str] | None = None, *, live_fetcher: LiveFetchers | None
 
 
 def load_markets(settings: Settings, live_fetcher: LiveFetchers | None = None) -> Loaded:
-    """Every tracked venue's markets. A live venue that fails is read from the snapshot (D17)."""
-    loaded = Loaded(markets=[], warnings=[])
-    for venue, events in load_tracked_events(TRACKED_EVENTS).items():
-        adapter = ADAPTERS.get(venue)
-        if adapter is None:
-            loaded.warnings.append(f"{venue.capitalize()}: no adapter, so it is not read.")
-            continue
-        result = _read_venue(venue, adapter, events, settings, live_fetcher)
-        loaded.markets += result.markets
-        loaded.warnings += result.warnings
-    return loaded
-
-
-def _read_venue(
-    venue: str,
-    adapter: type[VenueAdapter],
-    events: list[TrackedEvent],
-    settings: Settings,
-    live_fetcher: LiveFetchers | None,
-) -> AdapterResult:
-    options = settings.venue_options.get(venue, {})
-    notes: list[str] = []
-    if settings.source == "live":
-        fetch = (live_fetcher or (lambda _venue: HttpFetcher(settings.timeout)))(venue)
-        try:
-            return adapter(
-                fetch, events, "live", lambda: datetime.now(UTC), **options
-            ).fetch_markets()
-        except FetchError as error:
-            notes.append(f"{venue.capitalize()}: live data unavailable ({error})")
-    try:
-        snapshot = FixtureFetcher(settings.snapshot)
-        clock = lambda: snapshot.captured_at  # noqa: E731  the snapshot's own clock (D37)
-        result = adapter(snapshot, events, "fixture", clock, **options).fetch_markets()
-    except FetchError as error:
-        return AdapterResult([], [*notes, f"{venue.capitalize()}: no markets loaded ({error})."])
-    if notes:
-        captured = snapshot.captured_at.strftime("%Y-%m-%d %H:%M:%SZ")
-        notes = [f"{notes[0]}, so its markets come from the snapshot captured {captured}."]
-    return AdapterResult(result.markets, notes + result.warnings)
+    """`sources.load_markets`, reading this module's TRACKED_EVENTS so tests can repoint it."""
+    return sources.load_markets(settings, live_fetcher, tracked=TRACKED_EVENTS)
 
 
 # Commands.

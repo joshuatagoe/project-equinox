@@ -4,7 +4,11 @@ target-version = "py312"
 extend-exclude = ["*.md", ".claude"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E", "F", "I", "B", "UP", "C90"]
+
+# D52: a function more tangled than this is split, so each one reads in one pass.
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

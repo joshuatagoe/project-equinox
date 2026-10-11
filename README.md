@@ -125,6 +125,24 @@ A new venue is one adapter file, a fixture, an entry in `tracked_events.json` an
 
 The full design is [docs/architecture.md](docs/architecture.md).
 
+## Reading the code
+
+Each module has one job, stated at its top. Where to look for each part of the logic:
+
+| Question | Where |
+|---|---|
+| How is a venue read, and its wording turned into contract terms? | `src/equinox/adapters/kalshi.py`, `src/equinox/adapters/polymarket.py` |
+| What does a canonical market look like, and what does the model refuse? | `src/equinox/models/canonical.py` |
+| How is "the same bet" decided? | `src/equinox/matcher/terms.py` (the rules), `src/equinox/matcher/clusters.py` (grouping), `src/equinox/matcher/text.py` (the title fallback) |
+| How sure is each match? | `src/equinox/matcher/confidence.py` |
+| How is a venue chosen, and the cost worked out? | `src/equinox/router/depth.py` (walking the book), `src/equinox/router/engine.py` (eligibility and the decision) |
+| Where is the explanation written? | `src/equinox/router/rationale.py` |
+| Where do markets come from: live data or a snapshot? | `src/equinox/sources.py` |
+| How do the command line and the web pages present it? | `src/equinox/cli.py`, `src/equinox/web/order.py`, `src/equinox/web/board.py`, `src/equinox/web/match.py` |
+| Which tests pin the rules? | `tests/test_matcher.py` (the labelled pairs), `tests/test_router.py` (every status), `tests/test_docs.py` (this README's numbers) |
+
+The engines in `matcher/` and `router/` import only the models and never name a venue; `tests/test_layering.py` checks that on every run. `tests/test_quality.py` keeps modules under 300 lines and functions under 40, and keeps the command line and the web UI from depending on each other (D52).
+
 ## Equivalence and routing, in brief
 
 **Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed.

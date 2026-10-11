@@ -10,7 +10,7 @@ import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from equinox import health
-from equinox.cli import Settings
+from equinox.sources import Settings
 from equinox.web import App
 
 _default: App | None = None

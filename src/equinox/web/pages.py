@@ -5,48 +5,7 @@ from dataclasses import dataclass, field
 from html import escape
 from urllib.parse import urlencode
 
-CSS = """
-:root { --ink: #1d2433; --muted: #5b6475; --line: #d9dee7; --soft: #f4f6f9; --accent: #1f5fbf;
-        --good: #1c7c4d; --warn: #9a5b00; --bad: #b3261e; --differs: #fff4d6; }
-* { box-sizing: border-box; }
-body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-       color: var(--ink); background: #fff; }
-header { background: var(--ink); color: #fff; padding: 12px 24px; display: flex; gap: 24px;
-         align-items: baseline; flex-wrap: wrap; }
-header strong { font-size: 18px; }
-header nav a { color: #c9d6ee; margin-right: 16px; text-decoration: none; }
-header nav a.active { color: #fff; border-bottom: 2px solid #fff; }
-main { max-width: 1100px; margin: 0 auto; padding: 20px 24px 48px; }
-.banner { background: var(--soft); border: 1px solid var(--line); border-radius: 6px;
-          padding: 8px 12px; margin-bottom: 20px; color: var(--muted); }
-.banner ul { margin: 4px 0 0; padding-left: 20px; color: var(--warn); }
-h1 { font-size: 22px; margin: 0 0 12px; }
-h2 { font-size: 17px; margin: 28px 0 8px; }
-form.order { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; padding: 14px;
-             border: 1px solid var(--line); border-radius: 6px; background: var(--soft); }
-form label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted);
-             gap: 4px; }
-form select, form input { font: inherit; padding: 6px 8px; border: 1px solid #b9c1ce;
-                          border-radius: 4px; min-width: 120px; background: #fff; }
-form button { font: inherit; padding: 7px 18px; border: 0; border-radius: 4px;
-              background: var(--accent); color: #fff; cursor: pointer; }
-.errors { color: var(--bad); margin: 10px 0 0; }
-.headline { font-size: 19px; margin: 20px 0 6px; padding: 14px 16px; border-radius: 4px;
-            border-left: 5px solid var(--good); background: #eef7f1; }
-.headline.no { border-color: var(--bad); background: #fbeeed; }
-table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 14px; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line);
-         vertical-align: top; }
-th { background: var(--soft); font-weight: 600; }
-td.num, th.num { text-align: right; white-space: nowrap; }
-tr.out td { color: var(--muted); }
-tr.differs td, tr.differs th { background: var(--differs); }
-.tag { font-size: 12px; color: var(--warn); font-weight: 600; }
-.muted { color: var(--muted); }
-details { margin-top: 8px; }
-footer { color: var(--muted); font-size: 13px; margin-top: 36px; }
-a { color: var(--accent); }
-"""
+from equinox.web.style import CSS
 
 
 @dataclass
@@ -200,18 +159,6 @@ def match_body(
     )
     if cmp is None:
         return intro + picker + "<p>That outcome isn't among the loaded markets.</p>"
-    head = "".join(f"<th>{escape(c)}</th>" for c in ["", *cmp.columns])
-    rows = []
-    for label, texts, hrefs, differs in cmp.rows:
-        cells = "".join(
-            f'<td><a href="{escape(link)}">{escape(text)}</a></td>'
-            if link
-            else f"<td>{escape(text)}</td>"
-            for text, link in zip(texts, hrefs, strict=True)
-        )
-        mark = ' <span class="tag">differs</span>' if differs else ""
-        row_class = ' class="differs"' if differs else ""
-        rows.append(f"<tr{row_class}><th>{escape(label)}{mark}</th>{cells}</tr>")
     verdicts = "".join(
         f"<p><strong>{escape(line)}</strong></p>"
         + ("<ul>" + "".join(f"<li>{escape(f)}</li>" for f in flags) + "</ul>" if flags else "")
@@ -224,9 +171,26 @@ def match_body(
         "clearly different.</p>"
     )
     return f"""{intro}{picker}
-<table><thead><tr>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table>
+{_comparison_table(cmp)}
 <h2>Verdict</h2>{verdicts}
 <h2>Considered and set aside</h2>{aside}"""
+
+
+def _comparison_table(cmp: Comparison) -> str:
+    """One column per venue, one row per rule; rows where the venues differ are marked."""
+    head = "".join(f"<th>{escape(c)}</th>" for c in ["", *cmp.columns])
+    rows = []
+    for label, texts, hrefs, differs in cmp.rows:
+        cells = "".join(
+            f'<td><a href="{escape(link)}">{escape(text)}</a></td>'
+            if link
+            else f"<td>{escape(text)}</td>"
+            for text, link in zip(texts, hrefs, strict=True)
+        )
+        mark = ' <span class="tag">differs</span>' if differs else ""
+        row_class = ' class="differs"' if differs else ""
+        rows.append(f"<tr{row_class}><th>{escape(label)}{mark}</th>{cells}</tr>")
+    return f"<table><thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table>"
 
 
 def _order_form(form: OrderForm) -> str:

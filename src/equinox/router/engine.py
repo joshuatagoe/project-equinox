@@ -40,26 +40,10 @@ def quote(
     best_ask = book.asks[0].price if book.asks else None
     average = base / filled if filled else None
 
-    reasons: list[QuoteReason] = []
-    if not market.tradable:
-        reasons.append(QuoteReason.NOT_TRADABLE)
-    if not market.collateral.has_value:
-        reasons.append(QuoteReason.TEST_MONEY)
-    if not book.asks:
-        reasons.append(QuoteReason.EMPTY_BOOK)
-    if filled < order.quantity:
-        reasons.append(QuoteReason.PARTIAL_FILL)
-    elif order.max_budget is not None and total > order.max_budget:
-        reasons.append(QuoteReason.OVER_BUDGET)
-
-    warnings: list[QuoteWarning] = []
-    if now - market.captured_at > stale_after:
-        warnings.append(QuoteWarning.STALE_DATA)
-    if market.data_source == "fixture":
-        warnings.append(QuoteWarning.FIXTURE_DATA)
-    if filled < order.quantity and not book.depth_complete:
-        warnings.append(QuoteWarning.DEPTH_INCOMPLETE)
-
+    reasons = _reasons(market, order, book.asks == (), filled, total)
+    warnings = _warnings(
+        market, now, stale_after, filled < order.quantity and not book.depth_complete
+    )
     return VenueQuote(
         market_id=market.market_id,
         venue=market.venue,
@@ -75,6 +59,35 @@ def quote(
         fee=fee,
         total_cost=total,
     )
+
+
+def _reasons(
+    market: CanonicalMarket, order: OrderRequest, empty: bool, filled: Decimal, total: Decimal
+) -> list[QuoteReason]:
+    """Every reason this venue can't take the order (section 7.1, step 3)."""
+    checks = (
+        (not market.tradable, QuoteReason.NOT_TRADABLE),
+        (not market.collateral.has_value, QuoteReason.TEST_MONEY),
+        (empty, QuoteReason.EMPTY_BOOK),
+        (filled < order.quantity, QuoteReason.PARTIAL_FILL),
+        (
+            filled >= order.quantity and order.max_budget is not None and total > order.max_budget,
+            QuoteReason.OVER_BUDGET,
+        ),
+    )
+    return [reason for applies, reason in checks if applies]
+
+
+def _warnings(
+    market: CanonicalMarket, now: datetime, stale_after: timedelta, ran_out_of_partial_book: bool
+) -> list[QuoteWarning]:
+    """What the reader should know about this quote's data (section 7.1, step 4)."""
+    checks = (
+        (now - market.captured_at > stale_after, QuoteWarning.STALE_DATA),
+        (market.data_source == "fixture", QuoteWarning.FIXTURE_DATA),
+        (ran_out_of_partial_book, QuoteWarning.DEPTH_INCOMPLETE),
+    )
+    return [warning for applies, warning in checks if applies]
 
 
 def simulate(
