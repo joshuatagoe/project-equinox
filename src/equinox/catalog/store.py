@@ -210,7 +210,8 @@ def _where(words: str, venue: str, status: str) -> tuple[str, list]:
     tokens = _TOKEN.findall(words.lower())
     if tokens:
         clauses.append("e.rowid IN (SELECT rowid FROM words WHERE words MATCH ?)")
-        args.append(" ".join(f'"{token}"*' for token in tokens))
+        # A word matches as a prefix ("liverp"); a number only whole, so 2-1 never finds 1H 2-0.
+        args.append(" ".join(f'"{t}"' if t.isdigit() else f'"{t}"*' for t in tokens))
     if venue:
         clauses.append("e.venue = ?")
         args.append(venue)

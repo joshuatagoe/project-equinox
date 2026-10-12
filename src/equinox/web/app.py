@@ -18,7 +18,7 @@ from equinox.models import EquivalenceCluster
 from equinox.reader import pricing
 from equinox.reader.pricing import PricingError
 from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
-from equinox.web import board, catalog_order, markets, match, order, pages
+from equinox.web import board, catalog_order, markets, match, order, pages, search, words
 from equinox.web.view import PageContext, View, build_view, holding
 
 ROUTES = {"/": order.page, "/index.html": order.page, "/board": board.page, "/match": match.page}
@@ -65,6 +65,7 @@ class App:
             self.settings.stale_after,
             self._banner(view, path, params),
             lambda market_id: self._price_catalog(view.source, market_id),
+            lambda text: search.search(self._catalog(), text),
         )
         return page(view, params, ctx)
 
@@ -78,6 +79,13 @@ class App:
         if found is None:
             raise PricingError("there is no catalog")
         return pricing.priced_group(found, market_id, self._source(source), self.live_fetcher)
+
+    def _catalog(self) -> catalog.Catalog | None:
+        """The newest catalog, or None when there is none or it can't be read."""
+        try:
+            return catalog.load_latest(self.settings.cache_dir)
+        except catalog.CatalogError:
+            return None
 
     def _source(self, source: str) -> Settings:
         if source == "live":
@@ -107,7 +115,11 @@ class App:
         else:
             try:
                 taken = FixtureFetcher(FIXTURES / view.source).captured_at
-                summary = f"Snapshot taken {taken:%Y-%m-%d %H:%M} UTC."
+                old = words.age((self._clock() - taken).total_seconds())
+                summary = (
+                    f"Snapshot taken {taken:%Y-%m-%d %H:%M} UTC, {old} ago: prices are as "
+                    "they were then."
+                )
             except FetchError:
                 summary = "Snapshot data."
         return pages.Banner(summary, path, view.source, choices, view.loaded.warnings)

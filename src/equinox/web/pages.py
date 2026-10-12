@@ -126,12 +126,16 @@ def _data_selector(banner: Banner) -> str:
     )
 
 
-def order_body(form: OrderForm, result: Result | None, empty: bool) -> str:
-    if empty:
-        return "<h1>Price an order</h1><p>No markets are loaded. Check the warnings above.</p>"
+def order_body(form: OrderForm, result: Result | None, empty: bool, find: str = "") -> str:
+    """`find` is the search box's HTML (`search.html`)."""
+    if empty:  # the search still works: it reads the catalog, not the loaded markets
+        return (
+            f"<h1>Price an order</h1>{find}<p>No markets are loaded. Check the warnings above.</p>"
+        )
     return f"""<h1>Price an order</h1>
 <p class="muted">Pick an outcome and an order. Equinox checks every venue that lists the same bet
 and recommends the cheapest one that can fill the whole order.</p>
+{find}
 {_order_form(form)}
 {_result(result) if result else ""}"""
 

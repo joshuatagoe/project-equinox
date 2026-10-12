@@ -56,6 +56,8 @@ class PageContext:
     price_catalog: Callable[[str], tuple[EquivalenceCluster, Loaded]] | None = None
     """market ID -> its same-bet group from the catalog, and its loader (D58, D65); raises
     PricingError or FetchError."""
+    find: Callable[[str], object] | None = None
+    """words -> the same bets in the catalog that match them (`search.Search`, feat-13)."""
 
 
 def build_view(source: str, loaded: Loaded, read_at: datetime, param: str = "") -> View:
@@ -83,17 +85,32 @@ def holding(view: View, market_id: str) -> Outcome | None:
 
 
 def choices(view: View) -> list[pages.Choice]:
-    return [pages.Choice(o.key, o.name, o.event) for o in view.outcomes]
+    """Outcomes both venues list first; the rest say which venue lists them (feat-13)."""
+    shared = [o for o in view.outcomes if _shared(o)]
+    alone = [o for o in view.outcomes if not _shared(o)]
+    return [pages.Choice(o.key, o.name, o.event) for o in shared] + [
+        pages.Choice(o.key, o.name, f"{o.event} (only on {_venues(o)})") for o in alone
+    ]
 
 
 def favorite(view: View) -> str:
-    """The outcome the markets think most likely: the highest price to buy YES."""
+    """The outcome the markets think most likely, the highest price to buy YES, among those both
+    venues list, so the page opens on a comparison (feat-13); among all when none is shared."""
 
     def best_yes(outcome: Outcome) -> Decimal:
         asks = [m.best_asks.get("YES") or Decimal(0) for m in outcome.cluster.markets]
         return max(asks, default=Decimal(0))
 
-    return max(view.outcomes, key=best_yes).key if view.outcomes else ""
+    pool = [o for o in view.outcomes if _shared(o)] or view.outcomes
+    return max(pool, key=best_yes).key if pool else ""
+
+
+def _shared(outcome: Outcome) -> bool:
+    return len({m.venue for m in outcome.cluster.markets}) > 1
+
+
+def _venues(outcome: Outcome) -> str:
+    return " and ".join(sorted({words.venue(m.venue) for m in outcome.cluster.markets}))
 
 
 def data_param(view: View) -> str:

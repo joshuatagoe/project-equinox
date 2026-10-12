@@ -75,7 +75,7 @@ $env:PYTHONPATH = "src"
 
 Then open http://127.0.0.1:8741 (on macOS and Linux, `make run`). Four pages, built from the user stories in [user/users.md](user/users.md):
 
-- **Price an order.** Pick an outcome, buy YES or NO, the number of contracts and an optional budget. The answer comes first: which venue, what it costs including fees, how much it saves. Below it: why, what each venue would cost or why it can't take the order, and whether the venues are really offering the same bet.
+- **Price an order.** Pick an outcome, buy YES or NO, the number of contracts and an optional budget. The answer comes first: which venue, what it costs including fees, how much it saves. The page opens on the most likely outcome both venues list, and labels the outcomes only one venue lists (D77). Its search box finds any same bet in the catalog, such as "coventry 2-1" or "ballon d'or", and prices it from where the catalog was read (D78). Below it: why, what each venue would cost or why it can't take the order, and whether the venues are really offering the same bet.
 - **Market board.** Every outcome with both venues' prices side by side, how sure Equinox is that they are the same bet, and the best venue for 100 YES and for 100 NO.
 - **Why these match.** Each venue's rules side by side, with the differences marked, the verdict, its confidence level and every pair that was set aside as unclear.
 - **All markets.** Search every open market in the saved catalog by title words, filtered by venue and by status: same bet (with a link that prices it), unclear (with the title score and the reasons it is never routed), or no match found. With no catalog, it shows the command that builds one.

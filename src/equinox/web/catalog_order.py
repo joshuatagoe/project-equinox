@@ -12,7 +12,7 @@ from equinox.models import CanonicalMarket, OrderRequest
 from equinox.reader.pricing import PricingError
 from equinox.router import simulate
 from equinox.sources import ensure_books
-from equinox.web import order, pages
+from equinox.web import order, pages, search
 from equinox.web.view import Outcome, PageContext, View, data_param
 
 CATALOG = "catalog:"
@@ -50,7 +50,7 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
         form.choices = [pages.Choice(key, name, GROUP)]
         found = pages.href("/markets", q=markets[market_id].title, data=data_param(view))
         result = order.result(Outcome(cluster, GROUP, name), trace, markets, found)
-    body = pages.order_body(form, result, empty=False)
+    body = pages.order_body(form, result, empty=False, find=search.html(None, data_param(view)))
     return pages.layout("Price an order", "/", view.source, ctx.banner, body)
 
 

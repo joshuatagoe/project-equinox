@@ -15,7 +15,7 @@ from equinox.models import (
 )
 from equinox.router import simulate
 from equinox.router.rationale import CENT, contracts, dollars, money_step
-from equinox.web import pages, words
+from equinox.web import pages, search, words
 from equinox.web.view import (
     Outcome,
     PageContext,
@@ -43,13 +43,14 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
     outcome = find(view, form.outcome)
     quantity, budget = amount(form.quantity), amount(form.budget) if form.budget else None
     form.errors = form_errors(form, outcome is not None, quantity, budget)
-    answer = None
-    if not form.errors:
+    answer, words_found = None, params.get("find", "").strip()
+    found = ctx.find(words_found) if words_found and ctx.find else None
+    if not form.errors and found is None:
         try:
             cluster = with_books(view, outcome.cluster)  # books for this group only (D49)
         except FetchError as error:
             form.errors = [f"The order books for this outcome couldn't be read: {error}"]
-    if not form.errors:
+    if not form.errors and found is None:
         market_id = cluster.markets[0].market_id
         order = OrderRequest(
             market_id=market_id, outcome=form.side, quantity=quantity, max_budget=budget
@@ -57,7 +58,8 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
         trace = simulate(order, cluster, ctx.now, ctx.stale_after)
         why = pages.href("/match", outcome=outcome.key, data=data_param(view))
         answer = result(outcome, trace, view.markets, why)
-    body = pages.order_body(form, answer, empty=not view.outcomes)
+    finder = search.html(found, data_param(view))
+    body = pages.order_body(form, answer, empty=not view.outcomes, find=finder)
     return pages.layout("Price an order", "/", view.source, ctx.banner, body)
 
 
@@ -98,7 +100,7 @@ def result(
         verdict=_verdict(outcome.cluster),
         match_href=why,
         risks=outcome.cluster.risk_flags,
-        warnings=list(dict.fromkeys(trace.warnings)),
+        warnings=[words.plain_note(w) for w in dict.fromkeys(trace.warnings)],
         assumptions=trace.assumptions,
     )
 

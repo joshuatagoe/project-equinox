@@ -4,6 +4,7 @@ Everything here is written from the canonical model and keyed by measure, never 
 new venue needs no change. Venue names come only from each market's `venue` field.
 """
 
+import re
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -41,6 +42,40 @@ UNITS = {"bps": "bps", "usd": "USD"}
 
 def venue(name: str) -> str:
     return name.capitalize()
+
+
+def age(seconds: float) -> str:
+    """How long ago, in the largest unit that says it: "45 seconds", "17 hours", "2 days"."""
+    for unit, size in (("day", 86400), ("hour", 3600), ("minute", 60)):
+        if seconds >= size:
+            count = int(seconds // size)
+            return f"{count} {unit}{'' if count == 1 else 's'}"
+    count = int(seconds)
+    return f"{count} second{'' if count == 1 else 's'}"
+
+
+_STALE = re.compile(
+    r"^(?P<venue>\w+): its order book is (?P<old>\d+) seconds old \(captured [^)]+\), "
+    r"past the (?P<limit>\d+)-second limit\.$"
+)
+
+
+def plain_note(note: str) -> str:
+    """A trace's data note in plain words; the trace keeps the exact figures (feat-13)."""
+    stale = _STALE.match(note)
+    if stale is None:
+        return note
+    return (
+        f"{stale['venue']}'s prices are {hours(int(stale['old']))} old, past the "
+        f"{age(int(stale['limit']))} Equinox treats as current: they may have moved since."
+    )
+
+
+def hours(seconds: int) -> str:
+    """An age in hours with one decimal ("16.8 hours"), or in days past two days."""
+    if seconds >= 2 * 86400:
+        return f"{seconds / 86400:.1f} days"
+    return f"{seconds / 3600:.1f} hours" if seconds >= 3600 else age(seconds)
 
 
 def number(value: Decimal) -> str:
