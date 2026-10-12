@@ -42,8 +42,8 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
     )
     outcome = find(view, form.outcome)
     quantity, budget = amount(form.quantity), amount(form.budget) if form.budget else None
-    form.errors = _errors(form, outcome, quantity, budget)
-    result = None
+    form.errors = form_errors(form, outcome is not None, quantity, budget)
+    answer = None
     if not form.errors:
         try:
             cluster = with_books(view, outcome.cluster)  # books for this group only (D49)
@@ -54,8 +54,10 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
         order = OrderRequest(
             market_id=market_id, outcome=form.side, quantity=quantity, max_budget=budget
         )
-        result = _result(view, outcome, simulate(order, cluster, ctx.now, ctx.stale_after))
-    body = pages.order_body(form, result, empty=not view.outcomes)
+        trace = simulate(order, cluster, ctx.now, ctx.stale_after)
+        why = pages.href("/match", outcome=outcome.key, data=data_param(view))
+        answer = result(outcome, trace, view.markets, why)
+    body = pages.order_body(form, answer, empty=not view.outcomes)
     return pages.layout("Price an order", "/", view.source, ctx.banner, body)
 
 
@@ -68,9 +70,9 @@ def amount(text: str) -> Decimal | None:
     return value if value.is_finite() and value > 0 else None
 
 
-def _errors(form, outcome, quantity, budget) -> list[str]:
+def form_errors(form, found: bool, quantity, budget) -> list[str]:
     checks = (
-        (outcome is None, "That outcome isn't among the loaded markets."),
+        (not found, "That outcome isn't among the loaded markets."),
         (form.side not in ("YES", "NO"), "Choose Buy YES or Buy NO."),
         (quantity is None, "Contracts must be a number greater than 0."),
         (
@@ -81,17 +83,20 @@ def _errors(form, outcome, quantity, budget) -> list[str]:
     return [message for failed, message in checks if failed]
 
 
-def _result(view: View, outcome: Outcome, trace: EquinoxTrace) -> pages.Result:
+def result(
+    outcome: Outcome, trace: EquinoxTrace, markets: dict[str, CanonicalMarket], why: str
+) -> pages.Result:
+    """The page's answer to one order. `why` links to the page that explains the match."""
     quotes = sorted(trace.quotes, key=lambda q: (not q.eligible, q.total_cost, q.market_id))
     return pages.Result(
         headline=headline(trace),
         routed=trace.status == RoutingStatus.ROUTED,
         rationale=trace.rationale,
         columns=COLUMNS,
-        rows=_cost_rows(quotes, view.markets, trace.order),
+        rows=_cost_rows(quotes, markets, trace.order),
         excluded=[not q.eligible for q in quotes],
         verdict=_verdict(outcome.cluster),
-        match_href=pages.href("/match", outcome=outcome.key, data=data_param(view)),
+        match_href=why,
         risks=outcome.cluster.risk_flags,
         warnings=list(dict.fromkeys(trace.warnings)),
         assumptions=trace.assumptions,

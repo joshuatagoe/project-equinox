@@ -103,6 +103,12 @@ class PolymarketAdapter(VenueAdapter):
                 listed.append(self._listed(events[0], raw, parse_terms, listed_at))
         return listed
 
+    def event_of(self, native_id: str) -> TrackedEvent:
+        """The event a catalog market belongs to, by its slug (D58). The list endpoint names a
+        market's events; the single-market endpoint doesn't."""
+        found = self.fetch(f"{self.gamma_url}/markets?{urlencode({'id': native_id})}")
+        return TrackedEvent(found[0]["events"][0]["slug"], "")
+
     def fetch_books(self, market: CanonicalMarket) -> CanonicalMarket:
         yes_token, no_token = market.venue_metadata["tokens"]
         yes_book = self.fetch(f"{self.clob_url}/book?{urlencode({'token_id': yes_token})}")

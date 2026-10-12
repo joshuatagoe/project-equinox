@@ -75,6 +75,10 @@ class VenueAdapter(ABC):
     def discover(self, family: str) -> list[TrackedEvent]:
         """The open events of a family, in date order; [] for a family this venue can't find."""
 
+    def event_of(self, native_id: str) -> TrackedEvent:
+        """The event a market belongs to. Raises FetchError when the venue can't say."""
+        raise FetchError(f"{self.venue} can't look up the event of {native_id}")
+
     @abstractmethod
     def fetch_books(self, market: CanonicalMarket) -> CanonicalMarket:
         """The same market with both order books; raises FetchError if a request fails."""

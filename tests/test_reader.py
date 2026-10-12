@@ -11,10 +11,11 @@ from equinox import catalog, cli
 from equinox.adapters.fetch import DEFAULT_SNAPSHOT, FixtureFetcher
 from equinox.adapters.kalshi import KalshiAdapter
 from equinox.adapters.polymarket import PolymarketAdapter
+from equinox.matcher import confidence
 from equinox.matcher.terms import decide
-from equinox.models import ContractTerms, EquivalenceStatus
+from equinox.models import ContractTerms, EquivalenceStatus, MatchResult
 from equinox.models.catalog import CatalogEntry, MarketText, ReadableMarket
-from equinox.reader import checks, client, prompt, run
+from equinox.reader import checks, client, evals, prompt, run
 from equinox.sources import Settings
 from equinox.web import App
 
@@ -419,3 +420,122 @@ def test_5_pairs_decided_by_an_older_prompt_are_read_again(tmp_path, monkeypatch
     report = run.read_catalog(found, model, "claude-haiku-5-5", limit=10)
     assert len(model.bodies) == 2 and report.same_bet == 1
     assert rows(tmp_path)["alpha:00"].read_by == "claude-haiku-5-5 (prompt next)"
+
+
+# Commit 2: pricing a same bet a model read, only when the evals allow it (D58).
+
+PAIR = NEW.parent / "snapshot-2026-10-11-pair"
+MBAPPE_K, MBAPPE_P = "kalshi:KXBALLONDOR-26-KMBA", "polymarket:608540"
+YEAR_END = datetime(2026, 12, 31, 23, tzinfo=UTC)
+BALLON = {
+    "readable": True,
+    "subject": "ballon_d_or_2026",
+    "measure": "named_kylian_mbappe",
+    "measured_by": "france_football",
+    "observed_on": "2026-12-31",
+    "comparison": "eq",
+    "threshold": "1",
+    "unit": "indicator",
+}
+BALLON_TITLES = (
+    "Who will win the Ballon d'Or in 2026?",
+    "Will Kylian Mbappé win the 2026 Ballon d'Or?",
+)
+BALLON_READINGS = {
+    BALLON_TITLES[0]: BALLON | {"evidence": "If Kylian Mbappe wins the Ballon d'Or in 2026"},
+    BALLON_TITLES[1]: BALLON | {"evidence": "Kylian Mbappé win the 2026 Ballon d'Or"},
+}
+
+
+def ballon_catalog(tmp_path, monkeypatch, version=None):
+    entries = [
+        replace(
+            entry("x", "kalshi", BALLON_TITLES[0]),
+            market_id=MBAPPE_K,
+            outcome_label="Kylian Mbappe",
+            closes_at=YEAR_END,
+        ),
+        replace(
+            entry("y", "polymarket", BALLON_TITLES[1]),
+            market_id=MBAPPE_P,
+            outcome_label="Kylian Mbappé",
+            closes_at=YEAR_END,
+        ),
+    ]
+    texts = {
+        MBAPPE_K: MarketText(
+            "If Kylian Mbappe wins the Ballon d'Or in 2026, then the market resolves to Yes."
+        ),
+        MBAPPE_P: MarketText(
+            "This market will resolve according to the winner of the 2026 Ballon d'Or."
+        ),
+    }
+    with catalog.TextStage(tmp_path) as stage:
+        stage.add(texts)
+        catalog.build(entries, skipped=0, cache_dir=tmp_path, seconds=0.0, texts=stage)
+    if version:
+        monkeypatch.setattr(prompt, "PROMPT_VERSION", version)
+    run.read_catalog(
+        catalog.load_latest(tmp_path), FakeModel(BALLON_READINGS), prompt.MODEL, limit=10
+    )
+    monkeypatch.setenv("EQUINOX_CACHE_DIR", str(tmp_path))
+
+
+def simulate_mbappe(capsys):
+    argv = ["simulate", "--market", MBAPPE_K, "--outcome", "YES", "--quantity", "10"]
+    code = cli.main([*argv, "--source", "fixtures", "--snapshot", PAIR.name, "--json"])
+    return code, json.loads(capsys.readouterr().out)
+
+
+def test_10_a_model_read_same_bet_is_priced_when_the_evals_allow(tmp_path, capsys, monkeypatch):
+    ballon_catalog(tmp_path, monkeypatch)
+    code, trace = simulate_mbappe(capsys)
+    assert (code, trace["status"]) == (0, "ROUTED")
+    assert {q["market_id"] for q in trace["quotes"]} == {MBAPPE_K, MBAPPE_P}
+    assert any(f.startswith("Terms read by a model") for f in trace["cluster"]["risk_flags"])
+    # Only warnings about the two markets priced: not their events' other markets or parsers.
+    assert not any("no term parser" in w or "608550" in w for w in trace["warnings"])
+
+
+def test_10_a_pair_read_with_another_prompt_is_not_routed(tmp_path, capsys, monkeypatch):
+    ballon_catalog(tmp_path, monkeypatch, version="older")
+    monkeypatch.setattr(prompt, "PROMPT_VERSION", "feat-10.7")
+    code, trace = simulate_mbappe(capsys)
+    assert (code, trace["status"]) == (1, "MARKET_NOT_FOUND")
+    assert "prompt older" in trace["rationale"] and "evals" in trace["rationale"]
+
+
+def test_10_no_model_read_pair_is_routed_when_the_evals_show_a_false_same_bet(
+    tmp_path, capsys, monkeypatch
+):
+    ballon_catalog(tmp_path, monkeypatch)
+    scores = json.loads(evals.SCORES.read_text(encoding="utf-8"))
+    scores["held_out"]["false_same"] = 1
+    (tmp_path / "scores.json").write_text(json.dumps(scores), encoding="utf-8")
+    monkeypatch.setattr(evals, "SCORES", tmp_path / "scores.json")
+    code, trace = simulate_mbappe(capsys)
+    assert (code, trace["status"]) == (1, "MARKET_NOT_FOUND")
+    assert "false same-bet" in trace["rationale"]
+
+
+def test_10_a_model_read_pair_is_medium_confidence_at_most():
+    pair = MatchResult(
+        market_a="a:1",
+        market_b="b:1",
+        status=EquivalenceStatus.EQUIVALENT,
+        method="terms",
+        risk_flags=("Terms read by a model: claude-haiku-5-5 (prompt feat-10.7).",),
+    )
+    level = confidence(pair)
+    assert level.level == "Medium" and "read by a model" in level.reason
+
+
+def test_10_the_all_markets_page_links_a_model_read_pair_to_its_price(tmp_path, monkeypatch):
+    ballon_catalog(tmp_path, monkeypatch)
+    app = App(Settings(cache_dir=tmp_path, snapshot=PAIR))
+    listing = html.unescape(app.respond("/markets", "q=mbappe"))
+    assert f"outcome=catalog%3A{MBAPPE_K.replace(':', '%3A')}" in listing
+    page = app.respond("/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10")
+    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
+    assert "Buy on " in text and "Terms read by a model" in text
+    assert "Confidence: Medium" in text

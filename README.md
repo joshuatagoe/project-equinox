@@ -56,6 +56,8 @@ Of the 287,523 markets in that refresh, 15 outcomes are the same bet on both ven
 
 Titles alone can't be routed, so `python -m equinox catalog read --limit 100` has a model (`claude-haiku-5-5`) read the markets in unclear pairs into contract terms. Deterministic checks refuse any reading the venue's own text doesn't support, and the same rules that match Fed markets decide (D57). It needs `ANTHROPIC_API_KEY` in the environment or in `.env` at the repository root (git ignores it). 100 markets cost about 47,000 input and 14,000 output tokens; answers are cached, so a re-run pays only for changed text. The command prints what it spent.
 
+A same bet the model read can be priced like a Fed outcome, with `simulate --market` or from the All markets page, but only while the recorded evals show no false same-bet; its trace says the terms were read by a model. On 2026-10-11, 10 YES on Mbappé winning the 2026 Ballon d'Or routed to Polymarket at $0.22 against $0.33 on Kalshi.
+
 `python -m equinox.reader.evals` scores the reader on three gold sets (the Fed meetings, hand-labelled pairs, and held-out pairs). On the recorded run it found 24 of 32 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
 
 ### The web UI
@@ -164,7 +166,7 @@ Each module has one job, stated at its top. Where to look for each part of the l
 | Where is the explanation written? | `src/equinox/router/rationale.py` |
 | Where do markets come from: live data or a snapshot? | `src/equinox/sources.py` |
 | How is every open market read and compared? | `src/equinox/catalog/__init__.py` (the refresh), `src/equinox/matcher/index.py` (finding candidates), `src/equinox/matcher/compare.py` (same bet, unclear, no match), `src/equinox/catalog/store.py` (the saved file) |
-| How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets) |
+| How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets), `src/equinox/reader/pricing.py` (when a model-read pair may be routed) |
 | How do the command line and the web pages present it? | `src/equinox/cli.py`, `src/equinox/cli_catalog.py`, `src/equinox/web/order.py`, `src/equinox/web/board.py`, `src/equinox/web/match.py`, `src/equinox/web/markets.py` |
 | Which tests pin the rules? | `tests/test_matcher.py` (the labelled pairs), `tests/test_router.py` (every status), `tests/test_index.py` (catalog candidates and statuses), `tests/test_docs.py` (this README's numbers) |
 

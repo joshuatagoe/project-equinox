@@ -393,8 +393,9 @@ For markets in the catalog's unclear pairs, a model fills in the terms that a pa
 3. **Check.** `checks.py` rejects a record whose evidence isn't in the market's text, whose threshold isn't a number the venue wrote (text or strike fields), whose comparison disagrees with the evidence's words, whose date falls after the market closes, or which Kalshi's strike fields contradict. On a count, only the side must agree (2+ is greater 1.5).
 4. **Decide.** `matcher.terms.decide` applies rules 2–6 of §6.1 to the two accepted readings. EQUIVALENT is the same bet, DISTINCT a different bet, AMBIGUOUS stays unclear.
 5. **Record.** Readings and decisions go into the catalog file. Every request is cached by its content; a pair decided by another prompt version or model is read again.
+6. **Route** (`pricing.py`). `simulate` on a market that isn't in a loaded family, and the order page for a `catalog:` outcome, look the market up among the catalog's model-read same bets. The gate allows it only when the pair was read with the model and prompt the committed evals were recorded with, and every gold set shows zero false same-bets. Each market's event is looked up from the venue at pricing time (D59), the listings and books are loaded, the model's terms are attached, and the group goes through the same clusters and router as a parser-read one, with the risk flag "Terms read by a model", so its confidence is Medium at most.
 
-Only `catalog read --limit N` calls the model, and it prints the tokens it spent. The evals (`reader/evals.py`) score three gold sets; the tests replay their recorded answers. A model-read same bet is routed only when the committed evals show zero false same-bets (D58).
+Only `catalog read --limit N` calls the model, and it prints the tokens it spent. The evals (`reader/evals.py`) score three gold sets; the tests replay their recorded answers.
 
 ### 6.4 Labelled pairs (acceptance tests for feat-03)
 

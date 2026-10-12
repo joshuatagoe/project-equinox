@@ -6,16 +6,18 @@ Exit codes: 0 when the command did what it says, 1 when there is no catalog or a
 
 import argparse
 import os
+import sqlite3
 from dataclasses import asdict
 from datetime import UTC, datetime
 
 from equinox import catalog
 from equinox.catalog import CatalogError
 from equinox.catalog.readings import OldCatalogError
+from equinox.models import EquivalenceCluster
 from equinox.models.catalog import CatalogSummary
-from equinox.reader import client, run
+from equinox.reader import client, pricing, run
 from equinox.reader.client import Ask, ReaderError
-from equinox.sources import LiveFetchers, Settings
+from equinox.sources import LiveFetchers, Loaded, Settings
 
 REFRESH = catalog.REFRESH_COMMAND
 SHOWN_PAIRS = 20
@@ -84,6 +86,20 @@ def read(settings: Settings, limit: int, model: str, workers: int, ask: Ask | No
     else:
         print(f"Used {r.input_tokens:,} input tokens and {r.output_tokens:,} output tokens.")
     return 0
+
+
+def model_read(
+    settings: Settings, market_id: str, live_fetcher: LiveFetchers | None
+) -> tuple[EquivalenceCluster, Loaded] | str:
+    """The market's same bet as read by a model, ready to route (D58); else why not, or "" when
+    the catalog has none for it."""
+    try:
+        found = catalog.load_latest(settings.cache_dir)
+        return pricing.priced_group(found, market_id, settings, live_fetcher) if found else ""
+    except (CatalogError, pricing.NotModelRead, sqlite3.Error):
+        return ""
+    except pricing.PricingError as error:
+        return str(error)
 
 
 def status(settings: Settings) -> int:

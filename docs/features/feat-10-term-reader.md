@@ -37,7 +37,7 @@ Catalog pairs that only titles could match are read by a model into contract ter
    - **Labelled pairs:** catalog pairs labelled by hand, including traps.
    It reports false same-bets, missed same-bets and rejected readings.
 
-Routing model-read pairs is commit 2 of this feature: the trace flags "terms read by a model", confidence is Medium at most, and it routes only when the committed eval shows zero false same-bets.
+Routing model-read pairs is commit 2 of this feature (`reader/pricing.py`, `web/catalog_order.py`, `sources.load_by_id`, each adapter's `event_of`, D59): the trace flags "terms read by a model", confidence is Medium at most, and it routes only when the committed evals show zero false same-bets for the model and prompt that read the pair. Its tests replay `snapshot-2026-10-11-pair`, recorded raw by `docs/research/capture_pair.py`.
 
 ## Acceptance tests (write first, see each fail)
 

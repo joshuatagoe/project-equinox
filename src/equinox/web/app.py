@@ -11,11 +11,14 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qs
 
-from equinox import sources
+from equinox import catalog, sources
 from equinox.adapters.base import FetchError
 from equinox.adapters.fetch import FixtureFetcher
+from equinox.models import EquivalenceCluster
+from equinox.reader import pricing
+from equinox.reader.pricing import PricingError
 from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
-from equinox.web import board, markets, match, order, pages
+from equinox.web import board, catalog_order, markets, match, order, pages
 from equinox.web.view import PageContext, View, build_view
 
 ROUTES = {"/": order.page, "/index.html": order.page, "/board": board.page, "/match": match.page}
@@ -49,19 +52,32 @@ class App:
         page = ROUTES.get(path)
         if page is None:
             return None
+        if page is order.page and params.get("outcome", "").startswith(catalog_order.CATALOG):
+            page = catalog_order.page  # a same bet a model read (D58)
         view = self._view(data or self.settings.snapshot.name)
         ctx = PageContext(
-            self._clock(), self.settings.stale_after, self._banner(view, path, params)
+            self._clock(),
+            self.settings.stale_after,
+            self._banner(view, path, params),
+            lambda market_id: self._price_catalog(view.source, market_id),
         )
         return page(view, params, ctx)
 
     def _load_markets(self, source: str) -> Loaded:
         """Listings only; each page fetches the books it prices (D49)."""
+        return sources.load_markets(self._source(source), self.live_fetcher, with_books=False)
+
+    def _price_catalog(self, source: str, market_id: str) -> tuple[EquivalenceCluster, Loaded]:
+        """A same bet a model read, loaded from `source` for pricing (D58)."""
+        found = catalog.load_latest(self.settings.cache_dir)
+        if found is None:
+            raise PricingError("there is no catalog")
+        return pricing.priced_group(found, market_id, self._source(source), self.live_fetcher)
+
+    def _source(self, source: str) -> Settings:
         if source == "live":
-            settings = replace(self.settings, source="live")
-        else:
-            settings = replace(self.settings, source="fixtures", snapshot=FIXTURES / source)
-        return sources.load_markets(settings, self.live_fetcher, with_books=False)
+            return replace(self.settings, source="live")
+        return replace(self.settings, source="fixtures", snapshot=FIXTURES / source)
 
     def _view(self, source: str) -> View:
         """The snapshot loads once; live data is read again after `live_for`."""

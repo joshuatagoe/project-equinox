@@ -110,6 +110,10 @@ class KalshiAdapter(VenueAdapter):
             listed += [self._listed(raw, event, shared, parse_terms) for raw in markets]
         return listed
 
+    def event_of(self, native_id: str) -> TrackedEvent:
+        """The event a catalog market belongs to, to load it in full for pricing (D58)."""
+        return TrackedEvent(self._get(f"/markets/{native_id}")["market"]["event_ticker"], "")
+
     def fetch_books(self, market: CanonicalMarket) -> CanonicalMarket:
         orderbook = self._get(f"/markets/{market.native_id}/orderbook")["orderbook_fp"]
         captured_at = self.clock()  # read time: the response carries none (D37)

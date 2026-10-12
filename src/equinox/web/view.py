@@ -1,5 +1,6 @@
 """The data every page shares: the loaded markets, their clusters, and each outcome's name."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -52,6 +53,8 @@ class PageContext:
     now: datetime
     stale_after: timedelta
     banner: pages.Banner
+    price_catalog: Callable[[str], tuple[EquivalenceCluster, Loaded]] | None = None
+    """market ID -> its model-read group and loader (D58); raises PricingError or FetchError."""
 
 
 def build_view(source: str, loaded: Loaded, read_at: datetime, param: str = "") -> View:

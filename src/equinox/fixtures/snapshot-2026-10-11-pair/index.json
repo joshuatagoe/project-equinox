@@ -1,0 +1,13 @@
+{
+  "captured_at": "2026-10-11T23:05:12.262415+00:00",
+  "files": {
+    "01_external_api_kalshi_com_trade_api_v2_markets_KXBALLONDOR_26_KMBA.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXBALLONDOR-26-KMBA",
+    "02_external_api_kalshi_com_trade_api_v2_events_KXBALLONDOR_26_with_nested_markets_t.json": "https://external-api.kalshi.com/trade-api/v2/events/KXBALLONDOR-26?with_nested_markets=true",
+    "03_external_api_kalshi_com_trade_api_v2_series_KXBALLONDOR.json": "https://external-api.kalshi.com/trade-api/v2/series/KXBALLONDOR",
+    "04_gamma_api_polymarket_com_markets_id_608540.json": "https://gamma-api.polymarket.com/markets?id=608540",
+    "05_gamma_api_polymarket_com_events_slug_ballon_dor_winner_2026.json": "https://gamma-api.polymarket.com/events?slug=ballon-dor-winner-2026",
+    "06_external_api_kalshi_com_trade_api_v2_markets_KXBALLONDOR_26_KMBA_orderbook.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXBALLONDOR-26-KMBA/orderbook",
+    "07_clob_polymarket_com_book_token_id_9564054999690529351029795552958673717828569406.json": "https://clob.polymarket.com/book?token_id=95640549996905293510297955529586737178285694064878854803914367446504739764113",
+    "08_clob_polymarket_com_book_token_id_4368172031947718859787818842950439479698633362.json": "https://clob.polymarket.com/book?token_id=43681720319477188597878188429504394796986333625436226983885469009299707562545"
+  }
+}

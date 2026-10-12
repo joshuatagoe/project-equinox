@@ -123,6 +123,40 @@ def load_markets(
     return loaded
 
 
+def load_by_id(
+    settings: Settings, market_ids: list[str], live_fetcher: LiveFetchers | None = None
+) -> Loaded:
+    """Just these markets, without books, from the source the settings name (live or a snapshot),
+    each through its event (D58). Only warnings about these markets are kept. Raises FetchError:
+    there is no snapshot fallback for a priced pair."""
+    loaded = Loaded(markets=[], warnings=[])
+    for venue, adapter_class in ADAPTERS.items():
+        wanted = [m.split(":", 1)[1] for m in market_ids if m.startswith(f"{venue}:")]
+        if not wanted:
+            continue
+        adapter = _adapter(venue, adapter_class, settings, live_fetcher)
+        adapter.tracked = list(dict.fromkeys(adapter.event_of(native) for native in wanted))
+        result = adapter.list_markets()
+        loaded.markets += [m for m in result.markets if m.market_id in market_ids]
+        loaded.warnings += [w for w in result.warnings if any(n in w for n in wanted)]
+        loaded.readers[venue] = adapter
+    return loaded
+
+
+def _adapter(
+    venue: str,
+    adapter_class: type[VenueAdapter],
+    settings: Settings,
+    live_fetcher: LiveFetchers | None,
+) -> VenueAdapter:
+    options = settings.venue_options.get(venue, {})
+    if settings.source == "live":
+        fetch = (live_fetcher or (lambda _venue: HttpFetcher(settings.timeout)))(venue)
+        return adapter_class(fetch, [], "live", lambda: datetime.now(UTC), **options)
+    snapshot = FixtureFetcher(settings.snapshot)
+    return adapter_class(snapshot, [], "fixture", lambda: snapshot.captured_at, **options)
+
+
 def ensure_books(cluster: EquivalenceCluster, loaded: Loaded) -> EquivalenceCluster:
     """The cluster with every market's order books, fetched now for those without (D49)."""
     if all(market.books is not None for market in cluster.markets):

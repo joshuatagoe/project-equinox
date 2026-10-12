@@ -20,6 +20,7 @@ _CAVEATS = (
     ("Equal only on the ", "the payouts agree only for moves on the measure's grid ({step})"),
     ("Tie rule differs: ", "the payouts differ if the value lands exactly on the threshold"),
     ("Resolution sources differ: ", "the venues name different resolution sources"),
+    ("Terms read by a model", "its terms were read by a model and checked, not parsed (D58)"),
 )
 _EDGE_CASES = "Edge-case rules differ: "
 _ORDER: dict[Level | None, int] = {"High": 3, "Medium": 2, "Low": 1, None: 0}

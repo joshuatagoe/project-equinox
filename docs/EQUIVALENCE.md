@@ -170,6 +170,8 @@ A false same-bet is the number that matters: it would route money to the wrong c
 
 **What the live sample found.** A 100-market sample of the live catalog read 8 IPO pairs as the same bet while every gold set showed zero false same-bets. Kalshi pays when an IPO is *confirmed* (the S-1 declared effective, the price set, or a ticker assigned, even if trading starts after January 1); Polymarket pays when it is *completed*, by the first sale of shares, by December 31. A company that prices on December 30 and trades on January 2 pays Yes on one and No on the other. The IPO pairs joined the gold set, the prompt now names a measure as narrowly as the rules define it, and the next sample read all 19 IPO pairs as different and 12 Ballon d'Or pairs as the same bet. An eval set is evidence about the families in it, so samples of the live catalog are read by hand too (AI_USAGE 23).
 
+**Routing.** A model-read same bet can be priced like any other (`simulate --market`, or the All markets page), but only while the committed evals show zero false same-bets for the model and prompt that read it (D58). Its trace says the terms were read by a model, at Medium confidence at most.
+
 **Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens. Answers are cached by request, so a re-run pays only for markets whose text changed.
 
 ## Third venue: the Meridian fit check

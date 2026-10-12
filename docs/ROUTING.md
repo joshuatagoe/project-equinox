@@ -132,6 +132,10 @@ An excluded venue gets its own sentence. From the cut-by-25 market, buying 100 N
 
 The fit-check markets show the same for test money. Meridian-style AAPL-330 is cheaper ($4.75 for 5 YES against Polymarket's $4.80768), but it settles in devnet USDC, so Polymarket wins and the rationale says Meridian "would cost $4.75" (architecture §9.3).
 
+## Pairs a model read
+
+The router doesn't know how a group's terms were read. A same bet a model read (EQUIVALENCE.md, D57) reaches it through the same cluster as a parser-read one, with two differences in what it is given: the pair is priced only when the committed evals show zero false same-bets for the model and prompt that read it (D58), and its cluster carries the risk flag "Terms read by a model", which the trace prints and which keeps the confidence at Medium. On 2026-10-11, 10 YES on Kalshi's `KXBALLONDOR-26-KMBA` (Mbappé wins the 2026 Ballon d'Or), read as the same bet as Polymarket `608540`, routed to Polymarket at $0.22 against $0.33 on Kalshi; the trace also flagged that Kalshi names foxnews.com and Polymarket francefootball.fr as the source.
+
 ## Assumptions
 
 Every trace carries these, worded for the reader (DECISIONS.md, Assumptions):

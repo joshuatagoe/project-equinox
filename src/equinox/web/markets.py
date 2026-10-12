@@ -84,7 +84,8 @@ def _match(row: CatalogRow, source: str) -> Match | None:
     title = f"{row.partner_title} on {venue}"
     if _model_read(row):
         note = f"Confidence: Medium at most. The terms were read by {row.read_by} and checked."
-        return Match(title, note, row.reasons, None)
+        price = pages.href("/", outcome=f"catalog:{row.market_id}", data=source)
+        return Match(title, note, row.reasons, price)
     if row.status == SAME_BET:
         price = pages.href("/", outcome=row.terms_key or "", data=source)
         note = "Same contract terms. Price an order to see the confidence and the rule differences."

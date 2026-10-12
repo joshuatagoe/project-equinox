@@ -76,7 +76,7 @@ def main(
         return _markets(loaded, args.json)
     if args.command == "match":
         return _match(loaded, args.json, settings if args.catalog else None)
-    return _simulate(args, settings, loaded)
+    return _simulate(args, settings, loaded, live_fetcher)
 
 
 def load_markets(settings: Settings, live_fetcher: LiveFetchers | None = None) -> Loaded:
@@ -134,7 +134,9 @@ def _match(loaded: Loaded, as_json: bool, catalog: Settings | None) -> int:
     return 0
 
 
-def _simulate(args: argparse.Namespace, settings: Settings, loaded: Loaded) -> int:
+def _simulate(
+    args: argparse.Namespace, settings: Settings, loaded: Loaded, live_fetcher: LiveFetchers | None
+) -> int:
     now = datetime.now(UTC)
     try:
         order = OrderRequest(
@@ -149,8 +151,16 @@ def _simulate(args: argparse.Namespace, settings: Settings, loaded: Loaded) -> i
 
     market = next((m for m in loaded.markets if m.market_id == order.market_id), None)
     cluster = cluster_for(order.market_id, build_clusters(loaded.markets))
+    problem = ""
+    if market is None:  # perhaps a same bet a model read in the catalog (D58)
+        found = cli_catalog.model_read(settings, order.market_id, live_fetcher)
+        if isinstance(found, str):
+            problem = found
+        else:
+            cluster, loaded = found
+            market = next(m for m in loaded.markets if m.market_id == order.market_id)
     if market is None or cluster is None:
-        message = (
+        message = problem or (
             f"{order.market_id} is not among the loaded markets."
             if market is None
             else f"{order.market_id} has no contract terms: this market can only be matched by "
