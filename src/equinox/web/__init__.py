@@ -1,4 +1,4 @@
-"""The web UI (feat-07): price an order, see every market, and see why markets match."""
+"""The web app (feat-14): find a bet on both venues, price an order, and see why it matches."""
 
 from equinox.web.app import App
 

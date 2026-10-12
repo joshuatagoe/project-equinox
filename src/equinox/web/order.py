@@ -1,8 +1,13 @@
-"""The order page (Jordan): which venue to buy on, what it costs, and why."""
+"""An order's answer in words (Jordan): which venue to buy on, what it costs, and why.
 
+The ticket (`ticket.py`) prices the order with the router; this module turns its trace into the
+headline, the cost on each venue and the notes, and checks what the person typed.
+"""
+
+import re
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
-from equinox.adapters.base import FetchError
 from equinox.matcher import cluster_confidence
 from equinox.models import (
     CanonicalMarket,
@@ -13,54 +18,24 @@ from equinox.models import (
     RoutingStatus,
     VenueQuote,
 )
-from equinox.router import simulate
 from equinox.router.rationale import CENT, contracts, dollars, money_step
-from equinox.web import pages, search, words
-from equinox.web.view import (
-    Outcome,
-    PageContext,
-    View,
-    choices,
-    data_param,
-    favorite,
-    find,
-    with_books,
-)
+from equinox.web import words
 
 NOT_REAL = {QuoteReason.NOT_TRADABLE, QuoteReason.TEST_MONEY}
 COLUMNS = ["Venue", "Can take it", "Would buy", "Average price", "Fee", "Total", "Why not"]
 
 
-def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
-    form = pages.OrderForm(
-        choices=choices(view),
-        outcome=params.get("outcome") or favorite(view),
-        side=params.get("side", "YES").strip().upper(),
-        quantity=params.get("quantity", "100").strip(),
-        budget=params.get("budget", "").strip(),
-        data=data_param(view),
-    )
-    outcome = find(view, form.outcome)
-    quantity, budget = amount(form.quantity), amount(form.budget) if form.budget else None
-    form.errors = form_errors(form, outcome is not None, quantity, budget)
-    answer, words_found = None, params.get("find", "").strip()
-    found = ctx.find(words_found) if words_found and ctx.find else None
-    if not form.errors and found is None:
-        try:
-            cluster = with_books(view, outcome.cluster)  # books for this group only (D49)
-        except FetchError as error:
-            form.errors = [f"The order books for this outcome couldn't be read: {error}"]
-    if not form.errors and found is None:
-        market_id = cluster.markets[0].market_id
-        order = OrderRequest(
-            market_id=market_id, outcome=form.side, quantity=quantity, max_budget=budget
-        )
-        trace = simulate(order, cluster, ctx.now, ctx.stale_after)
-        why = pages.href("/match", outcome=outcome.key, data=data_param(view))
-        answer = result(outcome, trace, view.markets, why)
-    finder = search.html(found, data_param(view))
-    body = pages.order_body(form, answer, empty=not view.outcomes, find=finder)
-    return pages.layout("Price an order", "/", view.source, ctx.banner, body)
+@dataclass
+class Result:
+    headline: str
+    routed: bool
+    rationale: str
+    rows: list[list[str]]
+    excluded: list[bool]
+    verdict: str
+    risks: tuple[str, ...]
+    warnings: list[str]
+    assumptions: tuple[str, ...]
 
 
 def amount(text: str) -> Decimal | None:
@@ -72,34 +47,30 @@ def amount(text: str) -> Decimal | None:
     return value if value.is_finite() and value > 0 else None
 
 
-def form_errors(form, found: bool, quantity, budget) -> list[str]:
+def form_errors(side: str, quantity: Decimal | None, budget_text: str, budget) -> list[str]:
     checks = (
-        (not found, "That outcome isn't among the loaded markets."),
-        (form.side not in ("YES", "NO"), "Choose Buy YES or Buy NO."),
+        (side not in ("YES", "NO"), "Choose Buy YES or Buy NO."),
         (quantity is None, "Contracts must be a number greater than 0."),
         (
-            bool(form.budget) and budget is None,
+            bool(budget_text) and budget is None,
             "The budget must be a dollar amount greater than 0.",
         ),
     )
     return [message for failed, message in checks if failed]
 
 
-def result(
-    outcome: Outcome, trace: EquinoxTrace, markets: dict[str, CanonicalMarket], why: str
-) -> pages.Result:
-    """The page's answer to one order. `why` links to the page that explains the match."""
+def result(cluster: EquivalenceCluster, trace: EquinoxTrace) -> Result:
+    """The page's answer to one order."""
+    markets = {m.market_id: m for m in cluster.markets}
     quotes = sorted(trace.quotes, key=lambda q: (not q.eligible, q.total_cost, q.market_id))
-    return pages.Result(
+    return Result(
         headline=headline(trace),
         routed=trace.status == RoutingStatus.ROUTED,
         rationale=trace.rationale,
-        columns=COLUMNS,
         rows=_cost_rows(quotes, markets, trace.order),
         excluded=[not q.eligible for q in quotes],
-        verdict=_verdict(outcome.cluster),
-        match_href=why,
-        risks=outcome.cluster.risk_flags,
+        verdict=verdict(cluster),
+        risks=cluster.risk_flags,
         warnings=[words.plain_note(w) for w in dict.fromkeys(trace.warnings)],
         assumptions=trace.assumptions,
     )
@@ -127,12 +98,13 @@ def _cost_rows(
     return [row(q) for q in quotes]
 
 
-def _verdict(cluster: EquivalenceCluster) -> str:
+def verdict(cluster: EquivalenceCluster) -> str:
     if not cluster.pairs:
         only = words.venue(cluster.markets[0].venue)
         return f"Only {only} lists this outcome, so there is nothing to compare it with."
     level = cluster_confidence(cluster)
-    return f"Same bet. Confidence: {level.level}. {level.reason}"
+    reason = re.sub(r" \(D\d+\)", "", level.reason)  # decision numbers are for the docs
+    return f"Same bet. Confidence: {level.level}. {reason}"
 
 
 def headline(trace: EquinoxTrace) -> str:

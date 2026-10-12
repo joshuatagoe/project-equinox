@@ -6,7 +6,6 @@ RB Leipzig v PSV (full time), each on both venues. A catalog listing page is bui
 recorded events; the files themselves are never edited.
 """
 
-import html
 import json
 import re
 from dataclasses import asdict
@@ -20,8 +19,6 @@ from equinox.adapters.polymarket import GAMMA_URL, PolymarketAdapter
 from equinox.adapters.teams import team_key
 from equinox.matcher import terms_key
 from equinox.reader import check, client, evals, prompt
-from equinox.sources import Settings
-from equinox.web import App
 
 SCORES = DEFAULT_SNAPSHOT.parent / "snapshot-2026-10-11-scores"
 KALSHI_EVENTS = (
@@ -285,28 +282,6 @@ def test_7_a_parser_same_bet_in_the_catalog_is_priced_without_the_model_flag(
     flags = trace["cluster"]["risk_flags"]
     assert not any(f.startswith("Terms read by a model") for f in flags)
     assert any("premierleague.com" in f for f in flags)  # Kalshi uses ESPN
-
-
-def test_7_the_all_markets_page_links_a_parser_same_bet_by_its_market(tmp_path):
-    score_catalog(tmp_path)
-    app = App(Settings(cache_dir=tmp_path, snapshot=SCORES))
-    listing = html.unescape(app.respond("/markets", "q=coventry 2-1"))
-    assert f"outcome=catalog%3A{k(FT, 2, 1).replace(':', '%3A')}" in listing
-    page = app.respond("/", f"outcome=catalog:{k(FT, 2, 1)}&side=YES&quantity=10")
-    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
-    assert "Buy on " in text and "Terms read by a model" not in text
-
-
-def test_7_a_market_in_a_loaded_family_opens_its_usual_outcome(tmp_path):
-    hold = "kalshi:KXFEDDECISION-26OCT-H0"
-    page = App(Settings(cache_dir=tmp_path)).respond(
-        "/", f"outcome=catalog:{hold}&side=YES&quantity=10"
-    )
-    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
-    assert "Buy on " in text and "This pair can't be priced" not in text
-    assert 'value="FOMC|fed_upper_bound_change|fomc_statement|2026-10-28|eq|0|bps" selected' in (
-        html.unescape(page)
-    )
 
 
 # 8: the cross-check

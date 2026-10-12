@@ -214,6 +214,7 @@ def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
                     no_ask=listed_ask(raw.get("no_ask_dollars")),
                     terms=parse_terms(raw, event) if parse_terms else None,
                     family=family_of(parse_terms),
+                    topic=event.get("category") or "",
                 )
             )
             texts[entries[-1].market_id] = MarketText(rules_text(raw), strike_text(raw))

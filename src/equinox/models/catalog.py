@@ -26,6 +26,7 @@ class CatalogEntry:
     no_ask: Decimal | None
     terms: ContractTerms | None = None
     family: str = ""  # the parser family meant to read it ("exact_score"), even if it gave no terms
+    topic: str = ""  # the event's category as its venue lists it ("Sports"); "" if none (D87)
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,6 +124,8 @@ class CatalogRow:
     read_by: str | None = None  # the model that read both markets' terms, when one did (D57)
     partner_yes: Decimal | None = None  # the matching market's best asks, shown beside its own
     partner_no: Decimal | None = None
+    closes_at: datetime | None = None
+    topic: str = ""  # its own topic, else its match's; "" when neither venue gives one (D87)
 
 
 def _age(seconds: float) -> str:

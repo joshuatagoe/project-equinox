@@ -39,7 +39,7 @@ CREATE TABLE entries (
     title TEXT NOT NULL, outcome_label TEXT NOT NULL, described TEXT, closes_at TEXT,
     tradable INTEGER NOT NULL, yes_ask TEXT, no_ask TEXT, terms_key TEXT, status TEXT NOT NULL,
     rank INTEGER NOT NULL, partner TEXT, score TEXT, reasons TEXT NOT NULL, read_by TEXT,
-    family TEXT NOT NULL
+    family TEXT NOT NULL, topic TEXT NOT NULL
 );
 CREATE TABLE pairs (
     market_a TEXT NOT NULL, market_b TEXT NOT NULL, status TEXT NOT NULL, score TEXT,
@@ -64,9 +64,11 @@ CREATE INDEX pairs_order ON pairs (status, score DESC);
 _ROW = """
 SELECT e.market_id, e.venue, e.event_title, e.title, e.outcome_label, e.yes_ask, e.no_ask,
        e.terms_key, e.status, e.partner, coalesce(p.described, p.title), e.score, e.reasons,
-       e.read_by, p.yes_ask, p.no_ask
+       e.read_by, p.yes_ask, p.no_ask, e.closes_at, {topic}
 FROM entries e LEFT JOIN entries p ON p.market_id = e.partner
 """
+_TOPIC = "coalesce(nullif(e.topic, ''), p.topic, '')"  # a pair's topic from either venue
+
 _TOKEN = re.compile(r"\w+")
 
 
@@ -85,7 +87,7 @@ def save(
     try:
         with closing(sqlite3.connect(temp)) as db:
             db.executescript(_SCHEMA)
-            db.executemany(f"INSERT INTO entries VALUES ({_marks(18)})", _entries(entries, found))
+            db.executemany(f"INSERT INTO entries VALUES ({_marks(19)})", _entries(entries, found))
             db.executemany(f"INSERT INTO pairs VALUES ({_marks(6)})", _pairs(entries, found))
             db.execute("INSERT INTO summary VALUES (?)", (_dump(summary),))
             db.commit()
@@ -116,6 +118,9 @@ class Catalog:
         self.path = path
         with self.connect() as db:
             self.summary = _load(db.execute("SELECT body FROM summary").fetchone()[0])
+            columns = {row[1] for row in db.execute("PRAGMA table_info(entries)")}
+        # A catalog saved before topics (D87) shows every market without one.
+        self._row = _ROW.format(topic=_TOPIC if "topic" in columns else "''")
 
     def search(
         self,
@@ -134,7 +139,7 @@ class Catalog:
         order = "ORDER BY e.rank, e.read_by IS NOT NULL, e.rowid LIMIT ? OFFSET ?"
         with self.connect() as db:
             found = db.execute(
-                f"{_ROW} {where} {order}", (*args, per_page, (max(page, 1) - 1) * per_page)
+                f"{self._row} {where} {order}", (*args, per_page, (max(page, 1) - 1) * per_page)
             )
             return [_row(values) for values in found]
 
@@ -206,6 +211,7 @@ def _entries(entries: Sequence[CatalogEntry], found: Comparison):
             json.dumps(list(pair.reasons) if pair else []),
             None,  # read_by: set when a model reads the pair (D57)
             e.family,
+            e.topic,
         )
 
 
@@ -255,6 +261,8 @@ def _row(values: tuple) -> CatalogRow:
         by,
         _decimal(values[14]),
         _decimal(values[15]),
+        datetime.fromisoformat(values[16]) if values[16] else None,
+        values[17],
     )
 
 

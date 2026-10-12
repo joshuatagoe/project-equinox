@@ -56,7 +56,7 @@ One person runs one command or one local web page on one machine. Markets load i
 |---|---|---|---|
 | Catalog | Every open market on both venues as a lean entry: title, dates, best YES and NO ask, terms where a parser exists. Kalshi from `/events?status=open&with_nested_markets=true` (no combo markets, K12); Polymarket from `/events/keyset?closed=false` paged with `after_cursor` (P11). | 286 in the recorded refresh: 151 MiB with gzip (1.9 GB without), 94 s to read and 158 s in all, at 383 MiB of memory (2026-10-11, D55) | `python -m equinox catalog refresh`, cached in `.cache/equinox/` (D48) |
 | Families | The discovered events of each family Equinox can read (Fed decisions: K13, P12), loaded from their listings without books | A few: one discovery request and one listing per venue | Every live command and page load |
-| Books | Order books for the markets being priced, and for the cross-venue groups on the board | 1 per Kalshi market, 2 per Polymarket market | On demand |
+| Books | Order books for the markets being priced: on the web, the one pair on the order ticket | 1 per Kalshi market, 2 per Polymarket market | On demand |
 
 Equinox makes its requests one at a time, each with a 10-second timeout, and asks for gzip (D55). The research crawls paced theirs 150 ms apart and made about 700 requests without a rate-limit error; Equinox does not pace, and the recorded refresh made its 286 requests back to back without one. The catalog refresh retries a timeout, a dropped connection, a 429 or a 5xx twice; the command line and the web UI fall back to the snapshot instead (D17). A refresh streams page by page, so it holds one page of raw JSON at a time, but it keeps every lean entry in memory to compare them. The research snapshot also captured Polymarket's AAPL event for the §9 test data.
 
@@ -70,7 +70,7 @@ Equinox makes its requests one at a time, each with a 10-second timeout, and ask
 flowchart LR
     subgraph IN["Interfaces"]
         CLI["cli.py, cli_catalog.py<br/>markets, match, simulate, catalog"]
-        UI["server.py and web/<br/>order, board, match, all-markets pages"]
+        UI["server.py and web/<br/>markets, event and order-ticket pages"]
     end
     SRC["sources.py and catalog/<br/>data sources, discovery, books on demand,<br/>catalog refresh and its SQLite file"]
     subgraph AD["Adapters: the only venue-aware code"]
@@ -585,24 +585,22 @@ The trace uses typed sections instead of the first version's generic "spans" (D3
 
 The default source is `live`. `--snapshot` picks a snapshot folder under `src/equinox/fixtures/`; the default is `snapshot-2026-10-10`, the frozen baseline (D51). The demo commands in the README use `--source fixtures` so that their numbers match this document. `match` also prints each cluster's confidence (D46). `simulate` fetches books only for the requested market's group (D49).
 
-### 8.3 Web UI (`python -m equinox.server`, feat-07)
+### 8.3 Web app (`python -m equinox.server`, feat-07, feat-14)
 
-Server-rendered pages for the two people in `user/users.md` (D45). AutoTrader, a program, uses `--json`.
+Server-rendered pages for the two people in `user/users.md`, built from the catalog of every open market (D86). AutoTrader, a program, uses `--json`.
 
 | Page | For | Shows |
 |---|---|---|
-| `/`, Price an order | Jordan | A form (outcome in plain words, buy YES or NO, contracts, optional budget, snapshot or live). The recommendation is the headline: which venue, the total including fees, the saving over the runner-up. Then the router's rationale, each venue's fills, fee and total or why it can't take the order, the match verdict and confidence, risk flags, data warnings in plain words and assumptions. It opens on the most likely outcome both venues list (D77), and a search box finds any same bet in the catalog (D78). |
-| `/board`, Market board | Jordan | Per event, one row per outcome: each venue's price to buy YES and NO, the verdict and confidence, and the best venue for 100 YES and for 100 NO. Markets without terms are listed apart. |
-| `/match`, Why these match | Morgan | One column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules), differing rows marked; the verdict with confidence and flags; every AMBIGUOUS pair set aside, with reasons. |
-| `/markets`, All markets | Jordan and Morgan | Opens on the same bets you can price, a parser's matches before a model's (D82); search the saved catalog by title words, filtered by venue and by status (same bets, look alike, no match found, every market), 50 markets a page. A same bet is one row with both venues' best YES and NO asks from the listing, what a share of YES pays, how it matched and a button that prices an order on the catalog's own data source (D81); a model's reasons are folded under "How it matched" (D83). An unclear pair shows its confidence (Low), the title score and the reasons; a market with no match says what was looked for (D84). A legend says what each confidence level means. It shows the catalog's age; with no catalog it says how to build one. It reads only the saved file and never fetches. |
+| `/`, Markets | Jordan | The events both venues list (`catalog/events.py`), soonest to close first (D88), as cards: topic (D87), closing date, the three likeliest outcomes with what YES costs on each venue, the cheaper marked, and how many outcomes both venues list. Topic chips filter them; `?q=` searches either market's title words. With no catalog it says how to build one. |
+| `/event?m=`, an event | Jordan | Every outcome of the event both venues list, likeliest first: what YES pays in words, how it matched (Equinox's own reader, or a model, Medium at most), YES and NO on each venue, Buy YES and Buy NO. |
+| `/bet?m=&side=&quantity=&budget=`, the order ticket | Jordan and Morgan | The recommendation as the headline: which venue, the total including fees, the saving over the runner-up. Then each venue's fills, average price, fee and total or why it can't take the order, the router's rationale, data notes in plain words and the assumptions. Beside it, "Is this really the same bet?": how it matched, the verdict and confidence, one column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules) with differing rows marked, and the risk flags. |
 
 Rules the pages keep:
-- Every order goes through `simulate`, and every match through the matcher. A test checks that the page and `cli.main --json` show the same totals.
-- Plain-language names ("No change", "Cut 50 bps or more", "Pays YES if the Fed leaves its target rate unchanged") are written from the contract terms, keyed by measure, never by venue.
-- Every string that came from a venue is HTML-escaped.
-- The data selector lists the snapshots named by their date alone and live data (D51, D85); a capture named for one test (`-pair`, `-scores`) opens only by name, and the selector then shows it. `snapshot-2026-10-10` is the default; newer snapshots and live data show every discovered meeting, one board table per meeting. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
-- Books are fetched on demand: for the outcome being priced, and for the cross-venue groups on the board (D49).
-- Basis points are explained in words wherever they appear: "Cut 25 bps (0.25 percentage points)", with a one-line note that 1 bp is 0.01 percentage point.
+- Every order goes through `simulate`, and every match through the matcher and the catalog; the ticket prices a pair through `reader/pricing.py` from where the catalog was read (D78). A test checks that the ticket and `cli.main --json` show the same totals.
+- Only the pair being priced is read from the venues, with its order books (D49). If they can't be reached, the ticket says so and doesn't price.
+- The top bar says how old the catalog's prices are; the ticket's notes say how old each order book is.
+- Every string that came from a venue is HTML-escaped. Venue names come only from each market's `venue` field.
+- One stylesheet, light and dark, from phone width up; one script prices the ticket again as you type by fetching the ticket page itself (D89).
 - The server listens on 127.0.0.1 unless `--host` says otherwise.
 
 ---
@@ -700,9 +698,9 @@ src/equinox/
   cli.py                 # arguments and output only
   cli_catalog.py         # the catalog commands' output
   sources.py             # settings, data sources, discovery, books on demand (D49, D51)
-  catalog/  __init__.py  store.py   # catalog refresh, and its SQLite file (D48, D53)
-  server.py              # the web UI's routes and /health (§8.3)
-  web/      app.py  order.py  board.py  match.py  markets.py  markets_html.py  pages.py  words.py
+  catalog/  __init__.py  store.py  events.py  # refresh, its SQLite file, the events both venues list (D48, D53, D86)
+  server.py              # the web app's routes and /health (§8.3)
+  web/      app.py  shell.py  home.py  event.py  ticket.py  same_bet.py  order.py  words.py  style.py  script.py
   tracked_events.json
   fixtures/
     snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json; the frozen baseline

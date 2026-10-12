@@ -1,4 +1,4 @@
-"""Plain words for the pages: event and outcome names, rules, prices and reasons.
+"""Plain words for the pages: outcomes, how a pair matched, rules, prices and reasons.
 
 Everything here is written from the canonical model and keyed by measure, never by venue, so a
 new venue needs no change. Venue names come only from each market's `venue` field.
@@ -7,6 +7,7 @@ new venue needs no change. Venue names come only from each market's `venue` fiel
 import re
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal
+from string import capwords
 
 from equinox.models import (
     CanonicalMarket,
@@ -16,6 +17,7 @@ from equinox.models import (
     QuoteReason,
     VenueQuote,
 )
+from equinox.models.catalog import CatalogRow
 from equinox.router.rationale import contracts
 
 FED_CHANGE = "fed_upper_bound_change"
@@ -38,6 +40,7 @@ VERDICTS = {
     EquivalenceStatus.DISTINCT: "Different",
 }
 UNITS = {"bps": "bps", "usd": "USD"}
+GENERIC = "YES pays $1 a share if this happens; NO pays $1 if it doesn't."
 
 
 def venue(name: str) -> str:
@@ -94,34 +97,43 @@ def cents(price: Decimal) -> str:
     return f"{number((price * 100).quantize(Decimal('0.01'), ROUND_HALF_UP))}¢"
 
 
-def event_name(terms: ContractTerms) -> str:
-    if terms.measure == FED_CHANGE:
-        return f"Fed rate decision, {day(terms.observed_on)}"
-    return f"{terms.subject} {terms.measure.replace('_', ' ')}, {day(terms.observed_on)}"
+def when(value: datetime) -> str:
+    """A date as people write it: "Oct 12, 2026"."""
+    return f"{value:%b} {value.day}, {value.year}"
 
 
-def outcome_name(terms: ContractTerms) -> str:
-    """ "No change", "Cut 25 bps", "Hike 50 bps or more"; otherwise the terms in words."""
-    move = _fed_move(terms)
-    if move is None:
-        return f"{terms.subject} {terms.measure.replace('_', ' ')} {_bound(terms)}"
-    direction, size, how = move
-    verb, points = ("Cut" if direction == "cut" else "Hike"), _points(size)
-    return {
-        "unchanged": "No change",
-        "exactly": f"{verb} {size} bps ({points} percentage points)",
-        "or more": f"{verb} {size} bps or more ({points} percentage points or more)",
-        "more than": f"{verb} more than {size} bps (more than {points} percentage points)",
-    }[how]
+def outcome(row: CatalogRow) -> str:
+    """An outcome's name: the venue's label for it ("Cut 25bps"), else the market's title."""
+    return row.outcome_label or row.title
 
 
-def _points(bps: str) -> str:
-    """Basis points as percentage points, for people who don't use bps: "25" -> "0.25"."""
-    return f"{Decimal(bps) / 100:.2f}"
+def badge(row: CatalogRow) -> tuple[str, str]:
+    """How the pair matched, in two words, and its style: a parser's or a model's reading."""
+    return ("Read by a model", "medium") if row.read_by else ("Exact match", "high")
+
+
+def matched(row: CatalogRow) -> str:
+    """How the two markets were found to be the same bet (D57, D65)."""
+    if row.read_by:
+        return (
+            f"Both venues' terms were read by a model, {row.read_by}, and checked against "
+            "their rules, so the confidence is Medium at most."
+        )
+    return (
+        "Both venues' terms were read by Equinox's own reader for this kind of market, and "
+        "they match exactly."
+    )
 
 
 def pays_if(terms: ContractTerms) -> str:
     """When YES pays, as the end of the sentence "Pays YES if ..."."""
+    score = _SCORE.match(terms.measure)
+    if score:  # an exact score (D61): the subject names the match, home team first
+        when = "after 90 minutes" if score[1] == "full_time" else "at half time"
+        match = capwords(terms.subject).replace(" Vs ", " vs ")
+        return f"the score {when} in {match} is {score[2]}-{score[3]}"
+    if terms.unit == "indicator":  # a model's reading of a yes-or-no event (D57)
+        return f"{terms.measure.replace('_', ' ')} ({terms.subject.replace('_', ' ')})"
     move = _fed_move(terms)
     if move is None:
         return f"the {terms.measure.replace('_', ' ')} is {_bound(terms)}"
@@ -158,7 +170,7 @@ def yes_pays(key: str | None, event_title: str) -> str:
     if score and teams:
         when = "after 90 minutes" if score[1] == "full_time" else "at half time"
         return f"YES pays $1 if the score {when} is {teams[1]} {score[2]}, {teams[2]} {score[3]}."
-    return "YES pays $1 a share if this happens; NO pays $1 if it doesn't."
+    return GENERIC
 
 
 def _fed_move(terms: ContractTerms) -> tuple[str, str, str] | None:

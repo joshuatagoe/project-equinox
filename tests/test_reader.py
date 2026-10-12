@@ -1,8 +1,6 @@
 """feat-10: reading terms with a model, checking them, and deciding with the rules (D56-D58)."""
 
-import html
 import json
-import re
 from dataclasses import replace
 from datetime import UTC, date, datetime
 from decimal import Decimal
@@ -16,8 +14,6 @@ from equinox.matcher.terms import decide
 from equinox.models import ContractTerms, EquivalenceStatus, MatchResult
 from equinox.models.catalog import CatalogEntry, MarketText, ReadableMarket
 from equinox.reader import checks, client, evals, prompt, run
-from equinox.sources import Settings
-from equinox.web import App
 
 NEW = DEFAULT_SNAPSHOT.parent / "snapshot-2026-10-11"
 
@@ -336,15 +332,6 @@ def test_7_catalog_read_stops_at_the_limit_and_prints_the_tokens(tmp_path, capsy
     assert len(model.bodies) == 1 and "2 markets read" in out and "1,000 input tokens" in out
 
 
-def test_9_a_model_read_same_bet_says_so_on_the_all_markets_page(tmp_path):
-    run.read_catalog(mayors(tmp_path), FakeModel(READINGS), "claude-haiku-5-5", limit=10)
-    page = App(Settings(cache_dir=tmp_path)).respond("/markets", "q=springfield")
-    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
-    assert "Same bet, read by a model" in text
-    assert f"Terms read by claude-haiku-5-5 (prompt {prompt.PROMPT_VERSION})" in text
-    assert "1 outcome is the same bet as read by a model" in text
-
-
 def test_4_no_change_is_zero_even_when_the_evidence_names_a_year():
     hold = replace(
         PCE,
@@ -528,39 +515,3 @@ def test_10_a_model_read_pair_is_medium_confidence_at_most():
     )
     level = confidence(pair)
     assert level.level == "Medium" and "read by a model" in level.reason
-
-
-def test_10_the_all_markets_page_links_a_model_read_pair_to_its_price(tmp_path, monkeypatch):
-    ballon_catalog(tmp_path, monkeypatch)
-    app = App(Settings(cache_dir=tmp_path, snapshot=PAIR))
-    listing = html.unescape(app.respond("/markets", "q=mbappe"))
-    assert f"outcome=catalog%3A{MBAPPE_K.replace(':', '%3A')}" in listing
-    page = app.respond("/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10")
-    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
-    assert "Buy on " in text and "Terms read by a model" in text
-    assert "Confidence: Medium" in text
-
-
-def option_label(page):
-    """The order form's outcome, as the person sees it."""
-    outcome = re.search(r'<select name="outcome">(.*?)</select>', page, re.DOTALL).group(1)
-    return html.unescape(re.search(r"<option[^>]*>(.*?)</option>", outcome).group(1))
-
-
-def test_10_the_order_page_names_a_model_read_outcome(tmp_path, monkeypatch):
-    ballon_catalog(tmp_path, monkeypatch)
-    page = App(Settings(cache_dir=tmp_path, snapshot=PAIR)).respond(
-        "/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10"
-    )
-    assert option_label(page) == "Who will win the Ballon d'Or in 2026? (Kylian Mbappe)"
-
-
-def test_10_a_refused_pair_shows_why_and_its_market_id(tmp_path, monkeypatch):
-    ballon_catalog(tmp_path, monkeypatch, version="older")
-    monkeypatch.setattr(prompt, "PROMPT_VERSION", "feat-10.7")
-    page = App(Settings(cache_dir=tmp_path, snapshot=PAIR)).respond(
-        "/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10"
-    )
-    assert option_label(page) == MBAPPE_K
-    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
-    assert "This pair can't be priced" in text and "Buy on " not in text
