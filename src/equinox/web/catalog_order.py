@@ -7,7 +7,7 @@ rendered exactly as the order page renders a parser-read outcome.
 """
 
 from equinox.adapters.base import FetchError
-from equinox.models import OrderRequest
+from equinox.models import CanonicalMarket, OrderRequest
 from equinox.reader.pricing import PricingError
 from equinox.router import simulate
 from equinox.sources import ensure_books
@@ -15,13 +15,14 @@ from equinox.web import order, pages
 from equinox.web.view import Outcome, PageContext, View, data_param
 
 CATALOG = "catalog:"
+GROUP = "Read by a model, from the catalog"
 
 
 def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
     key = params["outcome"]
     market_id = key.removeprefix(CATALOG)
     form = pages.OrderForm(
-        choices=[pages.Choice(key, market_id, "Read by a model, from the catalog")],
+        choices=[pages.Choice(key, market_id, GROUP)],  # named once the venue is read
         outcome=key,
         side=params.get("side", "YES").strip().upper(),
         quantity=params.get("quantity", "100").strip(),
@@ -44,8 +45,16 @@ def page(view: View, params: dict[str, str], ctx: PageContext) -> str:
         )
         trace = simulate(request, cluster, ctx.now, ctx.stale_after)
         markets = {m.market_id: m for m in cluster.markets}
-        named = Outcome(cluster, "Read by a model", markets[market_id].title)
+        name = _named(markets[market_id])
+        form.choices = [pages.Choice(key, name, GROUP)]
         found = pages.href("/markets", q=markets[market_id].title, data=data_param(view))
-        result = order.result(named, trace, markets, found)
+        result = order.result(Outcome(cluster, GROUP, name), trace, markets, found)
     body = pages.order_body(form, result, empty=False)
     return pages.layout("Price an order", "/", view.source, ctx.banner, body)
+
+
+def _named(market: CanonicalMarket) -> str:
+    """The market as the All markets page names it: its title, and its outcome when the title
+    doesn't say it ("Who will win the Ballon d'Or in 2026? (Kylian Mbappe)")."""
+    label = market.outcome_label
+    return f"{market.title} ({label})" if label and label not in market.title else market.title

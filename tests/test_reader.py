@@ -539,3 +539,28 @@ def test_10_the_all_markets_page_links_a_model_read_pair_to_its_price(tmp_path, 
     text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
     assert "Buy on " in text and "Terms read by a model" in text
     assert "Confidence: Medium" in text
+
+
+def option_label(page):
+    """The order form's outcome, as the person sees it."""
+    outcome = re.search(r'<select name="outcome">(.*?)</select>', page, re.DOTALL).group(1)
+    return html.unescape(re.search(r"<option[^>]*>(.*?)</option>", outcome).group(1))
+
+
+def test_10_the_order_page_names_a_model_read_outcome(tmp_path, monkeypatch):
+    ballon_catalog(tmp_path, monkeypatch)
+    page = App(Settings(cache_dir=tmp_path, snapshot=PAIR)).respond(
+        "/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10"
+    )
+    assert option_label(page) == "Who will win the Ballon d'Or in 2026? (Kylian Mbappe)"
+
+
+def test_10_a_refused_pair_shows_why_and_its_market_id(tmp_path, monkeypatch):
+    ballon_catalog(tmp_path, monkeypatch, version="older")
+    monkeypatch.setattr(prompt, "PROMPT_VERSION", "feat-10.7")
+    page = App(Settings(cache_dir=tmp_path, snapshot=PAIR)).respond(
+        "/", f"outcome=catalog:{MBAPPE_K}&side=YES&quantity=10"
+    )
+    assert option_label(page) == MBAPPE_K
+    text = " ".join(re.sub(r"<[^>]+>", " ", html.unescape(page)).split())
+    assert "This pair can't be priced" in text and "Buy on " not in text
