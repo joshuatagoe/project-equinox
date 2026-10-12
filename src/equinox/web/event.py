@@ -19,7 +19,7 @@ NOT_LISTED = (
 
 def page(ctx: Context, params: dict[str, str]) -> str:
     if ctx.found is None:
-        return shell.layout("Markets", home.missing(), ctx)
+        return home.no_catalog(ctx)
     event = event_of(ctx.found, params.get("m", ""))
     if event is None:
         return shell.layout("Not found", f"<h1>Not found</h1>{shell.empty(NOT_LISTED)}", ctx)

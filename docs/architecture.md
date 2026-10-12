@@ -104,7 +104,7 @@ flowchart LR
 | `matcher/` | Equivalence rules, clusters, confidence, and for the catalog the title index (`index.py`, D50) and the comparison of every market (`compare.py`, D54) | Pure. Imports only `models/`. Contains no venue names. |
 | `router/` | Depth walking, fees, eligibility, decision, rationale and trace | Pure. Imports only `models/`. Contains no venue names. The time comes in as an argument. |
 | `sources.py` | Settings, data sources (snapshots and live), discovery with its pinned fallback, loading families, fetching books on demand | Wires adapters, matcher and router together for both interfaces; neither interface imports the other (D52). |
-| `catalog/` | `catalog refresh` (`__init__.py`): pages every open market through the adapters and compares them with `matcher/compare.py`; the catalog file (`store.py`): one SQLite database per refresh, searchable by title words (D53) | A failed refresh keeps the previous catalog (D48). |
+| `catalog/` | `catalog refresh` (`__init__.py`): pages every open market through the adapters and compares them with `matcher/compare.py`; the catalog file (`store.py`): one SQLite database per refresh, searchable by title words (D53); the model's decisions kept across a refresh (`carry.py`, D91); the server's hourly refresh (`background.py`, D90) | A failed refresh keeps the previous catalog (D48). |
 | `reader/` | The term reader (§6.5): the prompt, the model client and its cache, the checks, reading the catalog, and the evals | The model only fills in terms; deterministic checks and the matcher's rules decide (D57). |
 | `cli.py`, `cli_catalog.py` | Arguments, output and exit codes for `markets`, `match`, `simulate` and `catalog` | Calls `sources.py` and `catalog/`; no loading logic of its own. |
 | `server.py`, `web/` | The web UI's pages (§8.3), one module per page, and `/health` | Renders what the matcher and router decide, through `sources.py` and `catalog/`. Adds no matching or routing logic and names no venue. No JSON API (D21, D45). |
@@ -593,12 +593,13 @@ Server-rendered pages for the two people in `user/users.md`, built from the cata
 |---|---|---|
 | `/`, Markets | Jordan | The events both venues list (`catalog/events.py`), soonest to close first (D88), as cards: topic (D87), closing date, the three likeliest outcomes with what YES costs on each venue, the cheaper marked, and how many outcomes both venues list. Topic chips filter them; `?q=` searches either market's title words. With no catalog it says how to build one. |
 | `/event?m=`, an event | Jordan | Every outcome of the event both venues list, likeliest first: what YES pays in words, how it matched (Equinox's own reader, or a model, Medium at most), YES and NO on each venue, Buy YES and Buy NO. |
-| `/bet?m=&side=&quantity=&budget=`, the order ticket | Jordan and Morgan | The recommendation as the headline: which venue, the total including fees, the saving over the runner-up. Then each venue's fills, average price, fee and total or why it can't take the order, the router's rationale, data notes in plain words and the assumptions. Beside it, "Is this really the same bet?": how it matched, the verdict and confidence, one column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules) with differing rows marked, and the risk flags. |
+| `/bet?m=&side=&quantity=&budget=`, the order ticket | Jordan and Morgan | A line saying what comparing does and that nothing is bought, and fields that say what they mean (D92). The recommendation as the headline, then what the contracts pay: which venue, the total including fees, the saving over the runner-up. Then each venue's fills, average price, fee and total or why it can't take the order, the router's rationale, data notes in plain words and the assumptions. Beside it, "Is this really the same bet?": how it matched, the verdict and confidence, one column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules) with differing rows marked, and the risk flags. |
 
 Rules the pages keep:
 - Every order goes through `simulate`, and every match through the matcher and the catalog; the ticket prices a pair through `reader/pricing.py` from where the catalog was read (D78). A test checks that the ticket and `cli.main --json` show the same totals.
 - Only the pair being priced is read from the venues, with its order books (D49). If they can't be reached, the ticket says so and doesn't price.
-- The top bar says how old the catalog's prices are; the ticket's notes say how old each order book is.
+- The top bar says how old the catalog's prices are, whether a refresh is running or the last one failed, and has a Refresh button; the ticket's notes say how old each order book is.
+- With live data the server refreshes the catalog on start when it has none or it is an hour old, then hourly, and on Refresh (D90). Before the first catalog the home page says it is being built; with no catalog and no venues, that they can't be reached. A refresh keeps the model's decisions where both markets' rules are unchanged (D91); the server never calls the model.
 - Every string that came from a venue is HTML-escaped. Venue names come only from each market's `venue` field.
 - One stylesheet, light and dark, from phone width up; one script prices the ticket again as you type by fetching the ticket page itself (D89).
 - The server listens on 127.0.0.1 unless `--host` says otherwise.
@@ -698,7 +699,8 @@ src/equinox/
   cli.py                 # arguments and output only
   cli_catalog.py         # the catalog commands' output
   sources.py             # settings, data sources, discovery, books on demand (D49, D51)
-  catalog/  __init__.py  store.py  events.py  # refresh, its SQLite file, the events both venues list (D48, D53, D86)
+  catalog/  __init__.py  store.py  events.py  carry.py  background.py
+            # refresh, its SQLite file, the events both venues list, decisions kept, the hourly refresh
   server.py              # the web app's routes and /health (§8.3)
   web/      app.py  shell.py  home.py  event.py  ticket.py  same_bet.py  order.py  words.py  style.py  script.py
   tracked_events.json

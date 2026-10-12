@@ -47,6 +47,9 @@ h2 { font-size: 17px; margin: 0 0 12px; }
               background: var(--bg); color: var(--ink); font: inherit; }
 .find input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fresh { font-size: 13px; color: var(--muted); white-space: nowrap; }
+form.refresh { display: inline; margin: 0; }
+button.link { background: none; border: 0; padding: 0; font: inherit; font-size: 13px;
+              font-weight: 600; color: var(--accent); cursor: pointer; }
 .fresh::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px;
                  border-radius: 50%; background: var(--yes); vertical-align: 1px; }
 
@@ -109,8 +112,12 @@ main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 40px; }
   .ticket aside { position: sticky; top: 76px; }
 }
 form.order { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-             align-items: end; }
+             align-items: start; }
+form.order .btn { grid-column: 1 / -1; justify-self: start; }
 form.order label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+form.order small { font-size: 12px; }
+.intro { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+#result:empty { display: none; }
 form.order input[inputmode] { padding: 9px 12px; font: inherit; border: 1px solid var(--line);
                               border-radius: 8px; background: var(--bg); color: var(--ink);
                               width: 100%; min-width: 0; }

@@ -8,8 +8,10 @@ import os
 import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 from equinox import health
+from equinox.catalog.background import Refresher
 from equinox.sources import Settings
 from equinox.web import App
 
@@ -48,6 +50,24 @@ class Handler(BaseHTTPRequestHandler):
             return
         self._send(200, "text/html; charset=utf-8", page.encode("utf-8"))
 
+    def do_POST(self) -> None:  # noqa: N802
+        """Only Refresh posts: ask for a refresh, then go back to the page."""
+        app = type(self).app or default_app()
+        if self.path.partition("?")[0] != "/refresh" or not app.refresh():
+            self._send(404, "text/plain; charset=utf-8", b"not found\n")
+            return
+        self.send_response(303)
+        self.send_header("Location", self._back())
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    def _back(self) -> str:
+        """The page Refresh was pressed on, when it is one of this app's; else Markets."""
+        came = urlsplit(self.headers.get("Referer", ""))
+        if came.netloc != self.headers.get("Host") or not came.path.startswith("/"):
+            return "/"
+        return came.path + (f"?{came.query}" if came.query else "")
+
     def _send(self, status: int, content_type: str, body: bytes) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -69,7 +89,12 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1", help="default: this computer only")
     parser.add_argument("--port", type=int, default=8741)
     args = parser.parse_args()
-    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    settings = Settings.from_env(os.environ)
+    refresher = Refresher(settings) if settings.source == "live" else None
+    app = App(settings, refresher=refresher)
+    if refresher is not None:  # the catalog keeps itself fresh (D90)
+        refresher.start()
+    server = ThreadingHTTPServer((args.host, args.port), make_handler(app))
     print(f"Project Equinox is running. Open http://{args.host}:{args.port} in a browser.")
     server.serve_forever()
 

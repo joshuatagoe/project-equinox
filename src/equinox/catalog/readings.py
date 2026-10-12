@@ -109,24 +109,31 @@ def record(
     rows = [(r.market_id, r.call, r.terms, r.problem, r.evidence, model, prompt) for r in readings]
     with found.connect(write=True) as db:
         db.executemany("INSERT INTO readings VALUES (?, ?, ?, ?, ?, ?, ?)", rows)
+        # Each pair found once by its row, not by a scan per decision: a refresh that keeps
+        # thousands of decisions (D91) records them in seconds.
+        listed = db.execute("SELECT rowid, market_a, market_b FROM pairs")
+        rowids = {(a, b): rowid for rowid, a, b in listed}
         for d in decisions:
             db.execute(
-                "UPDATE pairs SET status = ?, reasons = ?, read_by = ? "
-                "WHERE market_a = ? AND market_b = ?",
-                (d.status, json.dumps(list(d.reasons)), d.read_by, d.a, d.b),
+                "UPDATE pairs SET status = ?, reasons = ?, read_by = ? WHERE rowid = ?",
+                (d.status, json.dumps(list(d.reasons)), d.read_by, rowids.get((d.a, d.b))),
             )
+        candidates: dict[str, list[tuple]] = {}
+        query = (
+            "SELECT market_a, market_b, status, score, reasons, read_by FROM pairs "
+            "WHERE status IN (?, ?)"
+        )
+        for row in db.execute(query, (SAME_BET, UNCLEAR)):
+            candidates.setdefault(row[0], []).append(row)
+            candidates.setdefault(row[1], []).append(row)
         for market in {m for d in decisions for m in (d.a, d.b)}:
-            _show_best_pair(db, market)
+            _show_best_pair(db, market, candidates.get(market, []))
         db.commit()
 
 
-def _show_best_pair(db: sqlite3.Connection, market: str) -> None:
-    """The market's status, partner and reasons from its best pair: same bet, then unclear."""
-    found = db.execute(
-        "SELECT market_a, market_b, status, score, reasons, read_by FROM pairs "
-        "WHERE (market_a = ? OR market_b = ?) AND status IN (?, ?)",
-        (market, market, SAME_BET, UNCLEAR),
-    ).fetchall()
+def _show_best_pair(db: sqlite3.Connection, market: str, found: list[tuple]) -> None:
+    """The market's status, partner and reasons from its best pair (`found`: its same-bet and
+    unclear pairs): same bet, then unclear."""
     if not found:
         db.execute(
             "UPDATE entries SET status = ?, rank = ?, partner = NULL, score = NULL, "

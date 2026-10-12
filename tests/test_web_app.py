@@ -104,27 +104,52 @@ def test_a_pair_that_only_looks_alike_never_appears(tmp_path):
     assert "No bet on both venues matches" in found
 
 
+def chips(page):
+    """The topic chips' labels, or [] when the page shows none."""
+    bar = re.search(r'<nav class="chips"[^>]*>(.*?)</nav>', page, re.S)
+    return re.findall(r"<a [^>]*>([^<]+)<span>", bar.group(1)) if bar else []
+
+
 def test_topics_narrow_the_events(tmp_path):
+    """Changed with the user's OK (G5, 2026-10-12): one topic shows no chips; the filter stays."""
     app = scores_app(tmp_path)
-    page = app.respond("/", "")
-    assert re.search(r'<a [^>]*href="/\?topic=Sports"[^>]*>Sports', page)
+    assert chips(app.respond("/", "")) == []  # every event is Sports: nothing to pick
     assert len(cards(app.respond("/", "topic=Sports"))) == 3
     none = app.respond("/", "topic=Politics")
     assert cards(none) == [] and "No events in Politics" in words(none)
 
 
+def test_two_topics_show_their_chips(tmp_path):
+    later = FED.model_copy(update={"observed_on": date(2026, 12, 20)})
+    entries = [
+        entry("f1", "alpha", "Fed holds rates in December", FED, topic="Economics"),
+        entry("f2", "beta", "No change in December", FED),
+        entry("g1", "alpha", "Final whistle bet", later, topic="Sports", day=20),
+        entry("g2", "beta", "Final whistle wager", later, day=20),
+    ]
+    catalog.build(entries, skipped=0, cache_dir=tmp_path, seconds=1.0)
+    page = App(Settings(source="fixtures", cache_dir=tmp_path)).respond("/", "")
+    assert chips(page) == ["All", "Economics", "Sports"]
+    assert re.search(r'<a [^>]*href="/\?topic=Sports"[^>]*>Sports', page)
+
+
 def test_an_event_with_no_topic_is_under_other(tmp_path):
-    page = mixed(tmp_path).respond("/", "")
-    assert re.search(r'href="/\?topic=Other"', page)
+    """Changed with the user's OK (G5): the card says Other; with one topic there are no chips."""
+    app = mixed(tmp_path)
+    page = app.respond("/", "")
+    assert cards(page)[0].startswith("Other") and chips(page) == []
+    assert len(cards(app.respond("/", "topic=Other"))) == 1
 
 
 def test_an_older_catalog_without_topics_still_opens(tmp_path):
+    """Changed with the user's OK (G5): every card says Other, and there are no chips."""
     score_catalog(tmp_path)
     with sqlite3.connect(catalog.store.latest(tmp_path)) as db:
         db.execute("ALTER TABLE entries DROP COLUMN topic")
     app = App(Settings(source="fixtures", snapshot=SCORES, cache_dir=tmp_path))
     page = app.respond("/", "")
-    assert len(cards(page)) == 3 and re.search(r'href="/\?topic=Other"', page)
+    assert len(cards(page)) == 3 and all(c.startswith("Other") for c in cards(page))
+    assert chips(page) == []
 
 
 def test_search_finds_the_outcome_within_its_event(tmp_path):

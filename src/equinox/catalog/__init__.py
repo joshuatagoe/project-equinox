@@ -1,8 +1,10 @@
 """Every open market on both venues, compared and saved for search (D48, D50; architecture 5.1).
 
 `refresh` reads each venue's listing of open markets page by page (`list_open`), compares every
-market (`matcher.compare`), and saves the result in the cache folder (`store.py`). A refresh that
-fails, on any page of either venue, raises CatalogError and leaves the previous catalog in place;
+market (`matcher.compare`), and saves the result in the cache folder (`store.py`); a model's
+decisions in the previous catalog are kept where both markets' rules are unchanged (`carry.py`).
+A refresh that fails, on any page of either venue, raises CatalogError and leaves the previous
+catalog in place;
 live data is never mixed with the snapshot here. `load_latest` opens the newest catalog for the
 command line and the web page.
 
@@ -20,7 +22,7 @@ from pathlib import Path
 
 from equinox.adapters.base import FetchError, VenueAdapter
 from equinox.adapters.fetch import FixtureFetcher, HttpFetcher
-from equinox.catalog import store
+from equinox.catalog import carry, store
 from equinox.catalog.store import Catalog
 from equinox.catalog.texts import TextStage
 from equinox.matcher.compare import compare
@@ -67,8 +69,10 @@ def refresh(
     page_size: int | None = None,
     max_pages: int | None = None,
 ) -> CatalogSummary:
-    """Read every open market, compare them and save the catalog. Raises CatalogError."""
+    """Read every open market, compare them and save the catalog, keeping the model's decisions
+    where both markets' rules are unchanged (D91). Raises CatalogError."""
     started, read_at = time.perf_counter(), datetime.now(UTC)
+    kept = carry.keep(settings.cache_dir)
     if settings.source != "live":
         page_size, max_pages = page_size or SAMPLE_PAGE_SIZE, max_pages or SAMPLE_PAGES
         read_at = FixtureFetcher(settings.snapshot).captured_at
@@ -77,9 +81,14 @@ def refresh(
         paging = _Paging(page_size, max_pages)
         entries, skipped = _read_venues(settings, live_fetcher, paging, stage, progress)
         seconds = time.perf_counter() - started
-        return build(
+        summary = build(
             entries, skipped, settings.cache_dir, seconds, read_at, source=source, texts=stage
         )
+    carried = carry.apply(kept, settings.cache_dir)
+    if carried:
+        plural = "" if carried == 1 else "s"
+        progress(f"Kept {carried:,} model decision{plural} from the previous catalog.")
+    return summary
 
 
 def _read_venues(

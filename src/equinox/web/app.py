@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from urllib.parse import parse_qs
 
 from equinox import catalog
+from equinox.catalog.background import Status
 from equinox.models import EquivalenceCluster
 from equinox.reader import pricing
 from equinox.sources import FIXTURES, LiveFetchers, Settings, ensure_books, snapshot_names
@@ -28,8 +29,12 @@ class App:
         *,
         live_fetcher: LiveFetchers | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+        refresher=None,
     ) -> None:
+        """`refresher` keeps the catalog fresh (`catalog.background.Refresher`); without one,
+        the catalog is refreshed from the command line."""
         self.settings = settings
+        self.refresher = refresher
         self.live_fetcher = live_fetcher
         self._clock = clock
 
@@ -40,12 +45,24 @@ class App:
             return None
         params = {k: v[-1] for k, v in parse_qs(query, keep_blank_values=True).items()}
         found, now = self._catalog(), self._clock()
-        fresh = ""
-        if found is not None:
-            old = words.age((now - found.summary.refreshed_at).total_seconds())
-            fresh = f"Prices as of the last refresh, {old} ago"
-        ctx = Context(found, now, self.settings.stale_after, fresh, self._pricer(found))
+        status = self.refresher.status() if self.refresher else Status()
+        ctx = Context(
+            found,
+            now,
+            self.settings.stale_after,
+            _fresh(found, now, status),
+            self._pricer(found),
+            status=status,
+            can_refresh=self.refresher is not None,
+        )
         return page(ctx, params)
+
+    def refresh(self) -> bool:
+        """Ask for a refresh now; False when this app has no refresher."""
+        if self.refresher is None:
+            return False
+        self.refresher.request()
+        return True
 
     def _catalog(self) -> catalog.Catalog | None:
         """The newest catalog, or None when there is none or it can't be read."""
@@ -72,3 +89,15 @@ class App:
         if source in snapshot_names():
             return replace(self.settings, source="fixtures", snapshot=FIXTURES / source)
         return self.settings
+
+
+def _fresh(found: catalog.Catalog | None, now: datetime, status: Status) -> str:
+    """The top bar's line on the data: how old the prices are, and any refresh going on."""
+    if found is None:
+        return "Getting every open market…" if status.running else ""
+    # Never less than none: a clock a little behind the catalog's isn't a catalog from the future.
+    old = words.age(max((now - found.summary.refreshed_at).total_seconds(), 0))
+    line = f"Prices as of the last refresh, {old} ago"
+    if status.running:
+        return f"Refreshing now. {line}"
+    return f"{line}. The last refresh failed" if status.problem else line

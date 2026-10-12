@@ -23,7 +23,7 @@ LEAD = (
 def page(ctx: Context, params: dict[str, str]) -> str:
     asked = params.get("q", "").strip()[:200]
     if ctx.found is None:
-        return shell.layout("Markets", missing(), ctx, words=asked)
+        return no_catalog(ctx, asked)
     topic = "" if asked else params.get("topic", "")
     found = events(ctx.found, asked, topic)
     number = _page_number(params.get("page", "1"))
@@ -33,7 +33,8 @@ def page(ctx: Context, params: dict[str, str]) -> str:
         chips = ""
     else:
         heading = f"<h1>Markets</h1><p class='lead'>{escape(LEAD)}</p>"
-        chips = _chips(topics(ctx.found), topic)
+        counted = topics(ctx.found)
+        chips = _chips(counted, topic) if len(counted) > 1 else ""  # one topic: nothing to pick
     cards = "".join(card(event, ctx) for event in shown)
     listing = f'<div class="grid">{cards}</div>' if cards else shell.empty(_none(asked, topic))
     pager = _pager(len(found), number, asked, topic)
@@ -53,11 +54,28 @@ def card(event: Event, ctx: Context) -> str:
     )
 
 
-def missing() -> str:
-    return "<h1>Markets</h1>" + shell.empty(
+BUILDING = (
+    "Getting every open market from both venues. This takes about three minutes; the page "
+    "updates itself."
+)
+DOWN = (
+    "The venues can't be reached right now, so there are no markets to show. Equinox tries "
+    "again every hour; press Refresh to try now."
+)
+
+
+def no_catalog(ctx: Context, words: str = "") -> str:
+    """The page before there is a catalog: being built, the venues down, or how to build one."""
+    if ctx.status.running:
+        return shell.layout("Markets", f"<h1>Markets</h1>{shell.empty(BUILDING)}", ctx, reload=15)
+    if ctx.status.problem:
+        detail = f"<p class='muted small'>{escape(ctx.status.problem)}</p>"
+        return shell.layout("Markets", f"<h1>Markets</h1>{shell.empty(DOWN)}{detail}", ctx)
+    command = shell.empty(
         "No markets yet. Equinox reads every open market on both venues into a catalog, "
         f"which takes about three minutes: run {REFRESH_COMMAND}."
     )
+    return shell.layout("Markets", f"<h1>Markets</h1>{command}", ctx, words=words)
 
 
 def _line(row: CatalogRow) -> str:
