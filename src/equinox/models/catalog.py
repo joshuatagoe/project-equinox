@@ -121,6 +121,8 @@ class CatalogRow:
     score: Decimal | None  # the title score, for a pair compared by title
     reasons: tuple[str, ...]  # why the pair matches or may match
     read_by: str | None = None  # the model that read both markets' terms, when one did (D57)
+    partner_yes: Decimal | None = None  # the matching market's best asks, shown beside its own
+    partner_no: Decimal | None = None
 
 
 def _age(seconds: float) -> str:

@@ -133,6 +133,34 @@ def pays_if(terms: ContractTerms) -> str:
     return f"the Fed {verb} its target rate {amount.get(how, f'by more than {size} bps')}"
 
 
+_SCORE = re.compile(r"^(full_time|first_half)_score_(\d+)_(\d+)$")
+_TEAMS = re.compile(r"^(.+?) vs\.? (.+?)(?:: | - )")
+_COMPARISONS = {"eq": "eq", "below": "le", "above": "ge"}  # a terms key's directions
+
+
+def yes_pays(key: str | None, event_title: str) -> str:
+    """What a share of YES pays, from a parser's terms key and the event's title (feat-13): a Fed
+    move, or an exact score with the teams as the event names them; a plain general sentence for
+    a market whose terms a parser didn't read."""
+    parts = (key or "").split("|")
+    if len(parts) >= 7 and parts[1] == FED_CHANGE and parts[-3] in _COMPARISONS:
+        terms = ContractTerms(
+            subject=parts[0],
+            measure=parts[1],
+            measured_by=parts[2],
+            observed_on=date.fromisoformat(parts[3]),
+            comparison=_COMPARISONS[parts[-3]],
+            threshold=Decimal(parts[-2]),
+            unit=parts[-1],
+        )
+        return f"YES pays $1 if {pays_if(terms)}."
+    score, teams = _SCORE.match(parts[1]) if len(parts) > 1 else None, _TEAMS.match(event_title)
+    if score and teams:
+        when = "after 90 minutes" if score[1] == "full_time" else "at half time"
+        return f"YES pays $1 if the score {when} is {teams[1]} {score[2]}, {teams[2]} {score[3]}."
+    return "YES pays $1 a share if this happens; NO pays $1 if it doesn't."
+
+
 def _fed_move(terms: ContractTerms) -> tuple[str, str, str] | None:
     """A Fed-change market read as a move: (cut or hike, size, how), or None if it isn't one."""
     t, comparison = terms.threshold, terms.comparison

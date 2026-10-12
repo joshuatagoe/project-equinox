@@ -11,7 +11,7 @@ From the user (2026-10-11): "it should be easy to understand what's happening, w
 ## Build (three commits, each with a browser check)
 
 1. **The order page.** It opens on the most likely outcome both venues list, lists those first and labels the rest "only on Kalshi" (D77). A search box finds any same bet in the catalog by its words, each pair once, priced from where the catalog was read (D78); numbers match whole (D79). The banner says how old a snapshot is, and old-data notes are in plain words (D80).
-2. **All markets.** One row per same bet: both venues' prices side by side, what YES pays in plain words, how the match was made, and one button to compare the cost. It opens on the same bets that can be priced; markets that only look alike, or are on one venue, are behind a filter. Each confidence level is explained in a line.
+2. **All markets.** One row per same bet: both venues' prices side by side, what YES pays in plain words, how the match was made, and one button to compare the cost (D81). It opens on the same bets that can be priced, a parser's matches first (D82); markets that only look alike, or have no match, are behind a filter. Each confidence level is explained in a line, and a model's reasons are folded under "How it matched" (D83). A market with no match says what was looked for, not that no other venue lists it (D84).
 3. **Data sources.** The test snapshots (pair, scores) leave the data menu. Last, and droppable: a snapshot can build its own catalog, so scores can be seen offline.
 
 ## Acceptance tests (write first, see each fail)

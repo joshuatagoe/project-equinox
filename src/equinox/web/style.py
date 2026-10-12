@@ -43,4 +43,14 @@ tr.differs td, tr.differs th { background: var(--differs); }
 details { margin-top: 8px; }
 footer { color: var(--muted); font-size: 13px; margin-top: 36px; }
 a { color: var(--accent); }
+.bet { padding: 14px 0; border-bottom: 1px solid var(--line); }
+table.prices { width: auto; margin: 8px 0; }
+table.prices td { padding: 3px 14px 3px 0; border: 0; }
+.bet details { margin-top: 6px; }
+.bet summary { color: var(--accent); cursor: pointer; }
+a.button { display: inline-block; margin-top: 8px; padding: 6px 14px; border-radius: 4px;
+           background: var(--accent); color: #fff; text-decoration: none; }
+form.find { display: flex; gap: 8px; align-items: end; margin: 0 0 14px; }
+form.find label { flex: 1; }
+ul.found { margin: 0 0 16px; }
 """

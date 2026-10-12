@@ -64,7 +64,7 @@ CREATE INDEX pairs_order ON pairs (status, score DESC);
 _ROW = """
 SELECT e.market_id, e.venue, e.event_title, e.title, e.outcome_label, e.yes_ask, e.no_ask,
        e.terms_key, e.status, e.partner, coalesce(p.described, p.title), e.score, e.reasons,
-       e.read_by
+       e.read_by, p.yes_ask, p.no_ask
 FROM entries e LEFT JOIN entries p ON p.market_id = e.partner
 """
 _TOKEN = re.compile(r"\w+")
@@ -118,20 +118,30 @@ class Catalog:
             self.summary = _load(db.execute("SELECT body FROM summary").fetchone()[0])
 
     def search(
-        self, words: str = "", venue: str = "", status: str = "", page: int = 1, per_page: int = 50
+        self,
+        words: str = "",
+        venue: str = "",
+        status: str = "",
+        page: int = 1,
+        per_page: int = 50,
+        pairs_once: bool = False,
     ) -> list[CatalogRow]:
-        """Markets whose titles contain every word (as a prefix), best status first, then in
-        the order the venues listed them, which keeps each event's markets together."""
-        where, args = _where(words, venue, status)
-        order = "ORDER BY e.rank, e.rowid LIMIT ? OFFSET ?"  # in listing order, by event
+        """Markets whose titles contain every word (as a prefix), best status first, then those
+        a parser matched before those a model read (feat-13), then in the order the venues
+        listed them, which keeps each event's markets together. With `pairs_once`, a same bet
+        is one row: the market whose ID sorts first (feat-13)."""
+        where, args = _where(words, venue, status, pairs_once)
+        order = "ORDER BY e.rank, e.read_by IS NOT NULL, e.rowid LIMIT ? OFFSET ?"
         with self.connect() as db:
             found = db.execute(
                 f"{_ROW} {where} {order}", (*args, per_page, (max(page, 1) - 1) * per_page)
             )
             return [_row(values) for values in found]
 
-    def count(self, words: str = "", venue: str = "", status: str = "") -> int:
-        where, args = _where(words, venue, status)
+    def count(
+        self, words: str = "", venue: str = "", status: str = "", pairs_once: bool = False
+    ) -> int:
+        where, args = _where(words, venue, status, pairs_once)
         with self.connect() as db:
             return db.execute(f"SELECT count(*) FROM entries e {where}", args).fetchone()[0]
 
@@ -205,8 +215,11 @@ def _pairs(entries: Sequence[CatalogEntry], found: Comparison):
         yield (*ids, pair.status, _text(pair.score), json.dumps(list(pair.reasons)), None)
 
 
-def _where(words: str, venue: str, status: str) -> tuple[str, list]:
+def _where(words: str, venue: str, status: str, pairs_once: bool = False) -> tuple[str, list]:
     clauses, args = [], []
+    if pairs_once:
+        clauses.append("NOT (e.status = ? AND e.partner IS NOT NULL AND e.partner < e.market_id)")
+        args.append(STATUSES[0])
     tokens = _TOKEN.findall(words.lower())
     if tokens:
         clauses.append("e.rowid IN (SELECT rowid FROM words WHERE words MATCH ?)")
@@ -223,7 +236,7 @@ def _where(words: str, venue: str, status: str) -> tuple[str, list]:
 
 def _row(values: tuple) -> CatalogRow:
     market_id, venue, event, title, label, yes, no, key, status, partner, named, score, why, by = (
-        values
+        values[:14]
     )
     return CatalogRow(
         market_id,
@@ -240,6 +253,8 @@ def _row(values: tuple) -> CatalogRow:
         _decimal(score),
         tuple(json.loads(why)),
         by,
+        _decimal(values[14]),
+        _decimal(values[15]),
     )
 
 
