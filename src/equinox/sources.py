@@ -4,9 +4,11 @@ Both interfaces, the command line and the web UI, load markets through this modu
 depends on the other (D52). For each venue it discovers the events of the families Equinox can
 read, falling back to the pinned events when discovery can't run (D47); lists their markets without
 order books; and fetches books only for the group being priced (D49). A live venue that fails is
-read from the snapshot instead (D17). Every snapshot folder is a data source (D51).
+read from the snapshot instead (D17). Every snapshot folder is a data source (D51); the data menu
+offers those named by their date alone (D85).
 """
 
+import re
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -48,9 +50,19 @@ class SettingsError(ValueError):
     """A setting that can't be used, reported to the user as bad input."""
 
 
+_DATED = re.compile(r"snapshot-\d{4}-\d{2}-\d{2}")
+
+
 def snapshot_names() -> list[str]:
     """Every snapshot folder, oldest first."""
     return sorted(p.name for p in FIXTURES.iterdir() if (p / "index.json").is_file())
+
+
+def offered_snapshots() -> list[str]:
+    """The snapshots the data menu offers: those named by their date alone. A capture named for
+    what it tests ("snapshot-2026-10-11-pair") holds a few markets for one test; it can still be
+    chosen by name (feat-13, D85)."""
+    return [name for name in snapshot_names() if _DATED.fullmatch(name)]
 
 
 def snapshot_path(name: str) -> Path:

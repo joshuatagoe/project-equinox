@@ -600,7 +600,7 @@ Rules the pages keep:
 - Every order goes through `simulate`, and every match through the matcher. A test checks that the page and `cli.main --json` show the same totals.
 - Plain-language names ("No change", "Cut 50 bps or more", "Pays YES if the Fed leaves its target rate unchanged") are written from the contract terms, keyed by measure, never by venue.
 - Every string that came from a venue is HTML-escaped.
-- The data selector lists every snapshot folder and live data (D51). `snapshot-2026-10-10` is the default; newer snapshots and live data show every discovered meeting, one board table per meeting. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
+- The data selector lists the snapshots named by their date alone and live data (D51, D85); a capture named for one test (`-pair`, `-scores`) opens only by name, and the selector then shows it. `snapshot-2026-10-10` is the default; newer snapshots and live data show every discovered meeting, one board table per meeting. Live data is read on request, cached for 60 seconds, and falls back to the snapshot per venue (D17). The banner says which, and when.
 - Books are fetched on demand: for the outcome being priced, and for the cross-venue groups on the board (D49).
 - Basis points are explained in words wherever they appear: "Cut 25 bps (0.25 percentage points)", with a one-line note that 1 bp is 0.01 percentage point.
 - The server listens on 127.0.0.1 unless `--host` says otherwise.

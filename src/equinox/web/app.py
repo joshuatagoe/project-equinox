@@ -17,7 +17,14 @@ from equinox.adapters.fetch import FixtureFetcher
 from equinox.models import EquivalenceCluster
 from equinox.reader import pricing
 from equinox.reader.pricing import PricingError
-from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
+from equinox.sources import (
+    FIXTURES,
+    LiveFetchers,
+    Loaded,
+    Settings,
+    offered_snapshots,
+    snapshot_names,
+)
 from equinox.web import board, catalog_order, markets, match, order, pages, search, words
 from equinox.web.view import PageContext, View, build_view, holding
 
@@ -105,9 +112,10 @@ class App:
             return view
 
     def _banner(self, view: View, path: str, params: dict[str, str]) -> pages.Banner:
-        choices = [
-            (name, f"Snapshot {name.removeprefix('snapshot-')}") for name in snapshot_names()
-        ]
+        offered = offered_snapshots()
+        if view.source != "live" and view.source not in offered:
+            offered.append(view.source)  # opened by name: the menu still says what is shown
+        choices = [(name, f"Snapshot {name.removeprefix('snapshot-')}") for name in offered]
         choices.append(("live", "Live prices"))
         if view.source == "live":
             age = int((self._clock() - view.read_at).total_seconds())
