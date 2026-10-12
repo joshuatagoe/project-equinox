@@ -26,7 +26,7 @@ def panel(pair: Pair, keys: tuple[str | None, str | None]) -> str:
     table = _table(pair, keys) if all(keys) else ""
     return (
         "<details><summary>How it was decided</summary>"
-        f"{table}<p class='small'>{escape(why(pair, keys))}</p></details>"
+        f'<div class="explain">{table}<p>{escape(why(pair, keys))}</p></div></details>'
     )
 
 

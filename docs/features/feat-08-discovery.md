@@ -1,5 +1,7 @@
 # feat-08: Find every Fed meeting, price on demand, and say what bps means
 
+> **Web parts replaced by feat-14 (D86).** The board and the data selector are gone; discovery and the command line stand.
+
 **Lane:** after chore-01. **Depends on:** chore-01 merged.
 **Implements:** D47, D49 (books on demand), D51; architecture §2, §5.1, §8.2, §8.3 and §11; venue facts K12, K13, P11, P12.
 **Owns only these files:**

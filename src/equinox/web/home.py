@@ -62,7 +62,7 @@ BUILDING = (
 )
 DOWN = (
     "The venues can't be reached right now, so there are no markets to show. Equinox tries "
-    "again every hour; press Refresh to try now."
+    "again every minute; press Refresh to try now."
 )
 
 

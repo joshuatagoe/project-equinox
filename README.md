@@ -2,7 +2,7 @@
 
 Equinox compares prediction markets across venues. It reads Kalshi and Polymarket through their public APIs, turns each venue's markets into one venue-neutral shape, and groups markets that pay out under exactly the same conditions. Then it simulates a hypothetical order on every market in a group and picks the cheapest venue that can fill it, fees and order-book depth included. Every decision comes with a written explanation: why the markets were matched, what each venue would cost, why a venue was excluded, and what could still go wrong.
 
-It is an infrastructure prototype, not a trading product. Nothing is bought or sold. The only thing Equinox saves is its catalog of open markets, which it can rebuild at any time (D48).
+It is an infrastructure prototype, not a trading product. Nothing is bought or sold. Equinox saves only its catalog of open markets and a cache of the model's answers. The catalog can be rebuilt at any time; the model's decisions in it are kept across a refresh where both markets' rules are unchanged, and otherwise come back with a new `catalog read` (D48, D91).
 
 ## Run it
 
@@ -44,15 +44,15 @@ PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISIO
 
 Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
 
-Equinox finds the markets itself (D47). For each event family it can read, today Fed rate decisions, it asks each venue for every open event: Kalshi by its `KXFEDDECISION` series, Polymarket by its `fed-rates` tag, keeping only open "Fed Decision in …?" events. On 2026-10-11 that was 11 meetings on Kalshi and 3 on Polymarket, and the three meetings both list (October, December, January) are matched outcome by outcome. Order books are read only for the group being priced (D49).
+Equinox finds the markets itself (D47). For each family it discovers, today Fed rate decisions (exact scores and model-read markets come from the catalog), it asks each venue for every open event: Kalshi by its `KXFEDDECISION` series, Polymarket by its `fed-rates` tag, keeping only open "Fed Decision in …?" events. On 2026-10-11 that was 11 meetings on Kalshi and 3 on Polymarket, and the three meetings both list (October, December, January) are matched outcome by outcome. Order books are read only for the group being priced (D49).
 
-`--source fixtures` reads a saved snapshot, so the numbers below never change. `--snapshot NAME` picks one: `snapshot-2026-10-10` (the default) holds the October meeting only and predates discovery, so it uses the pinned events in `src/equinox/tracked_events.json` and says so; `snapshot-2026-10-11` holds every meeting discovery found. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded every market and routed the first demo order the same way. If a venue fails during a live run, its markets come from the snapshot and the output says so (D17).
+`--source fixtures` reads a saved snapshot, so the numbers below never change. `--snapshot NAME` picks one: `snapshot-2026-10-10` (the default) holds the October meeting only and predates discovery, so it uses the pinned events in `src/equinox/tracked_events.json` and says so; `snapshot-2026-10-11` holds every meeting discovery found. `--source live` reads the venues' public APIs; a live run on 2026-10-10 loaded every market and routed the first demo order the same way. If a venue fails while loading the Fed meetings live, its markets come from the snapshot and the output says so (D17); a pair from the catalog is never priced from a snapshot.
 
 ### Every open market
 
 `python -m equinox catalog refresh` reads every open market on Kalshi and Polymarket, compares them, and saves the result in `.cache/equinox/` (git ignores it; `EQUINOX_CACHE_DIR` moves it). The recorded refresh on 2026-10-11 read 287,523 markets in 286 requests: a 151 MiB download (gzip) and 158 seconds in all. It needs about 400 MB of free memory; that run peaked at 383 MiB, and the saved file was 110 MB. If any request fails after two retries, the refresh stops and the previous catalog is kept (D55). A refresh keeps the model's decisions where both markets' rules are unchanged, so it never calls the model (D91). `--source fixtures --snapshot snapshot-2026-10-11` builds one from that snapshot's small sample instead: 840 markets, in under a second. The older default snapshot holds no sample.
 
-Of the 287,523 markets in that refresh, 15 outcomes are the same bet on both venues (the Fed meetings both list) and can be priced. 10,957 pairs have similar titles but no readable terms: they are shown as unclear and never routed. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has every count and examples of both.
+In that refresh of 287,523 markets, before the exact-score parser and the model's readings, only 15 outcomes (the Fed meetings both list) were the same bet, and 10,957 pairs had similar titles but no readable terms: shown as unclear and never routed. On 2026-10-12, 860 outcomes were the same bet by their parsed terms and 220 as read by a model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has every count and examples of both.
 
 ### Reading terms with a model
 
@@ -73,15 +73,15 @@ $env:PYTHONPATH = "src"
 .venv\Scripts\python -m equinox.server
 ```
 
-Then open http://127.0.0.1:8741 (on macOS and Linux, `make run`). The app is built from the catalog of every open market. With live data the server builds it on first start (about three minutes; the page says so and updates itself) and refreshes it every 6 hours; Refresh in the top bar does it now, and grows more prominent as the prices age (D90, D98). While a refresh runs, the pages keep the markets they have and say they are updating (D95). The flow follows the user stories in [user/users.md](user/users.md) (D86):
+Then open http://127.0.0.1:8741 (on macOS and Linux, `make run`). The app is built from the catalog of every open market. With live data the server refreshes the catalog when it starts with none or one 6 hours old (about three minutes; the page says so and updates itself), then every 6 hours, and never calls the model; Refresh in the top bar does it now, and grows more prominent as the prices age (D90, D98). While a refresh runs, the pages keep the markets they have and say they are updating (D95). The flow follows the user stories in [user/users.md](user/users.md) (D86):
 
-- **Markets.** Every event both venues list, as cards: its topic, when it closes, its likeliest outcomes and what one YES share costs on each venue, the cheaper one marked. Browse by topic or search, for example "coventry 2-1" or "fed december".
+- **Markets.** Every event both venues list, as cards: its topic (the venue's category for the event, D87), when it closes, its likeliest outcomes and what one YES share costs on each venue, the cheaper one marked. Browse by topic or search, for example "coventry 2-1" or "fed december".
 - **An event.** Every outcome both venues list, with YES and NO on each venue, what YES pays in words, whether Equinox's own reader matched it or a model read it, and Buy YES / Buy NO.
-- **The order ticket.** Buy YES or NO, the number of contracts (each pays $1 if you're right) and, if you like, the most you'd spend; a venue that would cost more is ruled out. The comparison checks what each venue is selling at each price and adds its fees, and updates as you change the order; nothing is bought (D92, D96). The answer comes first: which venue, what it costs including fees, how much it saves, and what the contracts pay. Then the cost on each venue or why it can't take the order, why, and notes on the data. It prices again as you type, from the venues' order books for that one pair. Beside it, **Is this really the same bet?**: how the two markets were matched, the confidence and its reason, each venue's rules side by side with the differences marked, and the risks.
+- **The order ticket.** Buy YES or NO, the number of contracts (each pays $1 if you're right) and, if you like, the most you'd spend; a venue that would cost more is ruled out. The comparison checks what each venue is selling at each price and adds its fees, and updates as you change the order; nothing is bought (D92, D96). The answer comes first: which venue, what it costs including fees, how much it saves, and what the contracts pay. Then the cost on each venue or why it can't take the order, why, and notes on the data, all from the venues' order books for that one pair. Without JavaScript, a Compare venues button does the same. Beside it, **Is this really the same bet?**: how the two markets were matched, the confidence and its reason, each venue's rules side by side with the differences marked, and the risks.
 
 - **Matches.** For checking Equinox's work: every pair it kept, by how it was decided (exact matches, same bets a model read, pairs that only look alike and are never priced, pairs a model ruled different), with why. A same bet opens its ticket's rules side by side (D94).
 
-The top bar says how old the catalog's prices are. If the venues can't be reached, the ticket says so and doesn't price. The pages call the same code as the command line, so the two agree, and a test checks it. `/health` returns the server's status as JSON. The command line keeps the snapshots (`--snapshot`) and its `markets`, `match` and `simulate` commands; the old Market board's view of each Fed meeting is now that meeting's event page. Architecture §8.3 has the details.
+The top bar says how old the catalog's prices are. If the venues can't be reached, the ticket says so and doesn't price. The pages call the same code as the command line, so the two agree, and a test checks it. `/health` returns the server's status as JSON. The command line keeps the snapshots (`--snapshot`) and its `markets`, `match` and `simulate` commands; each Fed meeting both venues list has its own event page. Architecture §8.3 has the details.
 
 ## Demo
 
@@ -115,7 +115,7 @@ The rows with 100 NO and 5,000 NO pick different venues for the same market. Kal
 flowchart LR
     subgraph IN["Interfaces"]
         CLI["cli.py, cli_catalog.py<br/>markets, match, simulate, catalog"]
-        UI["server.py and web/<br/>markets, event and order-ticket pages"]
+        UI["server.py and web/<br/>markets, event, order-ticket and matches pages"]
     end
     SRC["sources.py and catalog/<br/>data sources, discovery, books on demand,<br/>the catalog and its SQLite file"]
     subgraph AD["Adapters: the only venue-aware code"]
@@ -149,9 +149,9 @@ flowchart LR
 | `matcher/` | Equivalence rules, clusters and confidence; for the catalog, the title index and the comparison of every market | Pure. Imports only `models/`. Names no venue. |
 | `router/` | The depth walk, fees, eligibility, the decision, the rationale and the trace | Pure. Imports only `models/`. Names no venue. Time comes in as an argument. |
 | `sources.py` | Settings, data sources (snapshots and live), discovery, books on demand | Wires adapters, matcher and router together for both interfaces. |
-| `catalog/` | Reading every open market, comparing them, and the saved SQLite file | A failed refresh keeps the previous catalog. |
+| `catalog/` | Reading every open market, comparing them, keeping the model's decisions across a refresh, the server's background refresh, and the saved SQLite file | A failed refresh keeps the previous catalog. |
 | `cli.py`, `cli_catalog.py` | Arguments, output, exit codes | No loading logic of its own. |
-| `server.py`, `web/` | The web app's pages (Markets, an event, the order ticket) and `/health` | Renders what the matcher and router decide, through `sources.py` and `catalog/`. No matching or routing logic of its own. |
+| `server.py`, `web/` | The web app's pages (Markets, an event, the order ticket, Matches), Refresh and `/health` | Renders what the matcher and router decide, through `sources.py` and `catalog/`. No matching or routing logic of its own. |
 
 The brief asks that routing logic contain no venue-specific assumptions. `tests/test_layering.py` checks it on every run: it fails if `matcher/` or `router/` imports anything but the models, the standard library and pydantic, or if the word "kalshi", "polymarket" or "meridian" appears in their code. Venue names reach the output only through each market's own `venue` field.
 
@@ -172,7 +172,7 @@ Each module has one job, stated at its top. Where to look for each part of the l
 | How is a venue chosen, and the cost worked out? | `src/equinox/router/depth.py` (walking the book), `src/equinox/router/engine.py` (eligibility and the decision) |
 | Where is the explanation written? | `src/equinox/router/rationale.py` |
 | Where do markets come from: live data or a snapshot? | `src/equinox/sources.py` |
-| How is every open market read and compared? | `src/equinox/catalog/__init__.py` (the refresh), `src/equinox/matcher/index.py` (finding candidates), `src/equinox/matcher/compare.py` (same bet, unclear, no match), `src/equinox/catalog/store.py` (the saved file) |
+| How is every open market read and compared? | `src/equinox/catalog/__init__.py` (the refresh), `src/equinox/matcher/index.py` (finding candidates), `src/equinox/matcher/compare.py` (same bet, unclear, no match), `src/equinox/catalog/store.py` (the saved file), `src/equinox/catalog/carry.py` (keeping the model's decisions, D91), `src/equinox/catalog/background.py` (the server's 6-hour refresh, D98) |
 | How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets), `src/equinox/reader/pricing.py` (when a catalog pair may be routed), `src/equinox/reader/check.py` (the model as a cross-check of the parsers) |
 | How are exact scores read? | `src/equinox/adapters/kalshi_terms.py` and `polymarket_terms.py` (each venue's wording), `src/equinox/adapters/scores.py` (one terms shape), `src/equinox/adapters/teams.py` and `team_aliases.json` (team names) |
 | How do the command line and the web app present it? | `src/equinox/cli.py`, `src/equinox/cli_catalog.py`; the web app: `src/equinox/catalog/events.py` (the events both venues list), `src/equinox/web/home.py`, `src/equinox/web/event.py`, `src/equinox/web/ticket.py` (the order ticket), `src/equinox/web/same_bet.py`, `src/equinox/web/matches.py` and `src/equinox/catalog/review.py` (match review) |
@@ -182,13 +182,13 @@ The engines in `matcher/` and `router/` import only the models and never name a 
 
 ## Equivalence and routing, in brief
 
-**Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed. Terms come from a parser for Fed decisions and, for other families, from a model whose readings are checked against the venues' text (D57, D60).
+**Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed. Terms come from a parser for Fed decisions and exact scores and, for other markets, from a model whose readings are checked against the venues' text (D57, D60, D61).
 
 **Routing** ([docs/ROUTING.md](docs/ROUTING.md)). For one order, every market in the group is simulated: walk the order book from the cheapest ask, charge each venue's own fee formula level by level, and record every reason the venue can't take the order. The cheapest venue that can fill the whole order within budget wins (D6, D7). The trace says why, what each venue would have cost, and what the match risks are.
 
 ## Why Python
 
-The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools when justified. Equinox is a local, single-process prototype: one command at a time, about 30 HTTP requests to price an order, and 286 to read every open market into a SQLite file (D1, D48, D53). Python's standard library covers the HTTP client, exact decimal arithmetic and time zones, and `pydantic` gives the canonical model its validation. The repository and both CI configurations were already set up for Python 3.12. Clarity of the matching and routing logic mattered more here than the runtime.
+The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools when justified. Equinox is a local, single-process prototype (a command, or the web server with its background refresh): about 30 HTTP requests to price an order, and 286 to read every open market into a SQLite file (D1, D48, D53). Python's standard library covers the HTTP client, exact decimal arithmetic and time zones, and `pydantic` gives the canonical model its validation. The repository and both CI configurations were already set up for Python 3.12. Clarity of the matching and routing logic mattered more here than the runtime.
 
 ## Where the reasoning is
 
@@ -201,9 +201,9 @@ The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools 
 
 Architecture §13 lists them with their reasons. In short:
 
-- Two families have term parsers: Fed rate decisions and exact scores (D61). Other markets are read by a model (D57); those pairs are priced at Medium confidence at most, and only while the recorded evals show no false same-bet (D58). The model can reverse a score: 7 of its 456 score same bets were false, which the evals didn't catch (feat-12 adds them as traps).
+- Two families have term parsers: Fed rate decisions and exact scores (D61). Other markets are read by a model (D57); those pairs are priced at Medium confidence at most, and only while the recorded evals show no false same-bet (D58). The model once reversed scores: 7 of its 456 score same bets on 2026-10-12 were false. They are now an eval set, and since the reader reads a score in parts (D71) no set has a false same-bet.
 - A team name the rules and the alias table don't match loses its pair until the table grows (D62); the cross-check lists such pairs.
-- The catalog is as fresh as its last refresh, and a title pair is found only if the markets close within 3 days and share two informative words (D50).
+- The catalog is as fresh as its last refresh: in the web app, up to 6 hours old unless someone presses Refresh (D98), though the ticket always prices from live order books. A title pair is found only if the markets close within 3 days and share two informative words (D50).
 - Discovery rules are written per venue and family (D47): a venue that renames its series or tag needs a code change, and until then live runs use the pinned events.
 - Order books are treated as frozen at capture (A2). One order goes to one venue; there is no split routing.
 - Fees are list fees: Polymarket's taker rebates are ignored (A5), and Kalshi fees are rounded up to the cent (A3).

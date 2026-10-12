@@ -1,5 +1,7 @@
 # feat-07: Web UI for Jordan and Morgan
 
+> **Superseded by feat-14 (D86).** The order page on `/`, `/board`, `/match`, the snapshot default and the 60-second live cache are gone; Morgan's view is now Matches (D94).
+
 **Lane:** after feat-06. **Depends on:** feat-01 to feat-06 merged.
 **Implements:** the brief's "produce a decision, and clearly explain why that venue was selected", "log and explain its matching and routing decisions" and "handle imperfect data gracefully and document assumptions", for the two people in `user/users.md`. D45, D46.
 **Owns only these files:**

@@ -1,5 +1,7 @@
 # feat-09: Read and compare every open market
 
+> **Web parts replaced by feat-14 (D86).** The All markets page is gone; the catalog and its commands stand.
+
 **Lane:** after feat-08. **Depends on:** feat-08 merged (its adapters, `sources.py`, and the catalog sample in `snapshot-2026-10-11`).
 **Implements:** D48, D49 (the catalog tier), D50; architecture §2, §6.3, §8.2, §8.3 and §11; venue facts K12 and P11.
 **Owns only these files:**

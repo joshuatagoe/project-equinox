@@ -42,14 +42,14 @@ Follow the project skills in `.claude/skills/`:
 
 ## Checks
 
-The one check is `scripts/gate.py`: ruff lint, ruff format, then pytest. GitHub Actions runs it on every push and pull request, and is the CI of record. GitLab runs the same job only when a project runner is registered and `EQUINOX_GITLAB_RUNNER` is set (D40).
+The one check is `scripts/gate.py`: ruff lint, ruff format, then pytest. GitHub Actions runs it on every push to main and every pull request, and is the CI of record. GitLab runs the same job only when a project runner is registered and `EQUINOX_GITLAB_RUNNER` is set (D40).
 
 - Windows: `.venv\Scripts\python scripts\gate.py`
 - macOS, Linux and CI: `make gate`
 
 Set up a venv with `uv venv --python 3.12 .venv` and `uv pip install --python .venv -r requirements.txt`. A new git worktree does not get the main checkout's `.venv`: run those two commands inside the worktree first.
 
-No test touches the network. Tests read fixtures under `src/equinox/fixtures/`, which hold raw venue responses. Never edit a fixture file; capture a new snapshot instead.
+No test touches the network. Tests read fixtures under `src/equinox/fixtures/`, which hold raw venue responses. Never edit a fixture file; capture a new snapshot instead. Tests also replay the model's answers in `evals/recorded.json` and check them against `evals/scores.json`; only `python -m equinox.reader.evals --record`, which calls the model, rewrites those two files.
 
 ## Working rules
 

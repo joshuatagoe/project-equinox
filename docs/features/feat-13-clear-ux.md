@@ -1,5 +1,7 @@
 # feat-13: A clearer app: what's happening, where the data comes from, why each decision
 
+> **Superseded by feat-14 (D86).** The order page, All markets and the data menu are gone.
+
 **Lane:** after feat-12. **Depends on:** the catalog (feat-09), catalog pricing (feat-10, feat-11).
 **Implements:** D77 onward.
 **Owns only these files:** `src/equinox/web/` (order, search, view, pages, words, app, markets, markets_html), `src/equinox/catalog/store.py` (search), `src/equinox/sources.py` (snapshots offered), `tests/test_web_*.py`, README, architecture §8.3, DECISIONS, AI_USAGE.

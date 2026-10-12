@@ -70,8 +70,8 @@ def _pair(p: Pair, keys: tuple[str | None, str | None]) -> str:
     return (
         f'<div class="pair"><div class="sides">{sides}</div>'
         f'<p class="small"><span class="tag {style}">{badge}</span> {escape(note)}</p>'
-        + explain.panel(p, keys)
-        + f"{check}</div><!--/pair-->"
+        + f'<div class="foot">{explain.panel(p, keys)}{check}</div>'  # one row of actions (D100)
+        + "</div><!--/pair-->"
     )
 
 

@@ -44,7 +44,7 @@ The last two rows route the same market's NO to different venues. Kalshi is chea
 
 ## Books on demand
 
-Reading every market's order book up front would be wasteful: a board of 11 meetings is 70 markets and about 85 book requests, and the router only ever needs one group at a time. So markets load from their venue's listing, which already carries each outcome's best ask (K12, P11), and the full books are fetched only for the group being priced, or for the groups on the board that more than one venue lists (D49). The router refuses a group whose books were not fetched, so a quote can never be built from a listing price alone.
+Reading every market's order book up front would be wasteful: the 11 Fed meetings are 70 markets and about 85 book requests, and the router only ever needs one group at a time. So markets load from their venue's listing, which already carries each outcome's best ask (K12, P11), and the full books are fetched only for the group being priced: the pair on the order ticket, or the group `simulate` names (D49, D86). The router refuses a group whose books were not fetched, so a quote can never be built from a listing price alone.
 
 ## Who can take the order
 
@@ -134,7 +134,7 @@ The fit-check markets show the same for test money. Meridian-style AAPL-330 is c
 
 ## Pairs a model read
 
-The router doesn't know how a group's terms were read. A same bet a model read (EQUIVALENCE.md, D57) reaches it through the same cluster as a parser-read one, with two differences in what it is given: the pair is priced only when the committed evals show zero false same-bets for the model and prompt that read it (D58), and its cluster carries the risk flag "Terms read by a model", which the trace prints and which keeps the confidence at Medium. On 2026-10-11, 10 YES on Kalshi's `KXBALLONDOR-26-KMBA` (Mbappé wins the 2026 Ballon d'Or), read as the same bet as Polymarket `608540`, routed to Polymarket at $0.22 against $0.33 on Kalshi; the trace also flagged that Kalshi names foxnews.com and Polymarket francefootball.fr as the source.
+The router doesn't know how a group's terms were read. A same bet a model read (EQUIVALENCE.md, D57) reaches it through the same cluster as a parser-read one, with two differences in what it is given: the pair is priced only when the committed evals show zero false same-bets for the model and prompt that read it (D58), and its cluster carries the risk flag "Terms read by a model", which the trace prints and which keeps the confidence at Medium. Pricing uses the latest readings of the two markets that agree, since a market read in several requests can be named differently in each (D75). A Polymarket market priced from the catalog that names no resolution source, on itself or its event, is built with "an unnamed source", and the trace flags it (D76). On 2026-10-11, 10 YES on Kalshi's `KXBALLONDOR-26-KMBA` (Mbappé wins the 2026 Ballon d'Or), read as the same bet as Polymarket `608540`, routed to Polymarket at $0.22 against $0.33 on Kalshi; the trace also flagged that Kalshi names foxnews.com and Polymarket francefootball.fr as the source.
 
 ## Pairs a parser read from the catalog
 
@@ -153,5 +153,5 @@ Every trace carries these, worded for the reader (DECISIONS.md, Assumptions):
 ## Limits
 
 - One order goes to one venue. Splitting an order across venues, selling, and maker orders are out of scope (D6).
-- The simulation is only as fresh as its books. Snapshot runs warn on every quote; live runs read the books once, in about 18 requests.
+- The simulation is only as fresh as its books. Snapshot runs warn on every quote; a live run reads the listings, then the books of the one group it prices (D49). The order ticket always prices from live books; the catalog's listed prices can be up to 6 hours old (D98).
 - A venue's per-order costs that don't scale with contracts, such as Solana transaction fees on Meridian, aren't modelled (DECISIONS.md, "Cut").

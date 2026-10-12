@@ -7,7 +7,7 @@ How AI was used on this project: tools, what worked, where it misled us, and how
 - **Antigravity agent session** — wrote `docs/prd.md`, ran an "architectural review" subagent (`docs/architectural_review.md`), wrote `docs/architecture.md`, `user/users.md`, and feature PRDs `docs/features/feat-01` to `feat-04`.
 - **Claude Code (Claude Opus 5.5)** — reviewed those documents against the brief, ran the specified code, and ran research subagents for venue facts. In the implementation phase it wrote feat-01, feat-05 and feat-06 itself, and ran feat-02a, 02b, 03 and 04 as four parallel subagents, each in its own git worktree, then reviewed and merged their work. It kept the status board in Notion through the Notion MCP server.
 
-**The product itself uses no AI.** Matching is rule-based on contract terms (D15), and routing is arithmetic on order books. AI was used to build Equinox, not inside it. An AI matcher was considered unnecessary for the one event family with structured terms, and too hard to explain for the families without them.
+**At runtime, the only AI is the term reader** (D57). `catalog read` and `catalog check` ask `claude-haiku-5-5` to read markets' terms; code checks every reading against the venue's own text, and the matcher's rules decide. The server never calls the model (D91). Fed decisions and exact scores are read by parsers (D61), and routing is arithmetic on order books. Before feat-10 the product used no AI: an AI matcher was thought unnecessary for the one family with structured terms, and too hard to explain for the rest; reading terms with a model and deciding them with rules (D57) answered the second worry.
 
 ## 2026-10-10 — PRD, review and architecture (Antigravity)
 
@@ -29,7 +29,7 @@ How AI was used on this project: tools, what worked, where it misled us, and how
 7. **The AI widened "check that the architecture could handle Meridian" into building a Meridian adapter.** After the user said to assume Meridian has an API like the other venues, the plan gained a Meridian adapter lane, a synthetic Meridian fixture, a stock-market parser for Polymarket and CLI demo rows. The user corrected it: the goal is robustness to a venue like Meridian, not integration. Correction: D26. The check is now a paper mapping (architecture §9.1) plus hand-built test markets run through the real matcher and router, and the adapter, fixture, parser and demo rows are cut. Lesson: "make sure the system could handle X" asks for evidence that the design fits, not for X to be built.
 8. **The AI pushed to the wrong host and skipped GitHub.** Asked to push, it sent the branch to `origin`, which pointed at origin.cursor.com and stalled on a credentials dialog. Then, after the user said the origin is labs.gauntletai.com, it pushed to GitLab only, although the README names both GitHub and GitLab. The user asked "did we also push to github?". Correction: D34, plus a remotes table in the README and AGENTS.md. Lesson: before any push, list the remotes and compare them with the hosts the project names.
 
-## 2026-10-10 — Implementation in Claude Code
+## 2026-10-10 to 2026-10-12 — Implementation in Claude Code
 
 ### What worked
 - **Fixed shapes and frozen test data first.** feat-01 wrote the models and a golden file of 21 canonical markets before anything else, so four lanes could then run at once in separate worktrees with no shared files. Put together, the four passed the gate at the first try (217 tests).

@@ -4,12 +4,12 @@ The brief asks what "equivalent" means and why. This is Equinox's answer, how th
 
 ## How Equinox finds the markets to compare
 
-Equinox doesn't start from a list of pairs. For each event family it can read (today, Fed rate decisions) it asks each venue for every open event of that family, then matches whatever it finds (D47):
+Equinox doesn't start from a list of pairs. On the command line, for each event family it discovers (today, Fed rate decisions), it asks each venue for every open event of that family, then matches whatever it finds (D47):
 
 - **Kalshi** lists every meeting in the `KXFEDDECISION` series (venue fact K13).
 - **Polymarket** tags its Fed events `fed-rates`. The tag also covers about 34 other Fed and Treasury events, and closed 2025 events with near-identical titles still exist, so only open, neg-risk events titled "Fed Decision in …?" are kept (P12).
 
-On the 2026-10-11 snapshot that finds 11 meetings on Kalshi and 3 on Polymarket. The matcher then pairs the three meetings both venues list (October, December and January), outcome by outcome: 15 groups of two. The other 40 Kalshi markets are groups of one: Equinox can still price them on Kalshi, but there is nothing to compare them with. If discovery can't run, for example on the 2026-10-10 snapshot, which was captured before discovery existed, the pinned events in `tracked_events.json` are used and the output says so.
+On the 2026-10-11 snapshot that finds 11 meetings on Kalshi and 3 on Polymarket. The matcher then pairs the three meetings both venues list (October, December and January), outcome by outcome: 15 groups of two. The other 40 Kalshi markets are groups of one: the command line can still price them on Kalshi, but there is nothing to compare them with. If discovery can't run, for example on the 2026-10-10 snapshot, which was captured before discovery existed, the pinned events in `tracked_events.json` are used and the output says so. The web app lists only same bets from the catalog (D86).
 
 ## The definition
 
@@ -33,6 +33,7 @@ Equinox decides equivalence from **contract terms**: a venue-neutral description
 | measured_by | Who or what produces that number | `fomc_statement`, `pyth_regular_close`, `official_close` |
 | observed_on / observed_at | The New York date, and the exact instant when the venue states one | `2026-10-28`; `2026-10-12T20:00:00Z` |
 | comparison and threshold | `gt`, `ge`, `lt`, `le`, `eq` or `between`, against a number | `eq 0`, `gt 330` |
+| unit | What the threshold counts; an indicator is `eq 1`, with the outcome in the measure (D56) | `bps`, `usd`, `percent`, `count`, `indicator` |
 | fallback_rules | The venue's edge-case rules, in plain words | "If the meeting is cancelled, 'Fed maintains rate' resolves Yes." |
 
 How the October 2026 Fed markets map onto terms (architecture §4.4):
@@ -90,7 +91,7 @@ Every match result also carries a confidence level and its reason (D46). The lev
 | Low | AMBIGUOUS, so never routed. A pair compared by title alone also shows its title score | The E13 titles, score 0.56 |
 | none | DISTINCT | "No change" and "25 bps increase" |
 
-`python -m equinox match` prints each cluster's level, and the web UI shows it on every page (architecture §8.3).
+`python -m equinox match` prints each cluster's level. In the web app, the order ticket's "Is this really the same bet?" panel shows the confidence and its reason; an event's page and Matches mark each pair as an exact match or read by a model (Medium at most).
 
 ## Why not title similarity
 
@@ -106,7 +107,7 @@ Titles are written for people, and venues word the same event differently. Simil
 
 ## The title fallback
 
-Markets without terms (any event family that has no parser) reach only a title fallback, and it can never say EQUIVALENT (architecture §6.3, D15). A pair is a candidate when the share of title words they have in common, stop words removed, is at least 0.3. A candidate is DISTINCT if:
+Markets without terms (any event family that has no parser) reach the title fallback, which can never say EQUIVALENT (architecture §6.3, D15); those left unclear can be read by the model (below). A pair is a candidate when the share of title words they have in common, stop words removed, is at least 0.3. A candidate is DISTINCT if:
 
 - their numbers differ (years from 1900 to 2099 are ignored);
 - a US state or a month differs; or
@@ -134,31 +135,34 @@ Comparing took 56 s, and the whole refresh 158 s at 383 MiB of memory.
 
 **One veto only the catalog can apply.** Listings carry outcome labels. In the first refresh, 25,517 of 34,807 unclear pairs (73%) were two markets that each named a different outcome, such as "Will Keria win Finals MVP at League of Legends Worlds?" (Keria) and "Will Eddie win Worlds 2026 Finals MVP?" (Eddie). Such a pair is now DISTINCT unless one label appears in the other title, so "Will Frank Ocean release a new album in 2026?" (labelled 2026) still matches "Will Frank Ocean release an album in 2026?" (labelled Frank Ocean).
 
-**What "unclear" looks like.** The most similar pairs are very likely the same bet. Both venues list "Will Taylor Swift be Time Person of the Year 2026?", and 20 such pairs score 1.00. Even so, nothing in the titles says how each venue resolves them, and their stated close times are 29 hours apart (Kalshi at 11:59 PM ET on December 31, Polymarket at 00:00 UTC on December 31). Lower down, titles mislead in both directions:
+**What "unclear" looks like.** The most similar pairs are very likely the same bet. Both venues list "Will Taylor Swift be Time Person of the Year 2026?", and 20 such pairs score 1.00. Even so, nothing in the titles says how each venue resolves them, and their stated close times are 29 hours apart (Kalshi at 11:59 PM ET on December 31, Polymarket at 00:00 UTC on December 31). The model reader later read the Taylor Swift pair as the same bet (below). Lower down, titles mislead in both directions:
 
 - "Will the rate of core PCE inflation be above 0.5% in September 2026?" and "Will Core PCE MoM be 0.5% or more in September?" read alike (score 0.45). At exactly 0.5%, though, one pays No and the other Yes. That is the tie rule the terms rules flag, which titles can't show.
 - "Joe Burrow: 2+ passing interceptions" and "Joe Burrow: 2+ Touchdowns" score 0.50 and are different bets.
 
-This is why D15 holds at catalog scale: titles find candidates for a person to check, and only terms make a market routable. The All markets page (`/markets`) shows each unclear pair with its score and reasons.
+This is why D15 holds at catalog scale: titles find candidates for a person to check, and only terms make a market routable. Matches (`/matches`, "Look alike, never priced") shows each unclear pair with its title score and why it is never priced (D94, D99).
 
-**What the index misses.** A true pair worded with fewer than two shared informative words, or closing more than 3 days apart, is never a candidate (D50). 1,866 Kalshi markets close in 2030 or later, some in "2099" as a placeholder for "eventually", and 1,424 Polymarket markets have no end date at all, so long-dated questions rarely pair.
+**What the index misses.** A true pair worded with fewer than two shared informative words, or closing more than 3 days apart, is never a candidate (D50). In the recorded refresh, 1,866 Kalshi markets close in 2030 or later, some in "2099" as a placeholder for "eventually", and 1,424 Polymarket markets have no end date at all, so long-dated questions rarely pair.
 
 ## Reading terms with a model
 
 Titles find candidates but can't be routed (D15), and a parser per family doesn't scale. The term reader is the hybrid the brief allows ("rule-based, heuristic, AI-assisted, or hybrid"): a model reads each market in an unclear pair into the same terms shape the Fed parsers fill, deterministic checks refuse any reading the venue's own text doesn't support, and the terms rules above decide (D56–D58). The model never says whether two markets are the same bet.
 
 **What the checks refuse.** A reading is rejected when:
+- the model says the market isn't one yes/no condition, or its terms don't validate;
 - its evidence phrase isn't in the market's text;
 - its threshold isn't a number the venue wrote, in the text or Kalshi's strike fields;
 - its comparison disagrees with the evidence's words ("above" is gt, "at least" and "+" are ge);
-- its date falls after the market closes;
-- Kalshi's own strike fields say otherwise.
+- it is an indicator but not `eq 1` (D56);
+- its date falls more than 7 days after the market closes;
+- Kalshi's own strike fields say otherwise;
+- a score's goals aren't in the order the venue states them, home team first (D67).
 
 A rejected market leaves its pair unclear, with the reason.
 
-**What a reading looks like.** Kalshi's "Final score Al Ahli Saudi FC wins 1-0?" (Al Wasl at home) and Polymarket's "Exact Score: Al Wasl FC 0 - 1 Al Ahli Saudi FC?" both read as `al_wasl_fc_vs_al_ahli_saudi_fc`, `final_score_0_1`, an indicator. The rules make them the same bet. Polymarket's "Al Wasl FC 1 - 0 Al Ahli Saudi FC", with the same words, reads as `final_score_1_0`: a different bet. That's the pair titles can't tell apart.
+**What a reading looks like.** Kalshi's "Final score Al Ahli Saudi FC wins 1-0?" (Al Wasl at home) and Polymarket's "Exact Score: Al Wasl FC 0 - 1 Al Ahli Saudi FC?" both read as `al_wasl_vs_al_ahli_saudi`, `full_time_score_0_1`, an indicator; since D71, code writes these from the score's parts the model reads. The rules make them the same bet. Polymarket's "Al Wasl FC 1 - 0 Al Ahli Saudi FC", with the same words, reads as `full_time_score_1_0`: a different bet. That's the pair titles can't tell apart.
 
-**Evals** (`python -m equinox.reader.evals`; recorded with prompt feat-10.7 and `claude-haiku-5-5`):
+**Evals** (`python -m equinox.reader.evals`; the first recording, with prompt feat-10.7 and `claude-haiku-5-5` on 2026-10-11):
 
 | Gold set | Pairs | Same bets labelled | Found | False same-bets | Readings rejected |
 |---|---|---|---|---|---|
@@ -166,11 +170,11 @@ A rejected market leaves its pair unclear, with the reason.
 | Catalog pairs labelled by hand (the prompt was tuned on these) | 35 | 13 | 8 | 0 | 5 of 70 |
 | Held-out pairs, labelled after tuning and never tuned on | 18 | 4 | 3 | 0 | 1 of 36 |
 
-A false same-bet is the number that matters: it would route money to the wrong contract. A missed same-bet only leaves a pair unclear. The tests replay the recorded answers, so the gate checks these numbers on every run without calling the model.
+A false same-bet is the number that matters: it would route money to the wrong contract. A missed same-bet only leaves a pair unclear. The tests replay the current recording (prompt feat-12.1, in "How strong the setup is" below) on every run without calling the model.
 
 **What the live sample found.** A 100-market sample of the live catalog read 8 IPO pairs as the same bet while every gold set showed zero false same-bets. Kalshi pays when an IPO is *confirmed* (the S-1 declared effective, the price set, or a ticker assigned, even if trading starts after January 1); Polymarket pays when it is *completed*, by the first sale of shares, by December 31. A company that prices on December 30 and trades on January 2 pays Yes on one and No on the other. The IPO pairs joined the gold set, the prompt now names a measure as narrowly as the rules define it, and the next sample read all 19 IPO pairs as different and 12 Ballon d'Or pairs as the same bet. An eval set is evidence about the families in it, so samples of the live catalog are read by hand too (AI_USAGE 23).
 
-**Routing.** A model-read same bet can be priced like any other (`simulate --market`, or the All markets page), but only while the committed evals show zero false same-bets for the model and prompt that read it (D58). Its trace says the terms were read by a model, at Medium confidence at most.
+**Routing.** A model-read same bet can be priced like any other (`simulate --market`, or the order ticket, opened from an event's page or from Matches), but only while the committed evals show zero false same-bets for the model and prompt that read it (D58). Its trace says the terms were read by a model, at Medium confidence at most.
 
 **Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens.
 
@@ -180,12 +184,12 @@ A false same-bet is the number that matters: it would route money to the wrong c
 
 Two things read a market's terms, and each does a job the other can't (D60):
 
-- A **parser** is code for one family on one venue. It is exact, free and offline, and its pairs can reach High confidence. Fed decisions have one on each venue.
+- A **parser** is code for one family on one venue. It is exact, free and offline, and its pairs can reach High confidence. Fed decisions and exact scores have one on each venue (D61).
 - The **model reader** covers every family without a parser, behind the checks and the eval gate. Its pairs are Medium confidence at most.
 
-The model doesn't replace the Fed parsers. On the Fed gold set it found 13 of 15 same bets with no false one, including "cut >25 bps" against "50+ bps decrease", which agree only on the 25 bps grid. It missed two because, within one answer, it dated a Polymarket market by the first day of a two-day meeting and its siblings by the second. The parser gets all 15 every time, its terms label the Fed gold set for free, and Kalshi's custom Fed strikes give the deterministic strike check nothing to compare.
+The model doesn't replace the Fed parsers. On the Fed gold set it found 13 of 15 same bets with no false one (prompt feat-10.7; the feat-12.1 reader finds all 15), including "cut >25 bps" against "50+ bps decrease", which agree only on the 25 bps grid. It missed two because, within one answer, it dated a Polymarket market by the first day of a two-day meeting and its siblings by the second. The parser gets all 15 every time, its terms label the Fed gold set for free, and Kalshi's custom Fed strikes give the deterministic strike check nothing to compare.
 
-**How a family graduates.** The model's reads show where a parser pays off: a family with many cross-venue same bets and regular wording on both venues. In the full read, exact scores were about 58% of the model-read same bets (439 of 752, in the eight score series among the 25 largest). Kalshi publishes each score as fields (`home_score`, `away_score`), and Polymarket writes every one as "Exact Score: <home> <h> - <a> <away>", so exact scores are the first candidate. A family with a handful of markets, such as an arrest list or one award, stays with the model. Once a family has a parser, its readings become free gold labels for the model's evals, as the Fed parsers' are.
+**How a family graduates.** The model's reads show where a parser pays off: a family with many cross-venue same bets and regular wording on both venues. In the full read, exact scores were about 58% of the model-read same bets (439 of 752, in the eight score series among the 25 largest). Kalshi publishes each score as fields (`home_score`, `away_score`), and Polymarket writes every one as "Exact Score: <home> <h> - <a> <away>", so exact scores were the first to get a parser (D61). A family with a handful of markets, such as an arrest list or one award, stays with the model. Once a family has a parser, its readings become free gold labels for the model's evals, as the Fed parsers' are.
 
 **The model as a cross-check.** Reading a parser family with the model too flags every pair where the two disagree: a parser that misses a rewording, or a model that misreads. Exact scores, below, are the first family read both ways.
 
@@ -195,20 +199,20 @@ Exact scores were 58% of the model's same bets in the full read (D60), so they w
 
 - **Kalshi.** The event is "<home> vs <away>: Correct Score" (or "1st Half Correct Score"), and `custom_strike` holds `home_score` and `away_score`. The parser also requires the rules to name the match in that order, state the period ("after 90 minutes plus stoppage time (does not include extra time or penalties)", or "at the end of the 1st Half") and state the same score, winner first: "If Coventry City wins 2-1".
 - **Polymarket.** `sportsMarketType` says `soccer_exact_score` or `soccer_first_half_exact_score`, the event's `teams` say which side is home, and the question must read "Exact Score: <home> <h> - <a> <away>?", home first. The description must state the period and the match. Its postponement, cancellation and no-data rules become fallback rules; "Any Other Score" gets no terms, since the venues list different scores.
-- **Team names** (D62). Accents, case, punctuation, club words and Brazilian state codes are dropped and "St." reads "Saint", so "Coventry City" is "Coventry City FC" and "CR Flamengo RJ" is "CR Flamengo". Four names still differed in the model's score pairs, and `adapters/team_aliases.json` maps them ("PSV Eindhoven" is "PSV"). A wrong merge would need both teams and the date to collide.
+- **Team names** (D62). Accents, case, punctuation, club words and Brazilian state codes are dropped and "St." reads "Saint", so "Coventry City" is "Coventry City FC" and "CR Flamengo RJ" is "CR Flamengo". Four names still differed in the model's score pairs; with Chapecoense, found by the cross-check (D64), `adapters/team_aliases.json` maps five ("PSV Eindhoven" is "PSV"). A wrong merge would need both teams and the date to collide.
 - **Source** (D63). Score markets have no `resolutionSource` of their own, so they take their event's (premierleague.com, uefa.com).
 
 Both parsers give one terms shape: subject "coventry city vs newcastle united", measure `full_time_score_2_1` (home goals first), observed on the day the match was "originally scheduled for", as an indicator. The same pair rules then decide, so 2-1 against 1-2, or the first half against full time, is a different bet.
 
-**The live refresh.** On 2026-10-12 at 02:29 UTC a refresh read 265,944 markets and found 733 outcomes that are the same bet by their contract terms: the 15 Fed outcomes and 718 exact scores. Every one of Kalshi's 1,175 score markets got terms; of Polymarket's 46,439, 44,942 did. Of the 1,497 without, 1,340 are "Any Other Score" and 157 are markets the parser refuses because a name is written two ways (the question says "CDPJuniorFC" where the event's teams spell it out), which fails safe: they stay unclear. Thirty of the 718 pairs, picked at random and read against both venues' rules, were all right.
+**The live refresh.** On 2026-10-12 at 02:29 UTC a refresh read 265,944 markets and found 733 outcomes that are the same bet by their contract terms: the 15 Fed outcomes and 718 exact scores. Every one of Kalshi's 1,175 score markets got terms; of Polymarket's 46,439, 44,942 did. Of the 1,497 without, 1,340 are "Any Other Score" and 157 are markets the parser refuses: some write a team two ways (the question says "CDPJuniorFC" where the event's teams spell it out), others use Polymarket's "regardless of format" wording, which counts extra time (D74). Both fail safe: they stay unclear. Thirty of the 718 pairs, picked at random and read against both venues' rules, were all right.
 
-**Against the model.** Of the model's 456 score same bets from the full read, the parser found 355 again; 95 belonged to matches that had closed before the refresh; 6 it read as different bets. In all 6 the parser is right. Checked against Kalshi's score fields and Polymarket's titles, all 456 hold **7 false same-bets**, each a reversed score: Kalshi's "Racing Club De Lens wins 4-1" (home 4, away 1) against Polymarket's "Racing Club de Lens 1 - 4 Sporting CP" (home 1, away 4). Kalshi writes the winner's goals first and Polymarket the home team's; the model sometimes gave one market the other's order. The 30-pair hand check had missed them: at 1.5%, a sample of 30 more likely than not shows none. The eval gate would have let them route; read again two at a time, the model repeats the mistake on 3 of 6, so feat-12 adds them as gold traps with a stronger reader. The parser also finds 363 same bets the model didn't: 273 that titles never paired (mostly draws, "Final score Draw 0-0?" against two team names) and 90 the model read as different.
+**Against the model.** Of the model's 456 score same bets from the full read, the parser found 355 again; 95 belonged to matches that had closed before the refresh; 6 it read as different bets. In all 6 the parser is right. Checked against Kalshi's score fields and Polymarket's titles, all 456 hold **7 false same-bets**, each a reversed score: Kalshi's "Racing Club De Lens wins 4-1" (home 4, away 1) against Polymarket's "Racing Club de Lens 1 - 4 Sporting CP" (home 1, away 4). Kalshi writes the winner's goals first and Polymarket the home team's; the model sometimes gave one market the other's order. The 30-pair hand check had missed them: at 1.5%, a sample of 30 more likely than not shows none. The eval gate would have let them route; read again two at a time, the model repeats the mistake on 3 of 6, so feat-12 added them as gold traps (D68), and its reader reads none of the 7 wrong (D71). The parser also finds 363 same bets the model didn't: 273 that titles never paired (mostly draws, "Final score Draw 0-0?" against two team names) and 90 the model read as different.
 
 **Pricing.** A parser's pair outside the loaded families is priced from the catalog like a model-read one, but without the eval gate or the model flag (D65). Live on 2026-10-12, 10 YES on Coventry City 2-1 Newcastle United routed to Polymarket at $0.84 against $0.86 on Kalshi, and 10 YES on RB Leipzig 2-1 PSV (an alias) at $1.05 against $1.17. Both are Medium confidence: Kalshi settles by ESPN and Polymarket by the league's statistics, and the trace says so with the venues' different postponement rules.
 
-**The cross-check** (D64). A refresh keeps the parser's pairs whose terms differ but whose titles alone would have left them unclear, as "different", with both markets' texts. `catalog check --limit N` reads them and the parser's same bets with the model, decides them with the same rules, and lists every pair the two decide differently, changing nothing. On the 2026-10-12 catalog that is 4,051 markets in 221 requests, about $0.47 at Haiku's prices (28 requests already cached); it hasn't been run. The comparison above did its job for free, from the full read's answers.
+**The cross-check** (D64). A refresh keeps the parser's pairs whose terms differ but whose titles alone would have left them unclear, as "different", with both markets' texts. `catalog check --limit N` reads them and the parser's same bets with the model, decides them with the same rules, and lists every pair the two decide differently, changing nothing. On the 2026-10-12 catalog that is 4,051 markets in 221 requests, about $0.47 at Haiku's prices (28 requests already cached); it was run with the new reader on 2026-10-12: see "The cross-check, live" below. The comparison above did its job for free, from the full read's answers.
 
-**Gold labels.** The parsers label a fourth eval set for free: three groups from `snapshot-2026-10-11-scores` (Coventry City v Newcastle United at full time, its first half against full time, and RB Leipzig v PSV), 68 pairs with 13 same bets. The model found 9 with no false same-bet; it missed three first-half pairs and one away win.
+**Gold labels.** The parsers label a fourth eval set for free: three groups from `snapshot-2026-10-11-scores` (Coventry City v Newcastle United at full time, its first half against full time, and RB Leipzig v PSV), 68 pairs with 13 same bets. With prompt feat-10.7 the model found 9 with no false same-bet; it missed three first-half pairs and one away win. The feat-12.1 reader finds all 13 (D71).
 
 ## How strong the setup is
 
@@ -273,7 +277,7 @@ Meridian settles in devnet USDC, which has no monetary value (M5). That is a rou
 
 ## Limits
 
-- One event family has a term parser: Fed rate decisions. Other markets are read by a model when they are in an unclear pair (D57); a model reading is checked against the venue's text but can still name one thing two ways, which leaves the pair unclear.
-- The catalog is as fresh as its last refresh, and its title candidates depend on the index's blocking rules: dates within 3 days, two shared informative words (D50).
+- Two families have a parser on each venue: Fed rate decisions and exact scores (D61). Others are read by a model when they are in an unclear pair (D57); a model reading is checked against the venue's text but can still name one thing two ways, which leaves the pair unclear.
+- The server refreshes the catalog every 6 hours and on Refresh (D98), keeping the model's decisions where both markets' texts are unchanged (D91); the ticket prices from live order books. The catalog's title candidates depend on the index's blocking rules: dates within 3 days, two shared informative words (D50).
 - No Kalshi and Polymarket stock or index pair is strictly equivalent today: they differ in comparison, tie rule, price source or underlying (S5).
 - Strictness is a choice. Some pairs a person would call the same bet are AMBIGUOUS here, for example two markets that differ only in whether they state an observation instant. AMBIGUOUS pairs are shown with their reasons, so the cost of strictness is visible.

@@ -1,6 +1,6 @@
 # Project Equinox: Product Requirements Document (PRD)
 
-> **2026-10-10: partly superseded.** §1–§2 still describe the product. The technical sections §4–§11 (models, adapters, matching, routing, trace schema, HTTP endpoints, layout, exit codes) are replaced by [architecture.md](architecture.md) and decisions D11–D30 in [DECISIONS.md](DECISIONS.md). Where this file and architecture.md disagree, architecture.md wins. The venue facts in §1.1 and §5 are corrected in [research/venue_facts.md](research/venue_facts.md).
+> **2026-10-10: partly superseded.** §1–§2 still describe the product, except that matching is by contract terms, not a scored pipeline (D15). The technical sections §3–§11 (models, adapters, matching, routing, trace schema, HTTP endpoints, layout, exit codes) are replaced by [architecture.md](architecture.md) and decisions D11–D30 in [DECISIONS.md](DECISIONS.md). Where this file and architecture.md disagree, architecture.md wins. The venue facts in §1.1 and §5 are corrected in [research/venue_facts.md](research/venue_facts.md).
 
 ---
 

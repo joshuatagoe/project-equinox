@@ -27,7 +27,7 @@ Instead of looking at software developers or evaluators, we look at the people a
 * **Their Problem:** They want to buy 100 YES contracts on an event, but don't want to manually calculate exchange fees, convert pennies to USDC, or check whether Kalshi or Polymarket is cheaper.
 * **What they need from Equinox:** 
   * "Tell me which venue gives me the best net price for my order, and explain why."
-  * In the web UI: **Price an order** and the **Market board** (architecture §8.3).
+  * In the web UI: **Markets**, an event's page and the **order ticket** (D86).
 
 ### User 2: The Automated Client / Trading Algorithm ("AutoTrader")
 * **Who they are:** A programmatic client or broker API that needs to execute orders automatically across multiple platforms.
@@ -42,7 +42,7 @@ Instead of looking at software developers or evaluators, we look at the people a
 * **What they need from Equinox:**
   * A clear, explainable audit trail showing *why* the system declared two markets equivalent.
   * An explicit confidence level with its reason for every match, risk warnings, and the pairs set aside as ambiguous, with the title score where only titles could be compared (D46). Matches are decided by rules, not by a score (D15).
-  * In the web UI: the **Why these match** page (architecture §8.3).
+  * In the web UI: **Matches**, and the order ticket's **Is this really the same bet?** panel: both venues' rules side by side, the confidence and the risks (D94, D99).
 
 ---
 
@@ -71,7 +71,7 @@ The project instructions highlight four critical architectural challenges. Here 
      * A different subject, date, outcome or threshold → `DISTINCT`.
      * Measured a different way, such as Pyth's price vs the official close → `AMBIGUOUS`, never routed.
      * Equal → `EQUIVALENT`, plus a risk flag for anything left over. For example, in the third-venue check, at exactly $330 a Meridian-style market pays Yes and Polymarket pays No.
-  3. **Text fallback.** Markets we have no term parser for are compared by title. The best result is `AMBIGUOUS`, never `EQUIVALENT`. We tried title similarity as the main method, and it called "25 bps" vs "50 bps" equivalent (AI_USAGE 2–4).
+  3. **Text fallback.** Markets we have no term parser for are compared by title. The best result is `AMBIGUOUS`, never `EQUIVALENT`. We tried title similarity as the main method, and it called "25 bps" vs "50 bps" equivalent (AI_USAGE 2–4). Pairs left unclear can be read by a model into the same terms, checked against the venue's text; a model-read same bet is Medium confidence at most and priced only while the evals show zero false same-bets (D57, D58).
   * Every decision comes with plain-English reasons and risk flags.
 
 ### Question 3: How does the routing engine evaluate venues and clearly explain its decision?
@@ -83,19 +83,17 @@ The project instructions highlight four critical architectural challenges. Here 
   3. Add venue-specific fees using the normalized fee model.
   4. Calculate the **Total Net Cost**.
 * **Explanation Output:**
-  The system produces a clear, auditable summary:
+  The system produces a clear, auditable summary. The order ticket gives the answer, then why. For 100 YES on "Fed holds rates in October 2026", with the books in the 2026-10-10 snapshot:
   ```text
-  Order: buy 100 YES, "Fed holds rates in October 2026" (snapshot 2026-10-10T20:44Z)
-  Selected venue: Polymarket, $84.67 total (vs $85.90 on Kalshi)
-  Rationale:
-    "Polymarket is the cheapest venue that can fill all 100 YES contracts: $84.67
-     including $0.67 in fees, versus $85.90 on Kalshi ($1.23 or 1.43% less)."
+  Buy on Polymarket: $84.67 for 100 YES contracts, including $0.67 in fees. That's $1.23 (1.43%) less than Kalshi at $85.90.
+
+  Polymarket is the cheapest venue that can fill all 100 YES contracts: $84.67 including $0.67 in fees, versus $85.90 on Kalshi ($1.23 or 1.43% less).
   ```
   For 100 NO the answer flips to Kalshi ($16.95 vs $17.71). For 5,000 NO it flips back to Polymarket, because Kalshi's cheapest level runs out (architecture §1).
 
 ### Question 4: How does the system handle imperfect or ambiguous data gracefully?
 * **Thin or missing order books:** An empty book or one too thin to fill the order makes that venue ineligible, and the trace says why ("only 5 of 10 contracts are available"). If a venue returned only part of its book, the quote is marked `DEPTH_INCOMPLETE`.
-* **Unavailable venues and old data:** If a live request fails, that venue's saved snapshot is used and the trace says `FIXTURE_DATA`. A book more than 5 minutes old is marked `STALE_DATA`.
+* **Unavailable venues and old data:** On the command line, if a live request fails, that venue's saved snapshot is used for the Fed markets it loads and the trace says `FIXTURE_DATA`; on the web, the ticket says the venues can't be reached and doesn't price. A book more than 5 minutes old is marked `STALE_DATA`.
 * **Test money and closed markets:** A venue settling in money with no value (such as devnet USDC), or a market that can't be traded now, is shown with its cost but can't win.
 * **Ambiguous matches:** Markets measured differently, or matched only by title, are labelled `AMBIGUOUS` and never routed.
 * **Documented assumptions:** The trace lists them: 1 USD = 1 USDC for collateral with value, books frozen at capture, Kalshi fees rounded to the cent, list fees without rebates (A1–A5).
@@ -116,7 +114,7 @@ flowchart TD
     end
 
     subgraph Equivalence ["3. Equivalence Engine"]
-        EE["Matcher<br/>(Filters -> Heuristics -> Risk Flags -> Confidence)"]
+        EE["Matcher<br/>(Terms rules: parsers or checked model readings -> Risk Flags -> Confidence)<br/>Titles only find candidates"]
     end
 
     subgraph Routing ["4. Venue-Agnostic Router"]

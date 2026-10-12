@@ -11,7 +11,7 @@ Properties:
 - Acceptance criteria, Test command and Evidence.
 
 Cards:
-- One card per lane PRD in `docs/features/` (feat-01 to feat-06).
+- One card per lane PRD in `docs/features/` (feat-01 to feat-14, chore-01).
 - One card per deliverable the brief requires: working prototype, setup instructions, architecture overview, equivalence and routing write-ups, and AI usage disclosure.
 - One card for the submission, which only the user can complete. Its proof is the user's confirmation.
 
