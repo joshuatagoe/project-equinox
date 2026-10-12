@@ -14,7 +14,7 @@ The flow, agreed the same day from `user/users.md`: Markets (search, topics, eve
 
 1. **Markets, an event and the order ticket, from the catalog** (D86-D89). Topics from each event's category; the old pages and the data selector leave the web app.
 2. **Fresh data without a command** (D90, D91). The server refreshes the catalog hourly in the background, with a Refresh button; a first-run page while it builds; the venues can't be reached, said plainly. A refresh, from the server or the command line, keeps a model's decision when both markets' rule texts are unchanged. The server never calls the model. Also here, from the user's first look at the ticket: it says what comparing does, what the budget is for and what the contracts pay (D92).
-3. **Match review for Morgan.** Every pair Equinox matched or set aside, by confidence, each opening the same panel.
+3. **Match review for Morgan** (D94). Every pair Equinox kept, by how it was decided, each same bet opening its ticket's panel.
 
 ## Acceptance (grill, 2026-10-12: all recommended)
 

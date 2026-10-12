@@ -16,10 +16,16 @@ from equinox.catalog.background import Status
 from equinox.models import EquivalenceCluster
 from equinox.reader import pricing
 from equinox.sources import FIXTURES, LiveFetchers, Settings, ensure_books, snapshot_names
-from equinox.web import event, home, ticket, words
+from equinox.web import event, home, matches, ticket, words
 from equinox.web.shell import Context
 
-ROUTES = {"/": home.page, "/index.html": home.page, "/event": event.page, "/bet": ticket.page}
+ROUTES = {
+    "/": home.page,
+    "/index.html": home.page,
+    "/event": event.page,
+    "/bet": ticket.page,
+    "/matches": matches.page,
+}
 
 
 class App:

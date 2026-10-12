@@ -16,7 +16,7 @@ from equinox.models import EquivalenceCluster
 from equinox.web.script import SCRIPT
 from equinox.web.style import CSS
 
-NAV = (("/", "Markets"),)
+NAV = (("/", "Markets"), ("/matches", "Matches"))
 BPS_NOTE = (
     "bps means basis points: 1 bp is 0.01 percentage point, so 25 bps is a quarter of a point."
 )

@@ -26,7 +26,7 @@ def page(ctx: Context, params: dict[str, str]) -> str:
         return no_catalog(ctx, asked)
     topic = "" if asked else params.get("topic", "")
     found = events(ctx.found, asked, topic)
-    number = _page_number(params.get("page", "1"))
+    number = page_number(params.get("page", "1"))
     shown = found[(number - 1) * PER_PAGE : number * PER_PAGE]
     if asked:
         heading = f"<h1>Bets matching “{escape(asked)}”</h1>"
@@ -132,5 +132,5 @@ def _pager(total: int, number: int, asked: str, topic: str) -> str:
     return f'<p class="pager">{back}<span class="muted">Page {number} of {last}</span>{ahead}</p>'
 
 
-def _page_number(text: str) -> int:
+def page_number(text: str) -> int:
     return int(text) if text.isdigit() and int(text) > 0 else 1

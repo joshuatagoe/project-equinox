@@ -89,6 +89,12 @@ main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 40px; }
 .empty { padding: 32px; text-align: center; color: var(--muted); background: var(--surface);
          border: 1px dashed var(--line); border-radius: var(--radius); }
 .pager { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+.pair { padding: 16px 0; border-top: 1px solid var(--line); }
+.pair:first-child { border-top: 0; padding-top: 0; }
+.sides { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+         font-weight: 600; }
+.pair p { margin: 10px 0 4px; }
+.find.inline { margin: 0 0 16px; max-width: 520px; }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
          box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px; }
