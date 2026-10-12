@@ -1,6 +1,6 @@
 # Equivalence: when two markets are the same bet
 
-The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50, D54 and D56–D58.
+The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50, D54, D56–D58 and D60.
 
 ## How Equinox finds the markets to compare
 
@@ -172,7 +172,22 @@ A false same-bet is the number that matters: it would route money to the wrong c
 
 **Routing.** A model-read same bet can be priced like any other (`simulate --market`, or the All markets page), but only while the committed evals show zero false same-bets for the model and prompt that read it (D58). Its trace says the terms were read by a model, at Medium confidence at most.
 
-**Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens. Answers are cached by request, so a re-run pays only for markets whose text changed.
+**Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens.
+
+**The full read.** On 2026-10-11 the reader read every unclear pair in the live catalog: 12,910 markets in 1,094 requests (a market paired with several others is read once per group), 8.05 million input and 1.79 million output tokens, about $1.70 at Haiku 5.5's prices. It accepted 12,158 readings and rejected 752. It decided 740 pairs as the same bet (752 with the earlier sample), 7,380 as different, and left 1,303 unclear; all 19 IPO pairs read as different. Thirty of the same bets, picked at random and checked by hand against both venues' rules, had no false same-bet: exact scores (including away wins, "Lille wins 2-0" against "Arsenal 0 - 2 Lille"), league and tournament winners, Game Awards, Google rankings and arrests. Where their rules differ it is in edge-case fallbacks, such as a shared MVP paid 1/N on Kalshi, which D23 flags rather than refuses. Answers are cached by request, so a re-run pays only for markets whose text changed.
+
+## Parsers and the model reader
+
+Two things read a market's terms, and each does a job the other can't (D60):
+
+- A **parser** is code for one family on one venue. It is exact, free and offline, and its pairs can reach High confidence. Fed decisions have one on each venue.
+- The **model reader** covers every family without a parser, behind the checks and the eval gate. Its pairs are Medium confidence at most.
+
+The model doesn't replace the Fed parsers. On the Fed gold set it found 13 of 15 same bets with no false one, including "cut >25 bps" against "50+ bps decrease", which agree only on the 25 bps grid. It missed two because, within one answer, it dated a Polymarket market by the first day of a two-day meeting and its siblings by the second. The parser gets all 15 every time, its terms label the Fed gold set for free, and Kalshi's custom Fed strikes give the deterministic strike check nothing to compare.
+
+**How a family graduates.** The model's reads show where a parser pays off: a family with many cross-venue same bets and regular wording on both venues. In the full read, exact scores were about 58% of the model-read same bets (439 of 752, in the eight score series among the 25 largest). Kalshi publishes each score as fields (`home_score`, `away_score`), and Polymarket writes every one as "Exact Score: <home> <h> - <a> <away>", so exact scores are the first candidate. A family with a handful of markets, such as an arrest list or one award, stays with the model. Once a family has a parser, its readings become free gold labels for the model's evals, as the Fed parsers' are.
+
+**The model as a cross-check** (next). Reading a parser family with the model too would flag every pair where the two disagree, usually the sign that a venue reworded its markets in a way the parser doesn't yet catch. It isn't built yet.
 
 ## Third venue: the Meridian fit check
 

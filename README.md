@@ -58,6 +58,8 @@ Titles alone can't be routed, so `python -m equinox catalog read --limit 100` ha
 
 A same bet the model read can be priced like a Fed outcome, with `simulate --market` or from the All markets page, but only while the recorded evals show no false same-bet; its trace says the terms were read by a model. On 2026-10-11, 10 YES on Mbappé winning the 2026 Ballon d'Or routed to Polymarket at $0.22 against $0.33 on Kalshi.
 
+The same day, a full read of the live catalog (12,910 markets, about $1.70) found 752 same bets; 30 of them, checked by hand against both venues' rules, had no false same-bet. Fed decisions keep their parsers, which are exact and free. The model's reads show which family deserves the next parser: exact scores, about 58% of those same bets (D60).
+
 `python -m equinox.reader.evals` scores the reader on three gold sets (the Fed meetings, hand-labelled pairs, and held-out pairs). On the recorded run it found 24 of 32 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
 
 ### The web UI
@@ -174,7 +176,7 @@ The engines in `matcher/` and `router/` import only the models and never name a 
 
 ## Equivalence and routing, in brief
 
-**Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed.
+**Equivalence** ([docs/EQUIVALENCE.md](docs/EQUIVALENCE.md)). Two markets are equivalent only if holding YES on one pays out under exactly the same real-world conditions as holding YES on the other (D8). Equinox decides that from structured contract terms (what is measured, how, when, the comparison and the threshold), not from how similar the titles are (D15). Differences that remain, such as how each venue breaks a tie or handles a cancelled meeting, are attached as risk flags and carried into every routing explanation. A pair whose terms can't be read is at most AMBIGUOUS and is never routed. Terms come from a parser for Fed decisions and, for other families, from a model whose readings are checked against the venues' text (D57, D60).
 
 **Routing** ([docs/ROUTING.md](docs/ROUTING.md)). For one order, every market in the group is simulated: walk the order book from the cheapest ask, charge each venue's own fee formula level by level, and record every reason the venue can't take the order. The cheapest venue that can fill the whole order within budget wins (D6, D7). The trace says why, what each venue would have cost, and what the match risks are.
 
@@ -193,7 +195,7 @@ The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools 
 
 Architecture §13 lists them with their reasons. In short:
 
-- One event family has a term parser: Fed rate decisions. Every other market can only be matched by text, so it is never routed.
+- One event family has a term parser: Fed rate decisions. Other markets are read by a model (D57); those pairs are priced at Medium confidence at most, and only while the recorded evals show no false same-bet (D58).
 - The catalog is as fresh as its last refresh, and a title pair is found only if the markets close within 3 days and share two informative words (D50).
 - Discovery rules are written per venue and family (D47): a venue that renames its series or tag needs a code change, and until then live runs use the pinned events.
 - Order books are treated as frozen at capture (A2). One order goes to one venue; there is no split routing.

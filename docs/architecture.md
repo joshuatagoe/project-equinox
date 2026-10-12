@@ -744,7 +744,7 @@ evals/      pairs.json  heldout.json  recorded.json  scores.json   # the term re
 
 ## 13. Known limitations
 
-- **One event family has a term parser:** Fed rate decisions, found automatically on both venues (D47). Every other market in the catalog is compared by title only, so it is at best "unclear" and never routed. §9 shows that a second family, stock close-above, fits the same terms shape.
+- **One event family has a term parser:** Fed rate decisions, found automatically on both venues (D47). Other catalog markets are read by a model (§6.5); those pairs are Medium confidence at most and routed only while the evals allow it. The model's reads choose the next parser: exact scores (D60). §9 shows that a second family, stock close-above, fits the same terms shape.
 - **The catalog is as fresh as its last refresh** (D48), and title candidates are limited by the index's blocking rules (D50): a true pair worded with no shared informative words, or dated days apart, is missed.
 - **Discovery rules are per venue** (D47). A venue that renames its series or tag needs a code change; until then, live runs fall back to the pinned events.
 - **Fees are list fees.** Polymarket's taker rebates (up to 50%) and builder fees are ignored (A5).
