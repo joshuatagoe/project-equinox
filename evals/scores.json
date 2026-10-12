@@ -1,25 +1,22 @@
 {
   "model": "claude-haiku-5-5",
-  "prompt": "feat-10.7",
+  "prompt": "feat-12.1",
   "fed": {
     "cases": 3,
     "pairs": 75,
     "same_labelled": 15,
     "different_labelled": 60,
-    "same_found": 13,
+    "same_found": 15,
     "false_same": 0,
-    "missed_same": 2,
+    "missed_same": 0,
     "readings": 30,
     "rejected": 0,
     "false_same_bound": "4.9%",
-    "raw_same_found": 13,
+    "raw_same_found": 15,
     "raw_false_same": 0,
-    "raw_missed_same": 2,
+    "raw_missed_same": 0,
     "raw_false_same_bound": "4.9%",
-    "mistakes": [
-      "Fed 2026-10-28: kalshi:KXFEDDECISION-26OCT-C26 ~ polymarket:2589810 not read as the same bet",
-      "Fed 2026-12-09: kalshi:KXFEDDECISION-26DEC-C26 ~ polymarket:3215005 not read as the same bet"
-    ]
+    "mistakes": []
   },
   "labelled": {
     "cases": 35,
@@ -38,9 +35,9 @@
     "raw_false_same_bound": "12.7%",
     "mistakes": [
       "Presidential nominee: kalshi:KXPRESNOMD-28-AOC ~ polymarket:559653 not read as the same bet",
+      "Presidential nominee: kalshi:KXPRESNOMD-28-JBP ~ polymarket:559663 not read as the same bet",
       "Above vs at least: kalshi:KXRT-HUN-50 ~ polymarket:5420123 not read as the same bet",
       "Above vs at least: kalshi:KXRT-HUN-60 ~ polymarket:5420124 not read as the same bet",
-      "Ranking: kalshi:KXGOOGLESEARCH-MOV27-ODY ~ polymarket:3251056 not read as the same bet",
       "Tournament winner: kalshi:KXCONMEBOLLIB-26-PAL ~ polymarket:1830625 not read as the same bet"
     ]
   },
@@ -53,7 +50,7 @@
     "false_same": 0,
     "missed_same": 1,
     "readings": 36,
-    "rejected": 1,
+    "rejected": 3,
     "false_same_bound": "19.3%",
     "raw_same_found": 3,
     "raw_false_same": 0,
@@ -68,22 +65,17 @@
     "pairs": 68,
     "same_labelled": 13,
     "different_labelled": 55,
-    "same_found": 9,
+    "same_found": 13,
     "false_same": 0,
-    "missed_same": 4,
+    "missed_same": 0,
     "readings": 29,
     "rejected": 0,
     "false_same_bound": "5.3%",
-    "raw_same_found": 9,
+    "raw_same_found": 13,
     "raw_false_same": 0,
-    "raw_missed_same": 4,
+    "raw_missed_same": 0,
     "raw_false_same_bound": "5.3%",
-    "mistakes": [
-      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV0NEW0 ~ polymarket:5299176 not read as the same bet",
-      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV0NEW1 ~ polymarket:5299177 not read as the same bet",
-      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV1NEW0 ~ polymarket:5299178 not read as the same bet",
-      "Scores: RB Leipzig v PSV, full time: kalshi:KXUCLSCORE-26OCT13RBLPSV-RBL1PSV2 ~ polymarket:5158654 not read as the same bet"
-    ]
+    "mistakes": []
   },
   "traps": {
     "cases": 7,
@@ -94,17 +86,13 @@
     "false_same": 0,
     "missed_same": 0,
     "readings": 14,
-    "rejected": 3,
+    "rejected": 0,
     "false_same_bound": "34.8%",
-    "raw_same_found": 3,
-    "raw_false_same": 3,
+    "raw_same_found": 0,
+    "raw_false_same": 0,
     "raw_missed_same": 0,
-    "raw_false_same_bound": "77.5%",
-    "mistakes": [
-      "Reversed score: Lens wins 4-1 vs Lens 1 - 4: kalshi:KXUCLSCORE-26OCT13RCLSPO-RCL4SPO1 ~ polymarket:5134646 read as the same bet before the checks",
-      "Reversed score: Lens wins 5-1 vs Lens 1 - 5: kalshi:KXUCLSCORE-26OCT13RCLSPO-RCL5SPO1 ~ polymarket:5134657 read as the same bet before the checks",
-      "Reversed score: Tractor 2-0 vs 0 - 2: kalshi:KXAFCCLSCORE-26OCT12TRASHM-TRA2SHM0 ~ polymarket:5452136 read as the same bet before the checks"
-    ]
+    "raw_false_same_bound": "34.8%",
+    "mistakes": []
   },
   "score_tune": {
     "cases": 8,
@@ -128,24 +116,16 @@
     "pairs": 800,
     "same_labelled": 80,
     "different_labelled": 720,
-    "same_found": 73,
+    "same_found": 80,
     "false_same": 0,
-    "missed_same": 7,
+    "missed_same": 0,
     "readings": 160,
     "rejected": 0,
     "false_same_bound": "0.4%",
-    "raw_same_found": 73,
+    "raw_same_found": 80,
     "raw_false_same": 0,
-    "raw_missed_same": 7,
+    "raw_missed_same": 0,
     "raw_false_same_bound": "0.4%",
-    "mistakes": [
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ1SAH2 ~ polymarket:5452508 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ1SAH3 ~ polymarket:5452512 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ1SAH4 ~ polymarket:5452517 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ1SAH5 ~ polymarket:5452522 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ2SAH3 ~ polymarket:5452518 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ2SAH4 ~ polymarket:5452523 not read as the same bet",
-      "Score group: al ittihad vs shabab al ahli dubai|2026-10-13: kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ2SAH5 ~ polymarket:5452527 not read as the same bet"
-    ]
+    "mistakes": []
   }
 }

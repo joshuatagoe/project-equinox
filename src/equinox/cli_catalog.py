@@ -142,6 +142,10 @@ def drift(settings: Settings, limit: int, model: str, workers: int, ask: Ask | N
         f"{len(r.candidates):,} markets read in {_count(r.calls, 'request')}: {len(missed):,} "
         "look like their family (the parser missed them); the rest do not."
     )
+    print(
+        "Check why the parser refused each one before teaching it: a venue may have spelled a "
+        "team another way, or changed the rule itself ('regardless of format' counts extra time)."
+    )
     for c in r.candidates:
         print(f"  {c.market_id} ({c.title}): {c.verdict}")
     _spent(ask, r.input_tokens, r.output_tokens)

@@ -31,6 +31,8 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from equinox.adapters.scores import MEASURED_BY as SCORE_MEASURED_BY
+from equinox.adapters.teams import team_key
 from equinox.models import ContractTerms
 from equinox.models.catalog import ReadableMarket
 
@@ -45,6 +47,8 @@ _DIRECTIONS = (  # the first group whose words appear in the evidence decides
     ("lt", r"\bbelow\b|less than|fewer than|\bunder\b|lower than|<"),
 )
 _MIRROR = {"ge": "le", "le": "ge", "gt": "lt", "lt": "gt"}
+SCORE_PARTS = ("score_order", "home_team", "away_team", "home_goals", "away_goals", "period")
+PERIODS = ("full_time", "first_half")
 _SPACED_SCORE = re.compile(r"(\d+) - (\d+)")  # Polymarket's "Racing Club de Lens 1 - 4 Sporting CP"
 _GOALS = re.compile(r"_(\d+)_(\d+)$")  # the last two numbers of a score's measure
 _STRIKES = {
@@ -101,7 +105,20 @@ def unchecked(raw: dict[str, Any], market: ReadableMarket) -> Reading:
 
 def _terms(raw: dict[str, Any]) -> ContractTerms:
     """The record as terms. An indicator's threshold is 1 by definition, whatever the record says:
-    the outcome it names is in its measure."""
+    the outcome it names is in its measure. An exact score is written here entirely from the parts
+    the model read, as the parsers write it: the model's own subject, measure, unit or threshold
+    for it are ignored, so a stray field can't spoil it (feat-12)."""
+    parts = _score_parts(raw)
+    if parts is not None:
+        return ContractTerms(
+            subject=_snake(parts[0]),
+            measure=_snake(parts[1]),
+            measured_by=SCORE_MEASURED_BY,
+            observed_on=date.fromisoformat(raw["observed_on"]),
+            comparison="eq",
+            threshold=Decimal(1),
+            unit="indicator",
+        )
     indicator = raw.get("unit") == "indicator"
     upper = None if indicator else raw.get("upper")
     return ContractTerms(
@@ -114,6 +131,22 @@ def _terms(raw: dict[str, Any]) -> ContractTerms:
         upper=None if upper in (None, "") else _decimal(upper),
         unit=raw["unit"],
     )
+
+
+def _score_parts(raw: dict[str, Any]) -> tuple[str, str] | None:
+    """An exact score's subject ("racing lens vs sporting cp", with the parsers' team keys) and
+    measure ("full_time_score_1_4", home goals first), from the parts the model read; None when
+    the record has no score parts. Bad parts raise ValueError, so the reading doesn't validate."""
+    home, away = raw.get("home_team"), raw.get("away_team")
+    goals = (raw.get("home_goals"), raw.get("away_goals"))
+    if not home or not away or any(g is None or g == "" for g in goals):
+        return None
+    home_goals, away_goals = (int(g) for g in goals)
+    period = raw.get("period") or "full_time"
+    if min(home_goals, away_goals) < 0 or period not in PERIODS:
+        raise ValueError(f"a score of {home_goals}-{away_goals} in the {period!r} period")
+    subject = f"{team_key(str(home))} vs {team_key(str(away))}"
+    return subject, f"{period}_score_{home_goals}_{away_goals}"
 
 
 def _quoted(terms: ContractTerms, evidence: str, market: ReadableMarket) -> str:

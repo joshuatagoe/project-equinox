@@ -1,6 +1,7 @@
 {
-  "about": "Team keys that still differ after the rules in teams.py, mapped to one key. Seeded on 2026-10-11 from the exact scores the model read as the same bet (D62).",
+  "about": "Team keys that still differ after the rules in teams.py, mapped to one key. Seeded on 2026-10-11 from the exact scores the model read as the same bet (D62); Chapecoense added from the cross-check on 2026-10-12 (D64).",
   "aliases": {
+    "associacao chapecoense futebol": "chapecoense",
     "athletic bilbao": "athletic",
     "corinthians paulista": "corinthians",
     "psv eindhoven": "psv",

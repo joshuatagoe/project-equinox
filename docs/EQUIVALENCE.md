@@ -228,6 +228,26 @@ The **traps** are the 7 reversed scores from the full read; read again two at a 
 
 **Upkeep.** Each catalog market records the parser family meant to read it (D69). `catalog check --drift --limit N` reads only a family's markets that got no terms and says which still look like the family, the sign that a venue reworded them, and which don't.
 
+**After the reader change** (D71, prompt feat-12.1). The model now reads a score in parts, working out which team is at home and how the market writes its score before the goals, and code writes the score's terms from them, as the parsers do. The same sets, read again:
+
+| Set | Before: false raw, same bets found | After: false raw, same bets found |
+|---|---|---|
+| Fed meetings | 0, 13 of 15 | 0, **15 of 15** |
+| Labelled pairs | 0, 8 of 13 | 0, 8 of 13 |
+| Held-out pairs | 0, 3 of 4 | 0, 3 of 4 |
+| Scores (fixture) | 0, 9 of 13 | 0, **13 of 13** |
+| Traps | **3** of 7 | **0** of 7 |
+| Score groups, tuning half | 0, 80 of 80 | 0, 80 of 80 |
+| Score groups, judging half | 0, 73 of 80 | 0, **80 of 80** |
+
+Guarded, no set has a false same-bet before or after. It took two fixes found on the tuning half and the fixture set: the model had named a score's settling body two ways for one match, and one stray quote in an answer had dropped a whole request's records (D72). The fixture set also now shows Kalshi's strike fields, as live reads do (D73). Strict tool mode was tried and refused: the API calls the tool's schema too complex.
+
+**Upkeep, live.** On the 2026-10-12 catalog, 157 markets of the exact-score family got no terms from the parser. Read by the model, all 157 look like exact scores. They fall in two groups (D74). Some write a team two ways in one event ("CDPJuniorFC" in the question, spelled out in the event's teams): the parser should learn those. The others use a new Polymarket wording, "considering the final score regardless of format (e.g. two halves totaling 90 minutes plus stoppage time, or four periods totaling 120 minutes)", which counts extra time: a different bet from Kalshi's 90 minutes, which the parser was right to refuse. None of them is paired with another market today; a period for extra time is on the cut list.
+
+**The cross-check, live.** Every parser pair in the catalog (3,978 markets, 2,461 pairs) read by the new reader: the model agrees on 2,404, leaves 43 undecided, and disagrees on 14. Thirteen are Chapecoense v CA Paranaense, where the parsers keyed Polymarket's "Associação Chapecoense de Futebol" apart from Kalshi's "Chapecoense SC": the model was right, and the name is now in the alias table. The fourteenth is a 0-0 draw the model read without the score parts, a missed same bet. The model raised no false same-bet against the parsers. It cost $0.68.
+
+**The re-read, live.** With the new reader the whole catalog's unclear pairs were read again on 2026-10-12: 8,637 markets in 837 requests, 8,069 readings accepted and 568 refused. It decided 229 same bets, 5,096 different and left 1,089 unclear; none of the same bets touches an exact score, which the parsers read. Twenty-five picked at random were all the same bet when read against both venues' rules (the closest call, "hear" against "accepts" an AI-copyright case, is a grant of certiorari in both). It cost $1.16; the run hit the API's limit of 80,000 output tokens a minute once and was resumed from the cache. Pricing one exposed a feat-10 bug, fixed here (D75): a model-read pair is priced with readings of its markets that agree. On 10 YES on Lamine Yamal winning the 2026 Ballon d'Or, the trace says the terms were read by a model and routes to Polymarket at $2.97 against $3.15 on Kalshi. A Polymarket market that names no resolution source, on itself or its event (127 of the 229 have none on the market), is now built for pricing with "an unnamed source" and the trace says so (D76): 10 YES on Taylor Swift as Time's 2026 Person of the Year routes to Kalshi at $0.43 against $0.49, flagged that Polymarket names no source.
+
 ## Third venue: the Meridian fit check
 
 Two venues can't show that the design generalizes. Meridian, a planned binary-stock-outcome venue on Solana devnet, is **not integrated** (D26). Instead, architecture §9 maps it onto the canonical model on paper, and hand-built Meridian-style markets go through the real matcher and router in the test suite.

@@ -105,8 +105,9 @@ class PolymarketAdapter(VenueAdapter):
                     f"{tracked.family!r}, so its markets have no terms"
                 )
                 listed.append((None, [note]))
+            unnamed = not tracked.family  # a catalog pair's market may name no source
             for raw in events[0].get("markets") or []:
-                listed.append(self._listed(events[0], raw, parse_terms, listed_at))
+                listed.append(self._listed(events[0], raw, parse_terms, listed_at, unnamed))
         return listed
 
     def event_of(self, native_id: str) -> TrackedEvent:
@@ -141,10 +142,14 @@ class PolymarketAdapter(VenueAdapter):
         raw: dict[str, Any],
         parse_terms: TermParser | None,
         listed_at: datetime,
+        unnamed: bool = False,
     ) -> Listed:
         notes: list[str] = []
         try:
-            market = self._market(event, raw, parse_terms, notes, listed_at)
+            outcomes = _json_list(raw["outcomes"])
+            if outcomes != ["Yes", "No"]:
+                raise ValueError(f"outcomes are {outcomes}, not ['Yes', 'No']")
+            market = self._market(event, raw, parse_terms, notes, listed_at, unnamed)
         except BAD_DATA as error:  # not FetchError: sources.py owns that
             return None, [f"polymarket: market {raw.get('id')} skipped: {describe(error)}"]
         return market, notes
@@ -156,11 +161,9 @@ class PolymarketAdapter(VenueAdapter):
         parse_terms: TermParser | None,
         notes: list[str],
         listed_at: datetime,
+        unnamed: bool = False,
     ) -> CanonicalMarket:
         native_id = str(raw["id"])
-        outcomes = _json_list(raw["outcomes"])
-        if outcomes != ["Yes", "No"]:
-            raise ValueError(f"outcomes are {outcomes}, not ['Yes', 'No']")
         best_bid = listed_ask(raw.get("bestBid"))
         return CanonicalMarket(
             market_id=f"{self.venue}:{native_id}",
@@ -172,7 +175,8 @@ class PolymarketAdapter(VenueAdapter):
             rules_text=raw.get("description") or "",
             terms=parse_terms(raw, notes) if parse_terms else None,
             resolution_source=_resolution_source(
-                raw.get("resolutionSource") or event.get("resolutionSource")  # D63
+                raw.get("resolutionSource") or event.get("resolutionSource"),
+                unnamed,  # D63, D76
             ),
             collateral=Collateral(asset="USDC", has_value=True),
             tradable=bool(
@@ -254,8 +258,12 @@ def _token_ids(raw: dict[str, Any]) -> list[str]:
     return tokens
 
 
-def _resolution_source(url: str | None) -> ResolutionSource:
+def _resolution_source(url: str | None, unnamed: bool = False) -> ResolutionSource:
+    """The source's host. With none: "an unnamed source" for a catalog pair's market (D76), so the
+    trace flags it; for a tracked family's market, bad data, and the market is skipped."""
     host = urlsplit(url).hostname if url else None
+    if not host and unnamed:
+        return ResolutionSource(name="an unnamed source")
     if not host:
         raise ValueError(f"resolutionSource {url!r} is not a URL")
     return ResolutionSource(name=host, url=url)

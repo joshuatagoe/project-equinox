@@ -4,6 +4,8 @@
   answer for each pair is what the Fed parsers' terms decide, so these labels cost nothing.
 - **Scores.** Exact scores of two matches in `snapshot-2026-10-11-scores`, labelled by the score
   parsers' terms (D60, D61): the same score, the reversed score, and half time against full time.
+  Each market is shown as a catalog read shows it: with its event's title and, on Kalshi, its
+  strike fields (feat-12).
 - **Labelled pairs** (`evals/pairs.json`). Catalog pairs a person labelled same or different after
   reading both venues' rules, including the traps titles fall for. The prompt was tuned on them.
 - **Held-out pairs** (`evals/heldout.json`). Labelled the same way after the prompt was tuned, from
@@ -24,8 +26,9 @@ from typing import Any
 
 from equinox.adapters.base import TrackedEvent
 from equinox.adapters.fetch import DEFAULT_SNAPSHOT, FixtureFetcher
-from equinox.adapters.kalshi import KalshiAdapter
-from equinox.adapters.polymarket import PolymarketAdapter
+from equinox.adapters.kalshi import DEFAULT_BASE_URL, KalshiAdapter
+from equinox.adapters.kalshi_terms import strike_text
+from equinox.adapters.polymarket import GAMMA_URL, PolymarketAdapter
 from equinox.matcher import evaluate_pair
 from equinox.models import CanonicalMarket, EquivalenceStatus
 from equinox.models.catalog import MarketText, ReadableMarket
@@ -98,6 +101,7 @@ def score_cases() -> list[Case]:
         tracked = [TrackedEvent(event, "") for event in events]
         adapter = adapter_class(fetch, tracked, "fixture", lambda: fetch.captured_at)
         markets += adapter.list_markets().markets
+    shown = _as_listed(fetch)
     cases = []
     for name, match, kalshi, polymarket, scores in SCORE_CASES:
         periods = {"kalshi": kalshi, "polymarket": polymarket}
@@ -105,8 +109,23 @@ def score_cases() -> list[Case]:
             (m for m in markets if _is_score(m, match, periods[m.venue], scores)),
             key=lambda m: m.market_id,
         )
-        cases.append(Case(name, [_readable(m) for m in chosen], _labels(chosen)))
+        readable = [_readable(m, *shown.get(m.market_id, ("", ""))) for m in chosen]
+        cases.append(Case(name, readable, _labels(chosen)))
     return cases
+
+
+def _as_listed(fetch: FixtureFetcher) -> dict[str, tuple[str, str]]:
+    """Each score market's event title and Kalshi strike fields, as a catalog read sends them."""
+    shown = {}
+    for event_id in SCORE_EVENTS[0][1]:
+        event = fetch(f"{DEFAULT_BASE_URL}/events/{event_id}?with_nested_markets=true")["event"]
+        for raw in event["markets"]:
+            shown[f"kalshi:{raw['ticker']}"] = (event["title"], strike_text(raw))
+    for slug in SCORE_EVENTS[1][1]:
+        event = fetch(f"{GAMMA_URL}/events?slug={slug}")[0]
+        for raw in event["markets"]:
+            shown[f"polymarket:{raw['id']}"] = (event["title"], "")
+    return shown
 
 
 def labelled_cases(path: Path = PAIRS) -> list[Case]:
@@ -151,15 +170,15 @@ def _is_score(
     return terms is not None and terms.subject == match and terms.measure in wanted
 
 
-def _readable(market: CanonicalMarket) -> ReadableMarket:
+def _readable(market: CanonicalMarket, event_title: str = "", strike: str = "") -> ReadableMarket:
     return ReadableMarket(
         market.market_id,
         market.venue,
-        "",
+        event_title,
         market.title,
         market.outcome_label,
         market.trading_closes_at,
-        MarketText(market.rules_text),
+        MarketText(market.rules_text, strike),
     )
 
 

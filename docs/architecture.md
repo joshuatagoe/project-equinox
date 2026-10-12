@@ -389,7 +389,7 @@ Only markets without terms reach it, and the result can never be EQUIVALENT:
 For markets in the catalog's unclear pairs, a model fills in the terms that a parser would:
 
 1. **Group.** The unclear pairs, most similar first, grouped by the event of their first market; each group (up to 20 markets) is one request, so the model names both sides alike.
-2. **Read.** A Messages API request (`claude-haiku-5-5`) forced through one tool whose input is one terms record per market, with the evidence phrase it read them from (`prompt.py`).
+2. **Read.** A Messages API request (`claude-haiku-5-5`) forced through one tool whose input is one terms record per market, with the evidence phrase it read them from (`prompt.py`). An exact score is read in parts: the model works out which team is at home and how the market writes its score, then gives the teams and goals, and code writes the score's terms from them as the parsers do (D71). A text answer that doesn't parse is read record by record (D72).
 3. **Check.** `checks.py` rejects a record whose evidence isn't in the market's text, whose threshold isn't a number the venue wrote (text or strike fields), whose comparison disagrees with the evidence's words, whose date falls after the market closes, which Kalshi's strike fields contradict, or whose score's goals aren't in the order the venue states them (D67). On a count, only the side must agree (2+ is greater 1.5).
 4. **Decide.** `matcher.terms.decide` applies rules 2–6 of §6.1 to the two accepted readings. EQUIVALENT is the same bet, DISTINCT a different bet, AMBIGUOUS stays unclear.
 5. **Record.** Readings and decisions go into the catalog file. Every request is cached by its content; a pair decided by another prompt version or model is read again.

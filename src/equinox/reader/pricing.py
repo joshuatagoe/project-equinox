@@ -18,7 +18,7 @@ from collections.abc import Sequence
 
 from equinox.adapters.base import FetchError
 from equinox.catalog import Catalog
-from equinox.matcher import build_clusters, cluster_for
+from equinox.matcher import build_clusters, cluster_for, terms_key
 from equinox.models import CanonicalMarket, ContractTerms, EquivalenceCluster
 from equinox.models.catalog import SAME_BET
 from equinox.reader import evals
@@ -102,22 +102,30 @@ def _same_bets(found: Catalog, market_id: str) -> tuple[list[str], str | None]:
 
 
 def _terms(found: Catalog, markets: Sequence[str], reader: str) -> dict[str, ContractTerms]:
-    """Each market's latest accepted reading by `reader`."""
+    """The most recent readings by `reader` that agree on every market of the group: the terms
+    that made it the same bet. A market in several pairs is read in several requests, and the model
+    may name it another way in each, so each market's latest reading need not agree (feat-12)."""
     named = _READER.match(reader)
     if named is None:
         raise PricingError(f"no readings are recorded for {reader}")
     query = (
-        "SELECT terms FROM readings WHERE market_id = ? AND terms IS NOT NULL AND model = ? "
-        "AND prompt = ? ORDER BY rowid DESC LIMIT 1"
+        "SELECT rowid, terms FROM readings WHERE market_id = ? AND terms IS NOT NULL "
+        "AND model = ? AND prompt = ? ORDER BY rowid DESC"
     )
-    found_terms = {}
+    by_key: dict[str, dict[str, tuple[int, ContractTerms]]] = {}
     with found.connect() as db:
         for market in markets:
-            row = db.execute(query, (market, named["model"], named["prompt"])).fetchone()
-            if row is None:
+            rows = db.execute(query, (market, named["model"], named["prompt"])).fetchall()
+            if not rows:
                 raise PricingError(f"no accepted reading of {market} by {reader} is recorded")
-            found_terms[market] = ContractTerms.model_validate_json(row[0])
-    return found_terms
+            for rowid, body in rows:
+                terms = ContractTerms.model_validate_json(body)
+                by_key.setdefault(terms_key(terms), {}).setdefault(market, (rowid, terms))
+    agreeing = {key: found for key, found in by_key.items() if len(found) == len(markets)}
+    if not agreeing:
+        raise PricingError(f"no readings of {', '.join(markets)} by {reader} agree")
+    latest = max(agreeing.values(), key=lambda found: min(rowid for rowid, _ in found.values()))
+    return {market: terms for market, (_, terms) in latest.items()}
 
 
 def _flagged(cluster: EquivalenceCluster, flag: str) -> EquivalenceCluster:

@@ -247,8 +247,10 @@ def test_5_a_score_market_takes_its_events_resolution_source():
     events = poly_events()
     events[0]["resolutionSource"] = ""
     result = poly_listing(events)
-    assert "5114624" not in {m.native_id for m in result.markets}
-    assert any(w.startswith("polymarket: market 5114624 skipped: ") for w in result.warnings)
+    # D76 (feat-12, the user agreed to update this frozen test): a catalog pair's market that
+    # names no source anywhere is built with "an unnamed source", not skipped.
+    market = next(m for m in result.markets if m.native_id == "5114624")
+    assert market.resolution_source.name == "an unnamed source"
 
 
 # 6: the catalog keeps what the cross-check reads

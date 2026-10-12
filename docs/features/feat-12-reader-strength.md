@@ -1,7 +1,7 @@
 # feat-12: Measure the setup's strength, and a stronger reader
 
 **Lane:** after feat-11. **Depends on:** feat-11 (the score parsers, which label the model's answers for free).
-**Implements:** D66 onward.
+**Implements:** D66–D76.
 **Owns only these files:**
 - `src/equinox/reader/evals.py`, `checks.py`, `prompt.py`, `check.py`: the scores, the score-order check, the reader's tool, upkeep detection
 - `evals/traps.json`, `evals/score_pairs.json` (new), `evals/recorded.json`, `evals/scores.json`

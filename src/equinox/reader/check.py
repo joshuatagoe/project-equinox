@@ -57,7 +57,9 @@ class Candidate:
     market_id: str
     title: str
     family: str
-    verdict: str  # "looks like exact_score: the parser missed it", or "not exact_score: ..."
+    verdict: (
+        str  # "looks like exact_score: the parser missed it", "not exact_score: ..." or "unread"
+    )
 
 
 @dataclass
@@ -163,11 +165,12 @@ def _groups(markets: list[ReadableMarket], limit: int) -> list[run.Call]:
 
 
 def _verdict(family: str, reading: Reading) -> str:
+    if reading.terms is None:
+        return f"unread: {reading.problem}"
     pattern = FAMILY_MEASURES.get(family)
-    if reading.terms is not None and pattern and pattern.search(reading.terms.measure):
+    if pattern and pattern.search(reading.terms.measure):
         return f"looks like {family}: the parser missed it"
-    seen = reading.terms.measure if reading.terms is not None else reading.problem
-    return f"not {family}: the model read {seen}"
+    return f"not {family}: the model read {reading.terms.measure}"
 
 
 def _readable(row: tuple) -> ReadableMarket:
