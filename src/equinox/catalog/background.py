@@ -1,10 +1,10 @@
 """Keeping the catalog fresh while the web app runs (feat-14, D90).
 
-The server refreshes the catalog when it has none or it is an hour old, then every hour, and when
-someone presses Refresh. A refresh reads only the venues' public listings and keeps the model's
-decisions where both markets' rules are unchanged (D91), so the server never calls the model. A
-refresh that fails keeps the previous catalog and says why. Snapshot data is never refreshed: a
-snapshot doesn't change.
+The server refreshes the catalog when it has none or it is 6 hours old, then every 6 hours (D98),
+and when someone presses Refresh. A refresh reads only the venues' public listings and keeps the
+model's decisions where both markets' rules are unchanged (D91), so the server never calls the
+model. A refresh that fails keeps the previous catalog and says why. Snapshot data is never
+refreshed: a snapshot doesn't change.
 """
 
 import threading
@@ -16,7 +16,7 @@ from datetime import UTC, datetime, timedelta
 from equinox.catalog import CatalogError, load_latest, refresh
 from equinox.sources import Settings
 
-EVERY = timedelta(hours=1)
+EVERY = timedelta(hours=6)  # the user's choice (D98); Refresh is louder as prices age
 CHECK = 60.0  # seconds between looks at the clock
 
 

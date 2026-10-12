@@ -13,10 +13,12 @@ from urllib.parse import urlencode
 from equinox.catalog.background import Status
 from equinox.catalog.store import Catalog
 from equinox.models import EquivalenceCluster
+from equinox.web import words
 from equinox.web.script import SCRIPT
 from equinox.web.style import CSS
 
 NAV = (("/", "Markets"), ("/matches", "Matches"))
+HOUR = 3600.0
 BPS_NOTE = (
     "bps means basis points: 1 bp is 0.01 percentage point, so 25 bps is a quarter of a point."
 )
@@ -35,6 +37,8 @@ class Context:
     FetchError (`reader.pricing`)."""
     status: Status = Status()  # the background refresh, when the server runs one
     can_refresh: bool = False
+    updating: str = ""  # the note while a refresh runs over a catalog already shown
+    age: float = 0.0  # how old the catalog's prices are, in seconds
 
 
 def href(path: str, **params: str) -> str:
@@ -69,7 +73,7 @@ def layout(
  aria-label="Search bets on both venues"></form>{fresh}
 </div></header>
 <main>
-{body}
+{_updating(ctx)}{body}
 <footer>Equinox compares what the same bet costs on each venue and simulates the order; it never
 places one. Prices come from each venue's public listings and order books. {escape(BPS_NOTE)}
 </footer>
@@ -84,11 +88,26 @@ def _data_line(ctx: Context) -> str:
     """The top bar's word on the data, and Refresh when the server keeps the catalog fresh."""
     line = f'<span class="fresh">{escape(ctx.fresh)}</span>' if ctx.fresh else ""
     if ctx.can_refresh and not ctx.status.running:
-        line += (
-            '<form class="refresh" method="post" action="/refresh">'
-            '<button class="link" type="submit">Refresh</button></form>'
-        )
+        old = ctx.found is not None and ctx.age >= HOUR  # louder as prices age (D98)
+        line += _refresh_button("btn small", "Refresh prices") if old else _refresh_button()
     return line
+
+
+def _refresh_button(style: str = "btn small ghost", label: str = "Refresh") -> str:
+    return (
+        '<form class="refresh" method="post" action="/refresh">'
+        f'<button class="{style}" type="submit">{label}</button></form>'
+    )
+
+
+def _updating(ctx: Context) -> str:
+    """The note at the top: updating now, or (from 3 hours) how old the prices are."""
+    if ctx.updating:
+        return f'<p class="notice">{escape(ctx.updating)}</p>'
+    if ctx.can_refresh and ctx.found is not None and ctx.age >= 3 * HOUR:
+        old = f"These prices are {words.age(ctx.age)} old. Refresh to update them."
+        return f'<p class="notice stale">{escape(old)} {_refresh_button("btn small")}</p>'
+    return ""
 
 
 def empty(message: str) -> str:

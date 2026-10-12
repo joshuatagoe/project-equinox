@@ -48,6 +48,10 @@ h2 { font-size: 17px; margin: 0 0 12px; }
 .find input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fresh { font-size: 13px; color: var(--muted); white-space: nowrap; }
 form.refresh { display: inline; margin: 0; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+.notice.stale { background: var(--warn-soft); border-left-color: var(--warn); }
+.notice form.refresh { margin-left: 8px; }
 button.link { background: none; border: 0; padding: 0; font: inherit; font-size: 13px;
               font-weight: 600; color: var(--accent); cursor: pointer; }
 .fresh::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px;
@@ -55,6 +59,8 @@ button.link { background: none; border: 0; padding: 0; font: inherit; font-size:
 
 main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 40px; }
 .lead { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+.notice { margin: 0 0 18px; padding: 10px 14px; border-radius: 10px; font-size: 14px;
+          background: var(--accent-soft); color: var(--ink); border-left: 4px solid var(--accent); }
 .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 
 .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin: 0 0 20px; }
@@ -124,6 +130,9 @@ form.order label { display: grid; gap: 6px; font-size: 13px; color: var(--muted)
 form.order small { font-size: 12px; }
 .intro { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
 #result:empty { display: none; }
+#result[aria-busy="true"] { opacity: .5; transition: opacity .15s; }
+[hidden] { display: none !important; }
+form.order [data-live-note] { grid-column: 1 / -1; margin: 0; }
 form.order input[inputmode] { padding: 9px 12px; font: inherit; border: 1px solid var(--line);
                               border-radius: 8px; background: var(--bg); color: var(--ink);
                               width: 100%; min-width: 0; }

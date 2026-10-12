@@ -60,6 +60,8 @@ class App:
             self._pricer(found),
             status=status,
             can_refresh=self.refresher is not None,
+            updating=_updating(found, now, status),
+            age=max((now - found.summary.refreshed_at).total_seconds(), 0) if found else 0.0,
         )
         return page(ctx, params)
 
@@ -95,6 +97,17 @@ class App:
         if source in snapshot_names():
             return replace(self.settings, source="fixtures", snapshot=FIXTURES / source)
         return self.settings
+
+
+def _updating(found: catalog.Catalog | None, now: datetime, status: Status) -> str:
+    """While a refresh runs, the pages keep the markets they have and say so (D95)."""
+    if found is None or not status.running:
+        return ""
+    old = words.age(max((now - found.summary.refreshed_at).total_seconds(), 0))
+    return (
+        f"Updating markets from both venues. You're seeing them as of {old} ago; the new "
+        "ones appear when the update finishes, in about three minutes."
+    )
 
 
 def _fresh(found: catalog.Catalog | None, now: datetime, status: Status) -> str:

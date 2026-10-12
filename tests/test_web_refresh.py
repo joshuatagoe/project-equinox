@@ -112,13 +112,15 @@ def test_with_no_previous_catalog_nothing_is_carried(tmp_path):
 # When the server refreshes.
 
 
-def test_a_refresh_is_due_with_no_catalog_or_an_hour_old_one(tmp_path):
+def test_a_refresh_is_due_with_no_catalog_or_a_six_hour_old_one(tmp_path):
+    """Changed at the user's request (D98, 2026-10-12): every 6 hours, not every hour."""
     now = datetime.now(UTC)
     settings = Settings(source="live", cache_dir=tmp_path)
     assert background.Refresher(settings, clock=lambda: now).due()
     rebuild(tmp_path)
-    assert not background.Refresher(settings, clock=lambda: now).due()
-    later = now + timedelta(hours=1, minutes=1)
+    soon = now + timedelta(hours=5, minutes=59)
+    assert not background.Refresher(settings, clock=lambda: soon).due()
+    later = now + timedelta(hours=6, minutes=1)
     assert background.Refresher(settings, clock=lambda: later).due()
 
 

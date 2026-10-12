@@ -111,9 +111,9 @@ def chips(page):
 
 
 def test_topics_narrow_the_events(tmp_path):
-    """Changed with the user's OK (G5, 2026-10-12): one topic shows no chips; the filter stays."""
+    """Changed back at the user's request (D97): every topic is a chip, even the only one."""
     app = scores_app(tmp_path)
-    assert chips(app.respond("/", "")) == []  # every event is Sports: nothing to pick
+    assert chips(app.respond("/", "")) == ["All", "Sports"]
     assert len(cards(app.respond("/", "topic=Sports"))) == 3
     none = app.respond("/", "topic=Politics")
     assert cards(none) == [] and "No events in Politics" in words(none)
@@ -134,22 +134,22 @@ def test_two_topics_show_their_chips(tmp_path):
 
 
 def test_an_event_with_no_topic_is_under_other(tmp_path):
-    """Changed with the user's OK (G5): the card says Other; with one topic there are no chips."""
+    """Changed back at the user's request (D97): Other is a chip that filters, like any topic."""
     app = mixed(tmp_path)
     page = app.respond("/", "")
-    assert cards(page)[0].startswith("Other") and chips(page) == []
+    assert cards(page)[0].startswith("Other") and chips(page) == ["All", "Other"]
     assert len(cards(app.respond("/", "topic=Other"))) == 1
 
 
 def test_an_older_catalog_without_topics_still_opens(tmp_path):
-    """Changed with the user's OK (G5): every card says Other, and there are no chips."""
+    """Changed back at the user's request (D97): every card says Other, and Other is a chip."""
     score_catalog(tmp_path)
     with sqlite3.connect(catalog.store.latest(tmp_path)) as db:
         db.execute("ALTER TABLE entries DROP COLUMN topic")
     app = App(Settings(source="fixtures", snapshot=SCORES, cache_dir=tmp_path))
     page = app.respond("/", "")
     assert len(cards(page)) == 3 and all(c.startswith("Other") for c in cards(page))
-    assert chips(page) == []
+    assert chips(page) == ["All", "Other"]
 
 
 def test_search_finds_the_outcome_within_its_event(tmp_path):

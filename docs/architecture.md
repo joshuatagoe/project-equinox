@@ -600,9 +600,10 @@ Rules the pages keep:
 - Every order goes through `simulate`, and every match through the matcher and the catalog; the ticket prices a pair through `reader/pricing.py` from where the catalog was read (D78). A test checks that the ticket and `cli.main --json` show the same totals.
 - Only the pair being priced is read from the venues, with its order books (D49). If they can't be reached, the ticket says so and doesn't price.
 - The top bar says how old the catalog's prices are, whether a refresh is running or the last one failed, and has a Refresh button; the ticket's notes say how old each order book is.
-- With live data the server refreshes the catalog on start when it has none or it is an hour old, then hourly, and on Refresh (D90). Before the first catalog the home page says it is being built; with no catalog and no venues, that they can't be reached. A refresh keeps the model's decisions where both markets' rules are unchanged (D91); the server never calls the model.
+- With live data the server refreshes the catalog on start when it has none or it is 6 hours old, then every 6 hours, and on Refresh (D90, D98); Refresh is a link under an hour, a button from an hour, and from 3 hours a note at the top too. Before the first catalog the home page says it is being built; with no catalog and no venues, that they can't be reached. A refresh keeps the model's decisions where both markets' rules are unchanged (D91); the server never calls the model.
 - Every string that came from a venue is HTML-escaped. Venue names come only from each market's `venue` field.
-- One stylesheet, light and dark, from phone width up; one script prices the ticket again as you type by fetching the ticket page itself (D89).
+- One stylesheet, light and dark, from phone width up; one script prices the ticket again as you type by fetching the ticket page itself, and hides Compare venues, which only a browser without it needs (D89, D96).
+- While a refresh runs, every page keeps the markets it has and says they are updating; Markets reloads itself until the new ones are in (D95).
 - The server listens on 127.0.0.1 unless `--host` says otherwise.
 
 ---
@@ -702,7 +703,7 @@ src/equinox/
   sources.py             # settings, data sources, discovery, books on demand (D49, D51)
   catalog/  __init__.py  store.py  events.py  review.py  carry.py  background.py
             # refresh, its SQLite file, the events both venues list, the pairs for review,
-            # decisions kept across a refresh, the hourly refresh
+            # decisions kept across a refresh, the background refresh
   server.py              # the web app's routes and /health (§8.3)
   web/      app.py  shell.py  home.py  event.py  ticket.py  same_bet.py  matches.py  order.py  words.py  style.py  script.py
   tracked_events.json

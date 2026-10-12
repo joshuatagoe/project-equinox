@@ -33,12 +33,14 @@ def page(ctx: Context, params: dict[str, str]) -> str:
         chips = ""
     else:
         heading = f"<h1>Markets</h1><p class='lead'>{escape(LEAD)}</p>"
-        counted = topics(ctx.found)
-        chips = _chips(counted, topic) if len(counted) > 1 else ""  # one topic: nothing to pick
+        chips = _chips(topics(ctx.found), topic)  # every topic, Other too (D97)
     cards = "".join(card(event, ctx) for event in shown)
     listing = f'<div class="grid">{cards}</div>' if cards else shell.empty(_none(asked, topic))
     pager = _pager(len(found), number, asked, topic)
-    return shell.layout("Markets", heading + chips + listing + pager, ctx, words=asked)
+    again = 30 if ctx.updating else 0  # until the new markets are in (D95)
+    return shell.layout(
+        "Markets", heading + chips + listing + pager, ctx, words=asked, reload=again
+    )
 
 
 def card(event: Event, ctx: Context) -> str:

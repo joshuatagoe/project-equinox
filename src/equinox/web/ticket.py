@@ -77,7 +77,8 @@ def _form(market: str, side: str, quantity: str, budget: str) -> str:
 <label>Most you'd spend ($), optional
 <input name="budget" value="{escape(budget)}" inputmode="decimal">
 <small>A venue that would cost more is ruled out.</small></label>
-<button class="btn" type="submit">Compare venues</button>
+<button class="btn" type="submit" data-fallback>Compare venues</button>
+<p class="small muted" data-live-note hidden>The comparison updates as you change the order.</p>
 </form>"""
 
 
