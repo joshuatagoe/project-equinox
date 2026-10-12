@@ -33,6 +33,7 @@ from equinox.adapters.polymarket_terms import (
     TERM_PARSERS,
     TermParser,
     event_parser,
+    market_family,
     utc,
 )
 from equinox.models import (
@@ -213,6 +214,7 @@ def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
                     yes_ask=listed_ask(raw.get("bestAsk")),
                     no_ask=None if best_bid is None else 1 - best_bid,
                     terms=parse_terms(raw, []) if parse_terms else None,
+                    family=market_family(raw, event),
                 )
             )
             texts[entries[-1].market_id] = MarketText(_rules(raw))

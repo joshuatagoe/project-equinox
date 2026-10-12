@@ -38,7 +38,8 @@ CREATE TABLE entries (
     market_id TEXT PRIMARY KEY, venue TEXT NOT NULL, event_title TEXT NOT NULL,
     title TEXT NOT NULL, outcome_label TEXT NOT NULL, described TEXT, closes_at TEXT,
     tradable INTEGER NOT NULL, yes_ask TEXT, no_ask TEXT, terms_key TEXT, status TEXT NOT NULL,
-    rank INTEGER NOT NULL, partner TEXT, score TEXT, reasons TEXT NOT NULL, read_by TEXT
+    rank INTEGER NOT NULL, partner TEXT, score TEXT, reasons TEXT NOT NULL, read_by TEXT,
+    family TEXT NOT NULL
 );
 CREATE TABLE pairs (
     market_a TEXT NOT NULL, market_b TEXT NOT NULL, status TEXT NOT NULL, score TEXT,
@@ -84,7 +85,7 @@ def save(
     try:
         with closing(sqlite3.connect(temp)) as db:
             db.executescript(_SCHEMA)
-            db.executemany(f"INSERT INTO entries VALUES ({_marks(17)})", _entries(entries, found))
+            db.executemany(f"INSERT INTO entries VALUES ({_marks(18)})", _entries(entries, found))
             db.executemany(f"INSERT INTO pairs VALUES ({_marks(6)})", _pairs(entries, found))
             db.execute("INSERT INTO summary VALUES (?)", (_dump(summary),))
             db.commit()
@@ -194,6 +195,7 @@ def _entries(entries: Sequence[CatalogEntry], found: Comparison):
             _text(pair.score) if pair else None,
             json.dumps(list(pair.reasons) if pair else []),
             None,  # read_by: set when a model reads the pair (D57)
+            e.family,
         )
 
 

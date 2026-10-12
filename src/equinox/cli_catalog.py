@@ -40,6 +40,8 @@ def add_commands(commands, common: argparse.ArgumentParser) -> None:
         read.add_argument("--limit", type=int, required=True, help="the most markets to read")
         read.add_argument("--model", default=MODEL, help=f"default: {MODEL}")
         read.add_argument("--workers", type=int, default=4, help="requests at once (default: 4)")
+        if action == "check":
+            read.add_argument("--drift", action="store_true", help="read parser misses (feat-12)")
 
 
 def command(
@@ -52,6 +54,8 @@ def command(
         return refresh(settings, live_fetcher)
     if args.action == "read":
         return read(settings, args.limit, args.model, args.workers, ask)
+    if args.action == "check" and args.drift:
+        return drift(settings, args.limit, args.model, args.workers, ask)
     if args.action == "check":
         return check(settings, args.limit, args.model, args.workers, ask)
     return status(settings)
@@ -115,6 +119,31 @@ def check(settings: Settings, limit: int, model: str, workers: int, ask: Ask | N
     print(f"{_count(len(r.disagreements), 'disagreement')}{':' if r.disagreements else '.'}")
     for d in r.disagreements:
         print(f"  {d.a} ~ {d.b}: parser: {d.parser}, model: {d.model}. {d.reasons[0]}")
+    _spent(ask, r.input_tokens, r.output_tokens)
+    return 0
+
+
+def drift(settings: Settings, limit: int, model: str, workers: int, ask: Ask | None) -> int:
+    """Read the markets a parser family gave no terms, and say which still look like it."""
+    found, ask = _model(settings, ask)
+    if found is None or ask is None:
+        return 1
+    print(f"Reading at most {limit:,} parser-family markets without terms with {model}...")
+    try:
+        r = cross_check.drift(found, ask, model, limit, _say, workers)
+    except ReaderError as error:
+        print(f"Not read: {error}. Answers already received are cached.")
+        return 1
+    if r.problem:
+        print(f"Nothing read: {r.problem} with {REFRESH}.")
+        return 1
+    missed = [c for c in r.candidates if "missed" in c.verdict]
+    print(
+        f"{len(r.candidates):,} markets read in {_count(r.calls, 'request')}: {len(missed):,} "
+        "look like their family (the parser missed them); the rest do not."
+    )
+    for c in r.candidates:
+        print(f"  {c.market_id} ({c.title}): {c.verdict}")
     _spent(ask, r.input_tokens, r.output_tokens)
     return 0
 

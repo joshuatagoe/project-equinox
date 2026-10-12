@@ -1,6 +1,6 @@
 """The market texts the term reader reads (D57): staged on disk while a refresh reads the
-venues, then kept in the catalog only for the markets in pairs: unclear ones, and the parsers'
-pairs the cross-check reads (D64).
+venues, then kept in the catalog only for the markets in pairs (unclear ones, and the parsers'
+pairs the cross-check reads, D64) and for a parser family's markets that got no terms (feat-12).
 
 A refresh reads about 287,000 markets, and their rules texts would need hundreds of megabytes in
 memory. The stage writes each page's texts to a temporary SQLite file as it arrives; the catalog
@@ -42,12 +42,14 @@ class TextStage:
 
 def keep_texts(db: sqlite3.Connection, staged: Path) -> None:
     """Copy from the stage the texts of the markets the term reader may read: those in unclear
-    pairs (D57) and in the parsers' pairs, for the cross-check (D64). A refresh's pairs are
-    unclear, the same bet by terms, or kept as different."""
+    pairs (D57) and in the parsers' pairs, for the cross-check (D64), and a parser family's markets
+    that got no terms, for upkeep detection (feat-12). A refresh's pairs are unclear, the same bet
+    by terms, or kept as different."""
     db.execute("ATTACH DATABASE ? AS staged", (str(staged),))
     db.execute(
         "INSERT INTO texts SELECT market_id, rules, strike FROM staged.texts WHERE market_id IN "
-        "(SELECT market_a FROM pairs UNION SELECT market_b FROM pairs)"
+        "(SELECT market_a FROM pairs UNION SELECT market_b FROM pairs UNION "
+        "SELECT market_id FROM entries WHERE family != '' AND terms_key IS NULL)"
     )
     db.commit()
     db.execute("DETACH DATABASE staged")

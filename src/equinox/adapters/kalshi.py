@@ -31,6 +31,7 @@ from equinox.adapters.base import (
 from equinox.adapters.kalshi_terms import (
     FAMILY_SERIES,
     Parser,
+    family_of,
     fed_decision_terms,
     parser_for,
     rules_text,
@@ -212,6 +213,7 @@ def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
                     yes_ask=listed_ask(raw.get("yes_ask_dollars")),
                     no_ask=listed_ask(raw.get("no_ask_dollars")),
                     terms=parse_terms(raw, event) if parse_terms else None,
+                    family=family_of(parse_terms),
                 )
             )
             texts[entries[-1].market_id] = MarketText(rules_text(raw), strike_text(raw))

@@ -16,7 +16,7 @@ from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from equinox.adapters.scores import exact_score, scheduled_day
+from equinox.adapters.scores import EXACT_SCORE, exact_score, scheduled_day
 from equinox.models import ContractTerms
 
 NEW_YORK = ZoneInfo("America/New_York")
@@ -99,6 +99,11 @@ def _full_time_result(home: str, away: str, home_goals: int, away_goals: int) ->
     winner = home if home_goals > away_goals else away
     high, low = max(home_goals, away_goals), min(home_goals, away_goals)
     return f"If {winner} wins {high}-{low} "
+
+
+def family_of(parser: Parser | None) -> str:
+    """The family a parser reads, as the catalog records it (feat-12); "" for none."""
+    return {fed_decision_terms: FED_DECISION, score_terms: EXACT_SCORE}.get(parser, "")
 
 
 def rules_text(raw: dict[str, Any]) -> str:

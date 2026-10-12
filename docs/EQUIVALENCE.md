@@ -210,6 +210,24 @@ Both parsers give one terms shape: subject "coventry city vs newcastle united", 
 
 **Gold labels.** The parsers label a fourth eval set for free: three groups from `snapshot-2026-10-11-scores` (Coventry City v Newcastle United at full time, its first half against full time, and RB Leipzig v PSV), 68 pairs with 13 same bets. The model found 9 with no false same-bet; it missed three first-half pairs and one away win.
 
+## How strong the setup is
+
+Every gold set is scored twice (D66): **raw**, from every reading the model makes that forms valid terms, which says how often the model alone is right; and **guarded**, after the checks, which is what can route. Each false same-bet rate gets a one-sided 95% upper bound over the pairs labelled different, so a small clean set says how little it shows. The baseline, recorded on 2026-10-11 with prompt feat-10.7:
+
+| Set | Pairs labelled different | False same-bets, raw | False same-bets, guarded | Same bets found (raw) |
+|---|---|---|---|---|
+| Fed meetings | 60 | 0 (under 4.9%) | 0 | 13 of 15 |
+| Labelled pairs | 22 | 0 (under 12.7%) | 0 | 8 of 13 |
+| Held-out pairs | 14 | 0 (under 19.3%) | 0 | 3 of 4 |
+| Scores (fixture) | 55 | 0 (under 5.3%) | 0 | 9 of 13 |
+| Traps | 7 | **3** (under 77.5%) | 0 (under 34.8%) | none labelled |
+| Score groups, tuning half | 720 | 0 (under 0.4%) | 0 | 80 of 80 |
+| Score groups, judging half | 720 | 0 (under 0.4%) | 0 | 73 of 80 |
+
+The **traps** are the 7 reversed scores from the full read; read again two at a time, the model still reverses 3. The score-order check (D67) refuses those readings, so guarded they are 0. The **score groups** are 16 live catalog requests labelled by the parsers, one per match, split by match into a half the reader may be tuned on and a half it is only judged on (D68). On them the model makes no false same-bet; its order mix-up shows instead as 7 missed same bets, all away wins in one match (Al-Ittihad v Shabab Al Ahli). A better reader should bring the traps to 0 raw and the misses down, without a new false same-bet anywhere.
+
+**Upkeep.** Each catalog market records the parser family meant to read it (D69). `catalog check --drift --limit N` reads only a family's markets that got no terms and says which still look like the family, the sign that a venue reworded them, and which don't.
+
 ## Third venue: the Meridian fit check
 
 Two venues can't show that the design generalizes. Meridian, a planned binary-stock-outcome venue on Solana devnet, is **not integrated** (D26). Instead, architecture §9 maps it onto the canonical model on paper, and hand-built Meridian-style markets go through the real matcher and router in the test suite.

@@ -390,7 +390,7 @@ For markets in the catalog's unclear pairs, a model fills in the terms that a pa
 
 1. **Group.** The unclear pairs, most similar first, grouped by the event of their first market; each group (up to 20 markets) is one request, so the model names both sides alike.
 2. **Read.** A Messages API request (`claude-haiku-5-5`) forced through one tool whose input is one terms record per market, with the evidence phrase it read them from (`prompt.py`).
-3. **Check.** `checks.py` rejects a record whose evidence isn't in the market's text, whose threshold isn't a number the venue wrote (text or strike fields), whose comparison disagrees with the evidence's words, whose date falls after the market closes, or which Kalshi's strike fields contradict. On a count, only the side must agree (2+ is greater 1.5).
+3. **Check.** `checks.py` rejects a record whose evidence isn't in the market's text, whose threshold isn't a number the venue wrote (text or strike fields), whose comparison disagrees with the evidence's words, whose date falls after the market closes, which Kalshi's strike fields contradict, or whose score's goals aren't in the order the venue states them (D67). On a count, only the side must agree (2+ is greater 1.5).
 4. **Decide.** `matcher.terms.decide` applies rules 2–6 of §6.1 to the two accepted readings. EQUIVALENT is the same bet, DISTINCT a different bet, AMBIGUOUS stays unclear.
 5. **Record.** Readings and decisions go into the catalog file. Every request is cached by its content; a pair decided by another prompt version or model is read again.
 6. **Route** (`pricing.py`). `simulate` on a market that isn't in a loaded family, and the order page for a `catalog:` outcome, look the market up among the catalog's model-read same bets. The gate allows it only when the pair was read with the model and prompt the committed evals were recorded with, and every gold set shows zero false same-bets. Each market's event is looked up from the venue at pricing time (D59), the listings and books are loaded, the model's terms are attached, and the group goes through the same clusters and router as a parser-read one, with the risk flag "Terms read by a model", so its confidence is Medium at most.
@@ -399,7 +399,9 @@ A parser's same bet outside the loaded families (exact scores) is priced the sam
 
 `catalog check --limit N` (`check.py`, D64) reads the parsers' pairs with the model: the same bets and the pairs a refresh keeps as "different" because their titles alone would have left them unclear. It decides them with the same rules and lists every disagreement, changing nothing.
 
-Only `catalog read` and `catalog check` call the model, and both print the tokens they spent. The evals (`reader/evals.py`) score four gold sets; the tests replay their recorded answers.
+`catalog check --drift --limit N` (D69) reads only the markets a parser family is meant to read (the catalog's `family` column) but gave no terms, and says which still look like the family.
+
+Only `catalog read` and `catalog check` call the model, and both print the tokens they spent. The evals (`reader/evals.py`, sets in `reader/gold.py`) score seven gold sets twice, raw and guarded, with upper bounds (D66); the tests replay their recorded answers.
 
 ### 6.4 Labelled pairs (acceptance tests for feat-03)
 
@@ -708,7 +710,7 @@ src/equinox/
   models/   canonical.py  catalog.py  equivalence.py  routing.py  trace.py
   adapters/ base.py  fetch.py  kalshi.py  polymarket.py  scores.py  teams.py  team_aliases.json
   matcher/  terms.py  text.py  clusters.py  confidence.py  index.py  compare.py
-  reader/   prompt.py  client.py  checks.py  run.py  evals.py  pricing.py  check.py   # §6.5
+  reader/   prompt.py  client.py  checks.py  run.py  evals.py  gold.py  pricing.py  check.py
   router/   depth.py  engine.py  rationale.py
 tests/
   golden/canonical_markets.json   # includes the §9 fit-check markets
@@ -718,8 +720,8 @@ tests/
   test_matcher.py  test_router.py  test_cli.py
   test_confidence.py  test_web.py  test_docs.py  test_quality.py
   test_discovery.py  test_catalog.py  test_index.py  test_web_catalog.py  test_fetch.py
-  test_reader.py  test_reader_evals.py  test_scores.py
-evals/      pairs.json  heldout.json  recorded.json  scores.json   # the term reader's gold sets (D58)
+  test_reader.py  test_reader_evals.py  test_scores.py  test_strength.py  test_upkeep.py
+evals/      pairs.json  heldout.json  traps.json  score_pairs.json  recorded.json  scores.json
   test_equinox.py        # existing status-server tests
 ```
 

@@ -119,6 +119,12 @@ def check_answer(call: Call, answer: dict) -> dict[str, Reading]:
     return {m: checks.accept(records[m], market) for m, market in call.markets.items()}
 
 
+def unchecked_answer(call: Call, answer: dict) -> dict[str, Reading]:
+    """Every reading in the answer that forms valid terms, before the checks (feat-12)."""
+    records = prompt.answers(answer, list(call.markets.values()))
+    return {m: checks.unchecked(records[m], market) for m, market in call.markets.items()}
+
+
 def decide_pair(pair: PairToRead, got: dict[str, Reading], call: Call, reader: str) -> PairDecision:
     """`reader` names the model and prompt that read the pair, as recorded with the decision."""
     first, second = got[pair.a], got[pair.b]

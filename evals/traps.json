@@ -1,0 +1,177 @@
+[
+ {
+  "name": "Reversed score: Lens wins 4-1 vs Lens 1 - 4",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXUCLSCORE-26OCT13RCLSPO-RCL4SPO1",
+   "venue": "kalshi",
+   "event_title": "Racing Club De Lens vs Sporting CP: Correct Score",
+   "title": "Final score Racing Club De Lens wins 4-1?",
+   "outcome_label": "Racing Club De Lens wins 4-1",
+   "closes_at": "2026-10-15T22:45:00+00:00",
+   "rules": "If Racing Club De Lens wins 4-1 in the Racing Club De Lens vs Sporting CP professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"bbafe881-978e-4eaa-b6d3-21fb6537d0af\", \"home_score\": \"4\", \"home_team_id\": \"037e6593-99d0-464b-a28c-ac1211d6a6f3\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5134646",
+   "venue": "polymarket",
+   "event_title": "Racing Club de Lens vs. Sporting CP - Exact Score",
+   "title": "Exact Score: Racing Club de Lens 1 - 4 Sporting CP?",
+   "outcome_label": "Racing Club de Lens 1 - 4 Sporting CP",
+   "closes_at": "2026-10-13T16:45:00+00:00",
+   "rules": "In the upcoming UEFA Champions League game between Racing Club de Lens and Sporting CP, scheduled for October 13, 2026 at 12:45 PM ET: This market will resolve based on the final score of the Racing Club de Lens vs. Sporting CP match originally scheduled for October 13, 2026 at 12:45 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: Lens wins 5-1 vs Lens 1 - 5",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXUCLSCORE-26OCT13RCLSPO-RCL5SPO1",
+   "venue": "kalshi",
+   "event_title": "Racing Club De Lens vs Sporting CP: Correct Score",
+   "title": "Final score Racing Club De Lens wins 5-1?",
+   "outcome_label": "Racing Club De Lens wins 5-1",
+   "closes_at": "2026-10-15T22:45:00+00:00",
+   "rules": "If Racing Club De Lens wins 5-1 in the Racing Club De Lens vs Sporting CP professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"bbafe881-978e-4eaa-b6d3-21fb6537d0af\", \"home_score\": \"5\", \"home_team_id\": \"037e6593-99d0-464b-a28c-ac1211d6a6f3\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5134657",
+   "venue": "polymarket",
+   "event_title": "Racing Club de Lens vs. Sporting CP - Exact Score",
+   "title": "Exact Score: Racing Club de Lens 1 - 5 Sporting CP?",
+   "outcome_label": "Racing Club de Lens 1 - 5 Sporting CP",
+   "closes_at": "2026-10-13T16:45:00+00:00",
+   "rules": "In the upcoming UEFA Champions League game between Racing Club de Lens and Sporting CP, scheduled for October 13, 2026 at 12:45 PM ET: This market will resolve based on the final score of the Racing Club de Lens vs. Sporting CP match originally scheduled for October 13, 2026 at 12:45 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: 1st half 1, 0 vs 0 - 1",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXSERIEA1HSCORE-26OCT12ATAVEN-ATA1VEN0",
+   "venue": "kalshi",
+   "event_title": "Atalanta BC vs Venezia FC: 1st Half Correct Score",
+   "title": "Will the 1st half score be Atalanta BC wins 1-0?",
+   "outcome_label": "Atalanta BC wins 1H 1-0",
+   "closes_at": "2026-10-14T22:30:00+00:00",
+   "rules": "If the score at the end of the 1st Half is Atalanta BC 1, Venezia FC 0 in the Atalanta BC vs Venezia FC professional Serie A soccer game originally scheduled for Oct 12, 2026, then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"0\", \"away_team_id\": \"1333d5e7-e2e6-464d-943c-db9b79e9596c\", \"home_score\": \"1\", \"home_team_id\": \"139b1e61-312d-4fb6-8e98-2dd6017e8660\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5292515",
+   "venue": "polymarket",
+   "event_title": "Atalanta BC vs. Venezia FC - 1st Half Exact Score",
+   "title": "1st Half Exact Score: Atalanta BC 0 - 1 Venezia FC?",
+   "outcome_label": "Atalanta BC 0 - 1 Venezia FC",
+   "closes_at": "2026-10-12T16:30:00+00:00",
+   "rules": "In the upcoming Serie A game between Atalanta BC and Venezia FC, scheduled for October 12, 2026 at 12:30 PM ET: This market will resolve based on the halftime score of the Atalanta BC vs. Venezia FC match originally scheduled for October 12, 2026 at 12:30 PM ET, considering only goals scored within the first 45 minutes of regular play plus first-half stoppage time; second-half goals, extra time, and penalty shoot-outs are excluded. If the actual halftime score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.\n\nThis market may resolve only when the listed period of play has concluded and the result can be definitively determined by the listed resolution source(s).",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: Al-Ittihad 4-1 vs 1 - 4",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT13ITJSAH-ITJ4SAH1",
+   "venue": "kalshi",
+   "event_title": "Al-Ittihad Club vs Shabab Al Ahli Dubai: Correct Score",
+   "title": "Final score Al-Ittihad Club wins 4-1?",
+   "outcome_label": "Al-Ittihad Club wins 4-1",
+   "closes_at": "2026-10-16T00:15:00+00:00",
+   "rules": "If Al-Ittihad Club wins 4-1 in the Al-Ittihad Club vs Shabab Al Ahli Dubai professional AFC Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"7141a77d-2e69-47e7-8a99-411b83104288\", \"home_score\": \"4\", \"home_team_id\": \"179e3160-e127-4321-a80e-e36b0dbcaf43\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452517",
+   "venue": "polymarket",
+   "event_title": "Al-Ittihad Club vs. Shabab Al Ahli Dubai - Exact Score",
+   "title": "Exact Score: Al-Ittihad Club 1 - 4 Shabab Al Ahli Dubai?",
+   "outcome_label": "Al-Ittihad Club 1 - 4 Shabab Al Ahli Dubai",
+   "closes_at": "2026-10-13T18:15:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Al-Ittihad Club and Shabab Al Ahli Dubai, scheduled for October 13, 2026 at 2:15 PM ET: This market will resolve based on the final score of the Al-Ittihad Club vs. Shabab Al Ahli Dubai match originally scheduled for October 13, 2026 at 2:15 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: Tractor 2-0 vs 0 - 2",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXAFCCLSCORE-26OCT12TRASHM-TRA2SHM0",
+   "venue": "kalshi",
+   "event_title": "Tractor Tabriz vs Al-Shamal: Correct Score",
+   "title": "Final score Tractor Tabriz wins 2-0?",
+   "outcome_label": "Tractor Tabriz wins 2-0",
+   "closes_at": "2026-10-14T22:00:00+00:00",
+   "rules": "If Tractor Tabriz wins 2-0 in the Tractor Tabriz vs Al-Shamal professional AFC Champions League soccer game originally scheduled for Oct 12, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"0\", \"away_team_id\": \"1cf92047-268c-49e8-8c2c-47d85a87fb85\", \"home_score\": \"2\", \"home_team_id\": \"38ea2269-4a0e-4858-9609-af643adb8cba\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5452136",
+   "venue": "polymarket",
+   "event_title": "Tractor Tabriz vs. Al-Shamal - Exact Score",
+   "title": "Exact Score: Tractor Tabriz 0 - 2 Al-Shamal?",
+   "outcome_label": "Tractor Tabriz 0 - 2 Al-Shamal",
+   "closes_at": "2026-10-12T16:00:00+00:00",
+   "rules": "In the upcoming AFC Champions League Elite game between Tractor Tabriz and Al-Shamal, scheduled for October 12, 2026 at 12:00 PM ET: This market will resolve based on the final score of the Tractor Tabriz vs. Al-Shamal match originally scheduled for October 12, 2026 at 12:00 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: Rayo 4-1 vs Rayo 1 - 4",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXLALIGASCORE-26OCT10RVCATH-RVC4ATH1",
+   "venue": "kalshi",
+   "event_title": "Rayo Vallecano vs Athletic Bilbao: Correct Score",
+   "title": "Final score Rayo Vallecano wins 4-1?",
+   "outcome_label": "Rayo Vallecano wins 4-1",
+   "closes_at": "2026-10-12T18:00:00+00:00",
+   "rules": "If Rayo Vallecano wins 4-1 in the Rayo Vallecano vs Athletic Bilbao professional La Liga soccer game originally scheduled for Oct 10, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"8a82e30a-849f-4499-84bc-4efe695d28f1\", \"home_score\": \"4\", \"home_team_id\": \"f52bf332-d290-4b44-9a13-4217f88f7c00\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5015171",
+   "venue": "polymarket",
+   "event_title": "Rayo Vallecano de Madrid vs. Athletic Club - Exact Score",
+   "title": "Exact Score: Rayo Vallecano de Madrid 1 - 4 Athletic Club?",
+   "outcome_label": "Rayo Vallecano de Madrid 1 - 4 Athletic Club",
+   "closes_at": "2026-10-10T12:00:00+00:00",
+   "rules": "In the upcoming La Liga game between Rayo Vallecano de Madrid and Athletic Club, scheduled for October 10, 2026 at 8:00 AM ET: This market will resolve based on the final score of the Rayo Vallecano de Madrid vs. Athletic Club match originally scheduled for October 10, 2026 at 8:00 AM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ },
+ {
+  "name": "Reversed score: Pachuca 4-1 vs 1 - 4",
+  "label": "different",
+  "why": "Reversed score: Kalshi names the winner and its goals first; Polymarket writes the home team's goals first. Read as the same bet in the 2026-10-11 full read; the parser and both texts say otherwise.",
+  "a": {
+   "market_id": "kalshi:KXLIGAMXSCORE-26OCT11PACNCX-PAC4NCX1",
+   "venue": "kalshi",
+   "event_title": "CF Pachuca vs Club Necaxa: Correct Score",
+   "title": "Final score CF Pachuca wins 4-1?",
+   "outcome_label": "CF Pachuca wins 4-1",
+   "closes_at": "2026-10-14T05:10:00+00:00",
+   "rules": "If CF Pachuca wins 4-1 in the CF Pachuca vs Club Necaxa professional Liga MX soccer game originally scheduled for Oct 11, 2026 after 90 minutes plus stoppage time (does not include extra time or penalties), then the market resolves to Yes.",
+   "strike": "{\"strike_type\": \"custom\", \"custom_strike\": {\"away_score\": \"1\", \"away_team_id\": \"8beb4fbf-a817-4807-9974-de8f08506044\", \"home_score\": \"4\", \"home_team_id\": \"649e847f-571e-48ab-96f2-d3c0b45dfe7a\"}}"
+  },
+  "b": {
+   "market_id": "polymarket:5083208",
+   "venue": "polymarket",
+   "event_title": "CF Pachuca vs. Club Necaxa - Exact Score",
+   "title": "Exact Score: CF Pachuca 1 - 4 Club Necaxa?",
+   "outcome_label": "CF Pachuca 1 - 4 Club Necaxa",
+   "closes_at": "2026-10-11T23:10:00+00:00",
+   "rules": "In the upcoming Liga MX game between CF Pachuca and Club Necaxa, scheduled for October 11, 2026 at 7:15 PM ET: This market will resolve based on the final score of the CF Pachuca vs. Club Necaxa match originally scheduled for October 11, 2026 at 7:15 PM ET, considering only the result at the end of 90 minutes of regulation plus stoppage time; extra time and penalty shoot-outs are excluded. If the actual score is not one of the explicitly listed outcomes, the market resolves to \"Any Other Score.\" If the match is postponed, the market will remain open until it is completed; if it is canceled with no make-up game, the market resolves to \"0-0.\" The primary resolution source for this market is the official statistics of the event as recognized by the governing body or event organizers. However, if the governing body or event organizers have not published final match statistics within 2 hours after the event's conclusion, data from Flashscore may be used; if Flashscore data is unavailable, data from Sofascore may be used; if neither is available, a consensus of credible reporting may be used instead. All markets will settle based on the official final result as recognized by the governing body or event organizers. Revisions to officially declared final scores made after market resolution will not be accounted for in determining the outcome. If no acceptable data is available within 24 hours of the event's conclusion, this market will resolve 50-50, or to \"Draw\" where applicable.",
+   "strike": ""
+  }
+ }
+]

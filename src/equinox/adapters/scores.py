@@ -13,6 +13,7 @@ from decimal import Decimal
 from equinox.adapters.teams import team_key
 from equinox.models import ContractTerms
 
+EXACT_SCORE = "exact_score"  # the family's name in the catalog (feat-12)
 MEASURED_BY = "official_match_score"
 _MONTHS = {
     name: number

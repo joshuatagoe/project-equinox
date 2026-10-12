@@ -25,6 +25,7 @@ class CatalogEntry:
     yes_ask: Decimal | None  # the best price to buy YES, from the listing; None if nobody sells
     no_ask: Decimal | None
     terms: ContractTerms | None = None
+    family: str = ""  # the parser family meant to read it ("exact_score"), even if it gave no terms
 
 
 @dataclass(frozen=True, slots=True)

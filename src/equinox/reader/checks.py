@@ -14,7 +14,12 @@ rejected, with the reason, when:
 - an indicator is anything but eq (its threshold is always 1);
 - its date doesn't parse, or falls more than 7 days after the market closes;
 - the venue's strike fields say otherwise. On a count, "above 29.5" and "at least 30" agree;
+- a score's goals are not in the order the venue states them: Kalshi's `home_score` and
+  `away_score`, or a score written "h - a" in the evidence, home team first (feat-12);
 - the terms don't validate.
+
+`unchecked` keeps every reading that forms valid terms, so the evals can say how often the model
+alone is right, apart from what the checks catch (feat-12).
 """
 
 import json
@@ -40,6 +45,8 @@ _DIRECTIONS = (  # the first group whose words appear in the evidence decides
     ("lt", r"\bbelow\b|less than|fewer than|\bunder\b|lower than|<"),
 )
 _MIRROR = {"ge": "le", "le": "ge", "gt": "lt", "lt": "gt"}
+_SPACED_SCORE = re.compile(r"(\d+) - (\d+)")  # Polymarket's "Racing Club de Lens 1 - 4 Sporting CP"
+_GOALS = re.compile(r"_(\d+)_(\d+)$")  # the last two numbers of a score's measure
 _STRIKES = {
     "greater": ("gt", "floor_strike"),
     "greater_or_equal": ("ge", "floor_strike"),
@@ -66,11 +73,30 @@ def accept(raw: dict[str, Any], market: ReadableMarket) -> Reading:
         terms = _terms(raw)
     except (ValidationError, ValueError, InvalidOperation, TypeError) as error:
         return Reading(market.market_id, None, f"The terms don't validate: {error}", evidence)
-    for check in (_quoted, _numbers_stated, _direction, _indicator, _dated, _strike_agrees):
+    for check in (
+        _quoted,
+        _numbers_stated,
+        _direction,
+        _indicator,
+        _dated,
+        _strike_agrees,
+        _score_order,
+    ):
         problem = check(terms, evidence, market)
         if problem:
             return Reading(market.market_id, None, problem, evidence)
     return Reading(market.market_id, terms, "", evidence)
+
+
+def unchecked(raw: dict[str, Any], market: ReadableMarket) -> Reading:
+    """The terms the model read, whenever they form valid terms: what the model alone says."""
+    evidence = str(raw.get("evidence") or "")
+    if not raw.get("readable"):
+        return Reading(market.market_id, None, "The model could not read it.", evidence)
+    try:
+        return Reading(market.market_id, _terms(raw), "", evidence)
+    except (ValidationError, ValueError, InvalidOperation, TypeError) as error:
+        return Reading(market.market_id, None, f"The terms don't validate: {error}", evidence)
 
 
 def _terms(raw: dict[str, Any]) -> ContractTerms:
@@ -155,6 +181,30 @@ def _strike_agrees(terms: ContractTerms, evidence: str, market: ReadableMarket) 
         return (
             f"The venue's strike fields say {comparison} {_plain_number(threshold)}, "
             f"not {terms.comparison} {_plain_number(terms.threshold)}."
+        )
+    return ""
+
+
+def _score_order(terms: ContractTerms, evidence: str, market: ReadableMarket) -> str:
+    """A score's goals, home team first, must be the ones the venue states. Kalshi names the
+    winner first ("Lens wins 4-1") but its strike fields say which side is home; Polymarket writes
+    the home team's goals first ("Lens 1 - 4 Sporting"). The model has swapped them (feat-11)."""
+    goals = _GOALS.search(terms.measure)
+    if terms.unit != "indicator" or "score" not in terms.measure or goals is None:
+        return ""
+    strike = json.loads(market.text.strike) if market.text.strike else {}
+    custom = strike.get("custom_strike") or {}
+    if {"home_score", "away_score"} <= set(custom):
+        stated = (str(custom["home_score"]), str(custom["away_score"]))
+    else:
+        written = _SPACED_SCORE.search(evidence)
+        if written is None:
+            return ""
+        stated = written.groups()
+    if goals.groups() != stated:
+        return (
+            f"The venue states the score {stated[0]}-{stated[1]}, home team first, not "
+            f"{goals[1]}-{goals[2]}."
         )
     return ""
 

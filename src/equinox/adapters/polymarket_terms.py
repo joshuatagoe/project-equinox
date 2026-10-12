@@ -13,7 +13,7 @@ from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from equinox.adapters.scores import exact_score, scheduled_day
+from equinox.adapters.scores import EXACT_SCORE, exact_score, scheduled_day
 from equinox.models import ContractTerms
 
 NEW_YORK = ZoneInfo("America/New_York")
@@ -110,6 +110,17 @@ def event_parser(event: dict[str, Any]) -> TermParser | None:
     if any(m.get("sportsMarketType") in SCORE_TYPES for m in event.get("markets") or []):
         return lambda raw, notes: score_terms(raw, event, notes)
     return None
+
+
+def market_family(raw: dict[str, Any], event: dict[str, Any]) -> str:
+    """The parser family meant to read this market, as the catalog records it (feat-12), even if
+    the parser gives it no terms. "Any Other Score" has none: no parser is meant to read it."""
+    if event_parser(event) is fed_terms:
+        return "fed_decision"
+    question = raw.get("question") or ""
+    if raw.get("sportsMarketType") in SCORE_TYPES and not question.endswith("Any Other Score?"):
+        return EXACT_SCORE
+    return ""
 
 
 def score_terms(

@@ -40,6 +40,7 @@ PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISIO
 | `python -m equinox match --catalog` | `match`, plus the catalog's summary and its 20 most similar unclear pairs |
 | `python -m equinox catalog read --limit N` | Has a model read the terms of up to N markets in unclear pairs; checks and rules decide them (see below) |
 | `python -m equinox catalog check --limit N` | Has the model read up to N markets of the parsers' pairs too, and lists every pair the two decide differently (see below) |
+| `python -m equinox catalog check --drift --limit N` | Has the model read up to N markets a parser was meant to read but gave no terms, and says which look like a rewording the parser missed (D69) |
 
 Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
 
@@ -63,7 +64,7 @@ The same day, a full read of the live catalog (12,910 markets, about $1.70) foun
 
 Exact scores now have a parser on each venue (D61, D62). A live refresh on 2026-10-12 found 733 outcomes that are the same bet by their contract terms: the 15 Fed outcomes and 718 exact scores, at full time and at half time. The parser showed the 30-pair check was too small: checked against Kalshi's score fields and Polymarket's titles, 7 of the model's 456 score same bets were false, each a reversed score ("Racing Club De Lens wins 4-1" against "Racing Club de Lens 1 - 4 Sporting CP"). A parser's pair is priced from the catalog without the eval gate (D65): 10 YES on Coventry City 2-1 Newcastle United routed to Polymarket at $0.84 against $0.86 on Kalshi, at Medium confidence because the venues name different sources. `python -m equinox catalog check --limit N` reads the parsers' pairs with the model and lists where the two disagree (D64).
 
-`python -m equinox.reader.evals` scores the reader on four gold sets (the Fed meetings, hand-labelled pairs, held-out pairs, and exact scores labelled by the score parsers). On the recorded run it found 33 of 45 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
+`python -m equinox.reader.evals` scores the reader on seven gold sets: the Fed meetings, hand-labelled pairs, held-out pairs, three matches' exact scores, the 7 reversed-score traps, and 16 live score groups split into a tuning half and a judging half. Each is scored raw (the model alone) and guarded (after the checks), with an upper bound on the false same-bet rate (D66). Guarded, no set has a false same-bet; raw, the model still reverses 3 of the 7 traps, which the score-order check refuses (D67). The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
 
 ### The web UI
 
