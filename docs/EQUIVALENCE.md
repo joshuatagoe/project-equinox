@@ -1,6 +1,6 @@
 # Equivalence: when two markets are the same bet
 
-The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50, D54, D56–D58 and D60.
+The brief asks what "equivalent" means and why. This is Equinox's answer, how the matcher applies it, and where it stops. The design is architecture §6; the decisions are D8, D15, D18, D20, D22, D23, D42, D50, D54, D56–D58 and D60–D65.
 
 ## How Equinox finds the markets to compare
 
@@ -174,7 +174,7 @@ A false same-bet is the number that matters: it would route money to the wrong c
 
 **Cost.** 100 markets took 8 requests, about 47,000 input and 14,000 output tokens.
 
-**The full read.** On 2026-10-11 the reader read every unclear pair in the live catalog: 12,910 markets in 1,094 requests (a market paired with several others is read once per group), 8.05 million input and 1.79 million output tokens, about $1.70 at Haiku 5.5's prices. It accepted 12,158 readings and rejected 752. It decided 740 pairs as the same bet (752 with the earlier sample), 7,380 as different, and left 1,303 unclear; all 19 IPO pairs read as different. Thirty of the same bets, picked at random and checked by hand against both venues' rules, had no false same-bet: exact scores (including away wins, "Lille wins 2-0" against "Arsenal 0 - 2 Lille"), league and tournament winners, Game Awards, Google rankings and arrests. Where their rules differ it is in edge-case fallbacks, such as a shared MVP paid 1/N on Kalshi, which D23 flags rather than refuses. Answers are cached by request, so a re-run pays only for markets whose text changed.
+**The full read.** On 2026-10-11 the reader read every unclear pair in the live catalog: 12,910 markets in 1,094 requests (a market paired with several others is read once per group), 8.05 million input and 1.79 million output tokens, about $1.70 at Haiku 5.5's prices. It accepted 12,158 readings and rejected 752. It decided 740 pairs as the same bet (752 with the earlier sample), 7,380 as different, and left 1,303 unclear; all 19 IPO pairs read as different. Thirty of the same bets, picked at random and checked by hand against both venues' rules, had no false same-bet: exact scores (including away wins, "Lille wins 2-0" against "Arsenal 0 - 2 Lille"), league and tournament winners, Game Awards, Google rankings and arrests. Where their rules differ it is in edge-case fallbacks, such as a shared MVP paid 1/N on Kalshi, which D23 flags rather than refuses. That sample was too small: once exact scores had a parser, every one of the model's 456 score same bets was checked against the venues' own score fields, and 7 were false (below). Answers are cached by request, so a re-run pays only for markets whose text changed.
 
 ## Parsers and the model reader
 
@@ -187,7 +187,28 @@ The model doesn't replace the Fed parsers. On the Fed gold set it found 13 of 15
 
 **How a family graduates.** The model's reads show where a parser pays off: a family with many cross-venue same bets and regular wording on both venues. In the full read, exact scores were about 58% of the model-read same bets (439 of 752, in the eight score series among the 25 largest). Kalshi publishes each score as fields (`home_score`, `away_score`), and Polymarket writes every one as "Exact Score: <home> <h> - <a> <away>", so exact scores are the first candidate. A family with a handful of markets, such as an arrest list or one award, stays with the model. Once a family has a parser, its readings become free gold labels for the model's evals, as the Fed parsers' are.
 
-**The model as a cross-check** (next). Reading a parser family with the model too would flag every pair where the two disagree, usually the sign that a venue reworded its markets in a way the parser doesn't yet catch. It isn't built yet.
+**The model as a cross-check.** Reading a parser family with the model too flags every pair where the two disagree: a parser that misses a rewording, or a model that misreads. Exact scores, below, are the first family read both ways.
+
+## Exact scores: a parser, checked by the model
+
+Exact scores were 58% of the model's same bets in the full read (D60), so they were the first family to get a parser on each venue (D61):
+
+- **Kalshi.** The event is "<home> vs <away>: Correct Score" (or "1st Half Correct Score"), and `custom_strike` holds `home_score` and `away_score`. The parser also requires the rules to name the match in that order, state the period ("after 90 minutes plus stoppage time (does not include extra time or penalties)", or "at the end of the 1st Half") and state the same score, winner first: "If Coventry City wins 2-1".
+- **Polymarket.** `sportsMarketType` says `soccer_exact_score` or `soccer_first_half_exact_score`, the event's `teams` say which side is home, and the question must read "Exact Score: <home> <h> - <a> <away>?", home first. The description must state the period and the match. Its postponement, cancellation and no-data rules become fallback rules; "Any Other Score" gets no terms, since the venues list different scores.
+- **Team names** (D62). Accents, case, punctuation, club words and Brazilian state codes are dropped and "St." reads "Saint", so "Coventry City" is "Coventry City FC" and "CR Flamengo RJ" is "CR Flamengo". Four names still differed in the model's score pairs, and `adapters/team_aliases.json` maps them ("PSV Eindhoven" is "PSV"). A wrong merge would need both teams and the date to collide.
+- **Source** (D63). Score markets have no `resolutionSource` of their own, so they take their event's (premierleague.com, uefa.com).
+
+Both parsers give one terms shape: subject "coventry city vs newcastle united", measure `full_time_score_2_1` (home goals first), observed on the day the match was "originally scheduled for", as an indicator. The same pair rules then decide, so 2-1 against 1-2, or the first half against full time, is a different bet.
+
+**The live refresh.** On 2026-10-12 at 02:29 UTC a refresh read 265,944 markets and found 733 outcomes that are the same bet by their contract terms: the 15 Fed outcomes and 718 exact scores. Every one of Kalshi's 1,175 score markets got terms; of Polymarket's 46,439, 44,942 did. Of the 1,497 without, 1,340 are "Any Other Score" and 157 are markets the parser refuses because a name is written two ways (the question says "CDPJuniorFC" where the event's teams spell it out), which fails safe: they stay unclear. Thirty of the 718 pairs, picked at random and read against both venues' rules, were all right.
+
+**Against the model.** Of the model's 456 score same bets from the full read, the parser found 355 again; 95 belonged to matches that had closed before the refresh; 6 it read as different bets. In all 6 the parser is right. Checked against Kalshi's score fields and Polymarket's titles, all 456 hold **7 false same-bets**, each a reversed score: Kalshi's "Racing Club De Lens wins 4-1" (home 4, away 1) against Polymarket's "Racing Club de Lens 1 - 4 Sporting CP" (home 1, away 4). Kalshi writes the winner's goals first and Polymarket the home team's; the model sometimes gave one market the other's order. The 30-pair hand check had missed them: at 1.5%, a sample of 30 more likely than not shows none. The eval gate would have let them route; read again two at a time, the model repeats the mistake on 3 of 6, so feat-12 adds them as gold traps with a stronger reader. The parser also finds 363 same bets the model didn't: 273 that titles never paired (mostly draws, "Final score Draw 0-0?" against two team names) and 90 the model read as different.
+
+**Pricing.** A parser's pair outside the loaded families is priced from the catalog like a model-read one, but without the eval gate or the model flag (D65). Live on 2026-10-12, 10 YES on Coventry City 2-1 Newcastle United routed to Polymarket at $0.84 against $0.86 on Kalshi, and 10 YES on RB Leipzig 2-1 PSV (an alias) at $1.05 against $1.17. Both are Medium confidence: Kalshi settles by ESPN and Polymarket by the league's statistics, and the trace says so with the venues' different postponement rules.
+
+**The cross-check** (D64). A refresh keeps the parser's pairs whose terms differ but whose titles alone would have left them unclear, as "different", with both markets' texts. `catalog check --limit N` reads them and the parser's same bets with the model, decides them with the same rules, and lists every pair the two decide differently, changing nothing. On the 2026-10-12 catalog that is 4,051 markets in 221 requests, about $0.47 at Haiku's prices (28 requests already cached); it hasn't been run. The comparison above did its job for free, from the full read's answers.
+
+**Gold labels.** The parsers label a fourth eval set for free: three groups from `snapshot-2026-10-11-scores` (Coventry City v Newcastle United at full time, its first half against full time, and RB Leipzig v PSV), 68 pairs with 13 same bets. The model found 9 with no false same-bet; it missed three first-half pairs and one away win.
 
 ## Third venue: the Meridian fit check
 

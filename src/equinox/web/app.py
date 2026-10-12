@@ -19,7 +19,7 @@ from equinox.reader import pricing
 from equinox.reader.pricing import PricingError
 from equinox.sources import FIXTURES, LiveFetchers, Loaded, Settings, snapshot_names
 from equinox.web import board, catalog_order, markets, match, order, pages
-from equinox.web.view import PageContext, View, build_view
+from equinox.web.view import PageContext, View, build_view, holding
 
 ROUTES = {"/": order.page, "/index.html": order.page, "/board": board.page, "/match": match.page}
 
@@ -52,9 +52,14 @@ class App:
         page = ROUTES.get(path)
         if page is None:
             return None
-        if page is order.page and params.get("outcome", "").startswith(catalog_order.CATALOG):
-            page = catalog_order.page  # a same bet a model read (D58)
         view = self._view(data or self.settings.snapshot.name)
+        outcome = params.get("outcome", "")
+        if page is order.page and outcome.startswith(catalog_order.CATALOG):
+            loaded = holding(view, outcome.removeprefix(catalog_order.CATALOG))
+            if loaded is not None:  # a loaded family's market (Fed): its usual outcome
+                params = {**params, "outcome": loaded.key}
+            else:  # a same bet in the catalog (D58, D65)
+                page = catalog_order.page
         ctx = PageContext(
             self._clock(),
             self.settings.stale_after,
@@ -68,7 +73,7 @@ class App:
         return sources.load_markets(self._source(source), self.live_fetcher, with_books=False)
 
     def _price_catalog(self, source: str, market_id: str) -> tuple[EquivalenceCluster, Loaded]:
-        """A same bet a model read, loaded from `source` for pricing (D58)."""
+        """A same bet in the catalog, loaded from `source` for pricing (D58, D65)."""
         found = catalog.load_latest(self.settings.cache_dir)
         if found is None:
             raise PricingError("there is no catalog")

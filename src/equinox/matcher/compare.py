@@ -4,7 +4,9 @@
   venues is the same bet, and only such a group can be priced.
 - Every other cross-venue pair that the index finds (`index.py`) is decided by the title fallback,
   which says DISTINCT or AMBIGUOUS and never EQUIVALENT. AMBIGUOUS pairs are shown as unclear and
-  are never routed. A pair where both markets have terms is left to the terms.
+  are never routed. A pair where both markets have terms is left to the terms; when the terms make
+  it a different bet but the titles alone would have left it unclear, it is kept as "different",
+  so the model can read it as a cross-check of the parsers (D64). It changes no market's status.
 - The catalog adds one veto, because its listings carry outcome labels: two markets that each name
   an outcome the other's title never mentions ("Keria" and "Eddie" for the same MVP award) are
   different bets (D54). In the 2026-10-11 refresh, 73% of the unclear pairs were such pairs.
@@ -21,10 +23,17 @@ from decimal import Decimal
 from itertools import combinations
 
 from equinox.matcher.index import candidates, index_titles, title_words
-from equinox.matcher.terms import terms_key
+from equinox.matcher.terms import decide, terms_key
 from equinox.matcher.text import CANDIDATE_SCORE, text_match
 from equinox.models import ContractTerms, EquivalenceStatus
-from equinox.models.catalog import NO_MATCH, SAME_BET, STATUSES, UNCLEAR, CatalogEntry
+from equinox.models.catalog import (
+    DIFFERENT,
+    NO_MATCH,
+    SAME_BET,
+    STATUSES,
+    UNCLEAR,
+    CatalogEntry,
+)
 
 SCORE_PLACES = Decimal("0.01")
 
@@ -33,7 +42,7 @@ SCORE_PLACES = Decimal("0.01")
 class Pair:
     a: int  # positions in the list of entries
     b: int
-    status: str  # SAME_BET or UNCLEAR
+    status: str  # SAME_BET, UNCLEAR, or DIFFERENT for a parser pair kept for the cross-check
     score: Decimal | None  # the title score, for a pair compared by title
     reasons: tuple[str, ...]
 
@@ -107,7 +116,8 @@ def _by_terms(entries: Sequence[CatalogEntry], found: Comparison) -> None:
 def _by_titles(entries: Sequence[CatalogEntry], found: Comparison) -> None:
     for a, b in candidates(index_titles(entries)):
         if entries[a].terms is not None and entries[b].terms is not None:
-            continue  # the terms decide
+            _keep_for_the_check(entries, a, b, found)  # the terms decide
+            continue
         result = text_match(_described(entries[a]), _described(entries[b]))
         found.candidates += 1
         unclear = result.status == EquivalenceStatus.AMBIGUOUS
@@ -121,6 +131,21 @@ def _by_titles(entries: Sequence[CatalogEntry], found: Comparison) -> None:
         else:
             found.distinct += 1
             found.vetoes.update(_veto_kinds(result.text_score, result.reasons))
+
+
+def _keep_for_the_check(entries: Sequence[CatalogEntry], a: int, b: int, found: Comparison) -> None:
+    """A pair the parsers' terms make a different bet, kept when its titles alone would have left
+    it unclear: the pairs the model read before the parsers did (D64). Counted nowhere, and no
+    market's best pair."""
+    first, second = entries[a], entries[b]
+    names = (first.venue.capitalize(), second.venue.capitalize())
+    decision = decide(first.terms, second.terms, names)
+    if decision.status != EquivalenceStatus.DISTINCT:
+        return  # the same bet, found by its terms; or measured differently, never routed
+    result = text_match(_described(first), _described(second))
+    if result.status == EquivalenceStatus.AMBIGUOUS and not _outcomes_differ(first, second):
+        score = result.text_score.quantize(SCORE_PLACES)
+        found.pairs.append(Pair(a, b, DIFFERENT, score, (decision.reason,)))
 
 
 def _described(entry: CatalogEntry) -> _Described:

@@ -1,6 +1,7 @@
 """Model readings in the catalog file (D57): which pairs to read, and what reading them decided.
 
-`to_read` lists the unclear pairs, most similar first, with what the reader reads of each market.
+`to_read` lists the unclear pairs, most similar first, with what the reader reads of each market;
+`to_check` lists the parsers' pairs the same way, for the cross-check (D64).
 `record` saves every reading (accepted or not, with its problem) and each pair's new status: the
 same bet, a different bet (kept for the record, shown as no match), or still unclear. Each
 affected market then shows its best remaining pair, as after a refresh.
@@ -15,6 +16,7 @@ from decimal import Decimal
 
 from equinox.catalog.store import Catalog
 from equinox.models.catalog import (
+    DIFFERENT,
     NO_MATCH,
     SAME_BET,
     STATUSES,
@@ -23,8 +25,10 @@ from equinox.models.catalog import (
     ReadableMarket,
 )
 
-DIFFERENT = "different"
-"""A pair whose readings are different bets. Not a market status: the market shows no match."""
+_MARKETS = (
+    "SELECT e.market_id, e.venue, e.event_title, e.title, e.outcome_label, e.closes_at, "
+    "t.rules, t.strike FROM entries e JOIN texts t ON t.market_id = e.market_id"
+)
 
 
 class OldCatalogError(Exception):
@@ -64,18 +68,34 @@ def to_read(found: Catalog, reader: str) -> tuple[list[PairToRead], dict[str, Re
         "WHERE (status = ? AND read_by IS NULL) OR (read_by IS NOT NULL AND read_by != ?) "
         "ORDER BY CAST(score AS REAL) DESC, market_a, market_b"
     )
-    markets_query = (
-        "SELECT e.market_id, e.venue, e.event_title, e.title, e.outcome_label, e.closes_at, "
-        "t.rules, t.strike FROM entries e JOIN texts t ON t.market_id = e.market_id"
-    )
     try:
         with found.connect() as db:
             found_pairs = db.execute(pairs_query, (UNCLEAR, reader))
             pairs = [PairToRead(a, b, Decimal(score)) for a, b, score in found_pairs]
-            markets = {row[0]: _market(row) for row in db.execute(markets_query)}
+            markets = {row[0]: _market(row) for row in db.execute(_MARKETS)}
     except sqlite3.OperationalError as error:
         raise OldCatalogError(f"{found.path.name} has no texts to read ({error})") from error
     return pairs, markets
+
+
+def to_check(
+    found: Catalog,
+) -> tuple[list[PairToRead], dict[str, ReadableMarket], dict[tuple[str, str], str]]:
+    """The parsers' pairs (same bet, or kept as different), most similar titles first, a same bet
+    found by its terms alone last; every market in them, with texts; and each pair's status."""
+    pairs_query = (
+        "SELECT market_a, market_b, score, status FROM pairs "
+        "WHERE read_by IS NULL AND status IN (?, ?) "
+        "ORDER BY CAST(score AS REAL) DESC, market_a, market_b"
+    )
+    try:
+        with found.connect() as db:
+            rows = db.execute(pairs_query, (SAME_BET, DIFFERENT)).fetchall()
+            markets = {row[0]: _market(row) for row in db.execute(_MARKETS)}
+    except sqlite3.OperationalError as error:
+        raise OldCatalogError(f"{found.path.name} has no texts to read ({error})") from error
+    pairs = [PairToRead(a, b, Decimal(score or 0)) for a, b, score, _ in rows]
+    return pairs, markets, {(a, b): status for a, b, _, status in rows}
 
 
 def record(

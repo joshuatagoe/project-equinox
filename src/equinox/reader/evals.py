@@ -1,9 +1,11 @@
 """Scoring the term reader against gold labels (D58): `python -m equinox.reader.evals`.
 
-Three gold sets:
+Four gold sets:
 
 - **Fed.** Every cross-venue pair of the meetings both venues list in `snapshot-2026-10-11`. The
   answer for each pair is what the Fed parsers' terms decide, so these labels cost nothing.
+- **Scores.** Exact scores of two matches in `snapshot-2026-10-11-scores`, labelled by the score
+  parsers' terms (D60, D61): the same score, the reversed score, and half time against full time.
 - **Labelled pairs** (`evals/pairs.json`). Catalog pairs a person labelled same or different after
   reading both venues' rules, including the traps titles fall for. The prompt was tuned on them.
 - **Held-out pairs** (`evals/heldout.json`). Labelled the same way after the prompt was tuned, from
@@ -29,7 +31,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from equinox.adapters.fetch import DEFAULT_SNAPSHOT
+from equinox.adapters.base import TrackedEvent
+from equinox.adapters.fetch import DEFAULT_SNAPSHOT, FixtureFetcher
+from equinox.adapters.kalshi import KalshiAdapter
+from equinox.adapters.polymarket import PolymarketAdapter
 from equinox.catalog.readings import PairToRead
 from equinox.matcher import evaluate_pair
 from equinox.models import CanonicalMarket, EquivalenceStatus
@@ -42,6 +47,35 @@ EVALS = Path(__file__).resolve().parents[3] / "evals"
 PAIRS, HELD_OUT = EVALS / "pairs.json", EVALS / "heldout.json"
 RECORDED, SCORES = EVALS / "recorded.json", EVALS / "scores.json"
 FED_SNAPSHOT = DEFAULT_SNAPSHOT.parent / "snapshot-2026-10-11"
+SCORES_SNAPSHOT = DEFAULT_SNAPSHOT.parent / "snapshot-2026-10-11-scores"
+SCORE_EVENTS = (
+    (
+        KalshiAdapter,
+        ("KXEPLSCORE-26OCT12COVNEW", "KXEPL1HSCORE-26OCT12COVNEW", "KXUCLSCORE-26OCT13RBLPSV"),
+    ),
+    (
+        PolymarketAdapter,
+        (
+            "epl-cov-new-2026-10-12-exact-score",
+            "epl-cov-new-2026-10-12-first-half-exact-score",
+            "ucl-rbl-psv-2026-10-13-exact-score",
+        ),
+    ),
+)
+FIVE = ((0, 0), (1, 0), (0, 1), (2, 1), (1, 2))  # a draw, both wins, and a score both ways
+COVENTRY, LEIPZIG = "coventry city vs newcastle united", "rb leipzig vs psv"
+# name, match, the periods read on each venue, the scores
+SCORE_CASES = (
+    ("Scores: Coventry v Newcastle, full time", COVENTRY, ("full_time",), ("full_time",), FIVE),
+    (
+        "Scores: Coventry v Newcastle, half time against full time",
+        COVENTRY,
+        ("first_half",),
+        ("first_half", "full_time"),
+        FIVE[:3],
+    ),
+    ("Scores: RB Leipzig v PSV, full time", LEIPZIG, ("full_time",), ("full_time",), FIVE),
+)
 
 
 @dataclass
@@ -77,13 +111,26 @@ def fed_cases() -> list[Case]:
     for day, markets in sorted(meetings.items()):
         if len({m.venue for m in markets}) < 2:
             continue
-        labels = {
-            (a.market_id, b.market_id): evaluate_pair(a, b).status == EquivalenceStatus.EQUIVALENT
-            for a in markets
-            for b in markets
-            if a.venue < b.venue
-        }
-        cases.append(Case(f"Fed {day}", [_readable(m) for m in markets], labels))
+        cases.append(Case(f"Fed {day}", [_readable(m) for m in markets], _labels(markets)))
+    return cases
+
+
+def score_cases() -> list[Case]:
+    """Each case's markets from the score snapshot, labelled by the score parsers' own terms."""
+    fetch = FixtureFetcher(SCORES_SNAPSHOT)
+    markets: list[CanonicalMarket] = []
+    for adapter_class, events in SCORE_EVENTS:
+        tracked = [TrackedEvent(event, "") for event in events]
+        adapter = adapter_class(fetch, tracked, "fixture", lambda: fetch.captured_at)
+        markets += adapter.list_markets().markets
+    cases = []
+    for name, match, kalshi, polymarket, scores in SCORE_CASES:
+        periods = {"kalshi": kalshi, "polymarket": polymarket}
+        chosen = sorted(
+            (m for m in markets if _is_score(m, match, periods[m.venue], scores)),
+            key=lambda m: m.market_id,
+        )
+        cases.append(Case(name, [_readable(m) for m in chosen], _labels(chosen)))
     return cases
 
 
@@ -157,6 +204,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "fed": score(fed_cases(), live, args.model),
         "labelled": score(labelled_cases(), live, args.model),
         "held_out": score(labelled_cases(HELD_OUT), live, args.model),
+        "scores": score(score_cases(), live, args.model),
     }
     for name, result in scores.items():
         print(f"{name}: {json.dumps(asdict(result), indent=2)}")
@@ -178,6 +226,27 @@ def _count(total: Score, case: str, pair: tuple[str, str], same: bool, labelled:
     elif labelled and not same:
         total.missed_same += 1
         total.mistakes.append(f"{case}: {pair[0]} ~ {pair[1]} not read as the same bet")
+
+
+def _labels(markets: Sequence[CanonicalMarket]) -> dict[tuple[str, str], bool]:
+    """Every cross-venue pair, labelled by the parsers' terms: True when the same bet."""
+    return {
+        (a.market_id, b.market_id): evaluate_pair(a, b).status == EquivalenceStatus.EQUIVALENT
+        for a in markets
+        for b in markets
+        if a.venue < b.venue
+    }
+
+
+def _is_score(
+    market: CanonicalMarket,
+    match: str,
+    periods: Sequence[str],
+    scores: Sequence[tuple[int, int]],
+) -> bool:
+    terms = market.terms
+    wanted = {f"{period}_score_{h}_{a}" for period in periods for h, a in scores}
+    return terms is not None and terms.subject == match and terms.measure in wanted
 
 
 def _readable(market: CanonicalMarket) -> ReadableMarket:

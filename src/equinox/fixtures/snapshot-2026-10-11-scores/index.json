@@ -1,0 +1,29 @@
+{
+  "captured_at": "2026-10-12T02:09:45.248326+00:00",
+  "files": {
+    "01_external_api_kalshi_com_trade_api_v2_markets_KXEPLSCORE_26OCT12COVNEW_COV2NEW1.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXEPLSCORE-26OCT12COVNEW-COV2NEW1",
+    "02_external_api_kalshi_com_trade_api_v2_markets_KXEPL1HSCORE_26OCT12COVNEW_COV1NEW0.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXEPL1HSCORE-26OCT12COVNEW-COV1NEW0",
+    "03_external_api_kalshi_com_trade_api_v2_markets_KXUCLSCORE_26OCT13RBLPSV_RBL2PSV1.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXUCLSCORE-26OCT13RBLPSV-RBL2PSV1",
+    "04_external_api_kalshi_com_trade_api_v2_events_KXEPLSCORE_26OCT12COVNEW_with_nested.json": "https://external-api.kalshi.com/trade-api/v2/events/KXEPLSCORE-26OCT12COVNEW?with_nested_markets=true",
+    "05_external_api_kalshi_com_trade_api_v2_series_KXEPLSCORE.json": "https://external-api.kalshi.com/trade-api/v2/series/KXEPLSCORE",
+    "06_external_api_kalshi_com_trade_api_v2_events_KXEPL1HSCORE_26OCT12COVNEW_with_nest.json": "https://external-api.kalshi.com/trade-api/v2/events/KXEPL1HSCORE-26OCT12COVNEW?with_nested_markets=true",
+    "07_external_api_kalshi_com_trade_api_v2_series_KXEPL1HSCORE.json": "https://external-api.kalshi.com/trade-api/v2/series/KXEPL1HSCORE",
+    "08_external_api_kalshi_com_trade_api_v2_events_KXUCLSCORE_26OCT13RBLPSV_with_nested.json": "https://external-api.kalshi.com/trade-api/v2/events/KXUCLSCORE-26OCT13RBLPSV?with_nested_markets=true",
+    "09_external_api_kalshi_com_trade_api_v2_series_KXUCLSCORE.json": "https://external-api.kalshi.com/trade-api/v2/series/KXUCLSCORE",
+    "10_gamma_api_polymarket_com_markets_id_5114624.json": "https://gamma-api.polymarket.com/markets?id=5114624",
+    "11_gamma_api_polymarket_com_markets_id_5299178.json": "https://gamma-api.polymarket.com/markets?id=5299178",
+    "12_gamma_api_polymarket_com_markets_id_5158655.json": "https://gamma-api.polymarket.com/markets?id=5158655",
+    "13_gamma_api_polymarket_com_events_slug_epl_cov_new_2026_10_12_exact_score.json": "https://gamma-api.polymarket.com/events?slug=epl-cov-new-2026-10-12-exact-score",
+    "14_gamma_api_polymarket_com_events_slug_epl_cov_new_2026_10_12_first_half_exact_sco.json": "https://gamma-api.polymarket.com/events?slug=epl-cov-new-2026-10-12-first-half-exact-score",
+    "15_gamma_api_polymarket_com_events_slug_ucl_rbl_psv_2026_10_13_exact_score.json": "https://gamma-api.polymarket.com/events?slug=ucl-rbl-psv-2026-10-13-exact-score",
+    "16_external_api_kalshi_com_trade_api_v2_markets_KXEPLSCORE_26OCT12COVNEW_COV2NEW1_o.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXEPLSCORE-26OCT12COVNEW-COV2NEW1/orderbook",
+    "17_external_api_kalshi_com_trade_api_v2_markets_KXEPL1HSCORE_26OCT12COVNEW_COV1NEW0.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXEPL1HSCORE-26OCT12COVNEW-COV1NEW0/orderbook",
+    "18_external_api_kalshi_com_trade_api_v2_markets_KXUCLSCORE_26OCT13RBLPSV_RBL2PSV1_o.json": "https://external-api.kalshi.com/trade-api/v2/markets/KXUCLSCORE-26OCT13RBLPSV-RBL2PSV1/orderbook",
+    "19_clob_polymarket_com_book_token_id_6488193902137630946354645377136931556735257376.json": "https://clob.polymarket.com/book?token_id=64881939021376309463546453771369315567352573763973050169490251931151582432460",
+    "20_clob_polymarket_com_book_token_id_5789968924402236439215875060850642680159458078.json": "https://clob.polymarket.com/book?token_id=57899689244022364392158750608506426801594580781119679995847085474163030568048",
+    "21_clob_polymarket_com_book_token_id_1529816078684348160326626659410925468037651843.json": "https://clob.polymarket.com/book?token_id=15298160786843481603266266594109254680376518431312540139060948249602912540941",
+    "22_clob_polymarket_com_book_token_id_2995479640128507544518372357962720179850770608.json": "https://clob.polymarket.com/book?token_id=29954796401285075445183723579627201798507706082525475632461915191463147954734",
+    "23_clob_polymarket_com_book_token_id_7493319568430869612812528914307067592739169208.json": "https://clob.polymarket.com/book?token_id=74933195684308696128125289143070675927391692083360628323394939348535984655388",
+    "24_clob_polymarket_com_book_token_id_6850103528373331419986952138199272977502348365.json": "https://clob.polymarket.com/book?token_id=68501035283733314199869521381992729775023483658419742301314949283651773867000"
+  }
+}

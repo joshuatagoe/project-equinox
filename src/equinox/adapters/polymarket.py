@@ -8,7 +8,6 @@ market's `feeSchedule`, never from `takerBaseFee` (P7), rounded to 5 decimal pla
 """
 
 import json
-import re
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -29,7 +28,13 @@ from equinox.adapters.base import (
     listed_ask,
     with_books,
 )
-from equinox.adapters.polymarket_terms import TERM_PARSERS, TermParser, fed_terms, utc
+from equinox.adapters.polymarket_terms import (
+    FAMILY_TAGS,
+    TERM_PARSERS,
+    TermParser,
+    event_parser,
+    utc,
+)
 from equinox.models import (
     CanonicalMarket,
     Collateral,
@@ -43,8 +48,6 @@ from equinox.models.catalog import CatalogEntry, CatalogPage, MarketText
 GAMMA_URL = "https://gamma-api.polymarket.com"
 CLOB_URL = "https://clob.polymarket.com"
 FEE_STEP = Decimal("0.00001")  # P8
-# A family is found by its tag and an event title; only open, neg-risk events count (P12).
-FAMILY_TAGS = {"fed_decision": ("fed-rates", re.compile(r"^Fed Decision in [A-Za-z]+\?$", re.I))}
 
 
 class PolymarketAdapter(VenueAdapter):
@@ -92,7 +95,9 @@ class PolymarketAdapter(VenueAdapter):
                 listed.append((None, [f"polymarket: event {tracked.event_id} not found"]))
                 continue
             listed_at = read_at()
-            parse_terms = TERM_PARSERS.get(tracked.family)
+            parse_terms = (
+                TERM_PARSERS.get(tracked.family) if tracked.family else event_parser(events[0])
+            )
             if parse_terms is None:
                 note = (
                     f"polymarket: event {tracked.event_id}: no term parser for family "
@@ -165,7 +170,9 @@ class PolymarketAdapter(VenueAdapter):
             outcome_label=raw.get("groupItemTitle") or "",
             rules_text=raw.get("description") or "",
             terms=parse_terms(raw, notes) if parse_terms else None,
-            resolution_source=_resolution_source(raw.get("resolutionSource")),
+            resolution_source=_resolution_source(
+                raw.get("resolutionSource") or event.get("resolutionSource")  # D63
+            ),
             collateral=Collateral(asset="USDC", has_value=True),
             tradable=bool(
                 raw.get("active") and not raw.get("closed") and raw.get("acceptingOrders")
@@ -185,8 +192,7 @@ class PolymarketAdapter(VenueAdapter):
 
 def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
     """An event's open Yes/No markets as catalog entries, how many were left out, and texts."""
-    tag, title = FAMILY_TAGS["fed_decision"]
-    fed = bool(event.get("negRisk")) and bool(title.match(event.get("title") or ""))
+    parse_terms = event_parser(event)
     entries, skipped, texts = [], 0, {}
     for raw in event.get("markets") or []:
         if raw.get("closed"):
@@ -206,7 +212,7 @@ def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
                     tradable=bool(raw.get("active") and raw.get("acceptingOrders")),
                     yes_ask=listed_ask(raw.get("bestAsk")),
                     no_ask=None if best_bid is None else 1 - best_bid,
-                    terms=fed_terms(raw, []) if fed else None,
+                    terms=parse_terms(raw, []) if parse_terms else None,
                 )
             )
             texts[entries[-1].market_id] = MarketText(_rules(raw))

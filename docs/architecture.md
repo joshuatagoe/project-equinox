@@ -280,7 +280,7 @@ class VenueAdapter(ABC):
 
 **Read time (D37).** An adapter whose venue puts no timestamp on a response (Kalshi) sets `captured_at` from `clock()`. Live runs pass `datetime.now(UTC)`. Fixture runs pass the snapshot's own capture time, which `FixtureFetcher.captured_at` reads from the snapshot's `index.json`, so fixture data never looks fresh. Tests pass a fixed clock.
 
-`TrackedEvent` holds a venue's event ID (a Kalshi event ticker or a Polymarket slug) and its family. The only family with a term parser is `fed_decision`. Adding a family means adding a discovery rule and a parser to each adapter that lists it. Events are discovered (D47): Kalshi by series (K13), Polymarket by tag, open, neg-risk and title (P12). `tracked_events.json` is the pinned fallback when discovery can't run: a snapshot captured before discovery, or a failed live discovery request, in which case the events and books still come from the live API.
+`TrackedEvent` holds a venue's event ID (a Kalshi event ticker or a Polymarket slug) and its family. The only family that is discovered and tracked is `fed_decision`. Exact scores also have a parser on each venue (D61), but they are read from the catalog, not discovered: an event loaded without a family is parsed by what it is, and a tracked family keeps its own parser or none (D65). Adding a tracked family means adding a discovery rule and a parser to each adapter that lists it. Events are discovered (D47): Kalshi by series (K13), Polymarket by tag, open, neg-risk and title (P12). `tracked_events.json` is the pinned fallback when discovery can't run: a snapshot captured before discovery, or a failed live discovery request, in which case the events and books still come from the live API.
 
 **Failures.** One market that fails validation is skipped, and a warning names it. A request that fails makes the CLI retry that whole venue with the fixture fetcher, and say so (D17). If the fixture is missing too, that venue contributes no markets and a warning.
 
@@ -395,7 +395,11 @@ For markets in the catalog's unclear pairs, a model fills in the terms that a pa
 5. **Record.** Readings and decisions go into the catalog file. Every request is cached by its content; a pair decided by another prompt version or model is read again.
 6. **Route** (`pricing.py`). `simulate` on a market that isn't in a loaded family, and the order page for a `catalog:` outcome, look the market up among the catalog's model-read same bets. The gate allows it only when the pair was read with the model and prompt the committed evals were recorded with, and every gold set shows zero false same-bets. Each market's event is looked up from the venue at pricing time (D59), the listings and books are loaded, the model's terms are attached, and the group goes through the same clusters and router as a parser-read one, with the risk flag "Terms read by a model", so its confidence is Medium at most.
 
-Only `catalog read --limit N` calls the model, and it prints the tokens it spent. The evals (`reader/evals.py`) score three gold sets; the tests replay their recorded answers.
+A parser's same bet outside the loaded families (exact scores) is priced the same way, but its terms come from the venues' listings, with no gate and no model flag (D65).
+
+`catalog check --limit N` (`check.py`, D64) reads the parsers' pairs with the model: the same bets and the pairs a refresh keeps as "different" because their titles alone would have left them unclear. It decides them with the same rules and lists every disagreement, changing nothing.
+
+Only `catalog read` and `catalog check` call the model, and both print the tokens they spent. The evals (`reader/evals.py`) score four gold sets; the tests replay their recorded answers.
 
 ### 6.4 Labelled pairs (acceptance tests for feat-03)
 
@@ -573,6 +577,7 @@ The trace uses typed sections instead of the first version's generic "spans" (D3
 | `markets [--source live\|fixtures] [--snapshot NAME] [--json]` | One line per canonical market of every discovered family: market_id, terms in words, tradable, best asks |
 | `match [--source …] [--snapshot NAME] [--catalog] [--json]` | Clusters with their risk flags and confidence, then AMBIGUOUS pairs with their reasons. `--catalog` adds the saved catalog's summary and its 20 most similar unclear pairs. |
 | `catalog read --limit N [--model M] [--workers W]` | Reads the terms of at most N markets in unclear pairs with a model, checks and decides them (§6.5), and prints the readings accepted and rejected, the pairs decided and the tokens spent. Exit 1 without a key. |
+| `catalog check --limit N [--model M] [--workers W]` | Reads at most N markets of the parsers' pairs with the model and lists every pair the two decide differently (D64), with the tokens spent. Changes nothing. Exit 1 without a key. |
 | `catalog refresh [--source …] [--snapshot NAME]` / `catalog status` | `refresh` pages every open market on both venues (§2), compares them and saves the catalog, printing progress every 10 pages and a summary; from a snapshot it reads the snapshot's small sample. `status` prints the catalog's age and counts. Exit 0, or 1 when there is no catalog or the refresh failed (the previous catalog is kept), or 4 for bad arguments. |
 | `simulate --market ID --outcome YES\|NO --quantity N [--budget B] [--source …] [--json]` | A report: status, the quote table, the decision, the rationale and warnings. `--json` prints the whole trace instead. The exit code is from §7.2. |
 
@@ -701,9 +706,9 @@ src/equinox/
     snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json; the frozen baseline
     snapshot-2026-10-11/ # adds discovery responses, every discovered Fed meeting, a small catalog sample
   models/   canonical.py  catalog.py  equivalence.py  routing.py  trace.py
-  adapters/ base.py  fetch.py  kalshi.py  polymarket.py
+  adapters/ base.py  fetch.py  kalshi.py  polymarket.py  scores.py  teams.py  team_aliases.json
   matcher/  terms.py  text.py  clusters.py  confidence.py  index.py  compare.py
-  reader/   prompt.py  client.py  checks.py  run.py  evals.py   # the term reader (§6.5)
+  reader/   prompt.py  client.py  checks.py  run.py  evals.py  pricing.py  check.py   # §6.5
   router/   depth.py  engine.py  rationale.py
 tests/
   golden/canonical_markets.json   # includes the §9 fit-check markets
@@ -713,7 +718,7 @@ tests/
   test_matcher.py  test_router.py  test_cli.py
   test_confidence.py  test_web.py  test_docs.py  test_quality.py
   test_discovery.py  test_catalog.py  test_index.py  test_web_catalog.py  test_fetch.py
-  test_reader.py  test_reader_evals.py
+  test_reader.py  test_reader_evals.py  test_scores.py
 evals/      pairs.json  heldout.json  recorded.json  scores.json   # the term reader's gold sets (D58)
   test_equinox.py        # existing status-server tests
 ```
@@ -744,7 +749,7 @@ evals/      pairs.json  heldout.json  recorded.json  scores.json   # the term re
 
 ## 13. Known limitations
 
-- **One event family has a term parser:** Fed rate decisions, found automatically on both venues (D47). Other catalog markets are read by a model (§6.5); those pairs are Medium confidence at most and routed only while the evals allow it. The model's reads choose the next parser: exact scores (D60). §9 shows that a second family, stock close-above, fits the same terms shape.
+- **Two families have term parsers:** Fed rate decisions, found automatically on both venues (D47), and exact scores, read from the catalog (D61). Other catalog markets are read by a model (§6.5); those pairs are Medium confidence at most and routed only while the evals allow it. The full read held 7 reversed-score false same-bets among 456 the evals didn't catch; feat-12 adds them as traps. §9 shows that a second family, stock close-above, fits the same terms shape.
 - **The catalog is as fresh as its last refresh** (D48), and title candidates are limited by the index's blocking rules (D50): a true pair worded with no shared informative words, or dated days apart, is missed.
 - **Discovery rules are per venue** (D47). A venue that renames its series or tag needs a code change; until then, live runs fall back to the pinned events.
 - **Fees are list fees.** Polymarket's taker rebates (up to 50%) and builder fees are ignored (A5).

@@ -1,4 +1,5 @@
-"""The command line's catalog commands: `catalog refresh`, `catalog status` and `match --catalog`.
+"""The command line's catalog commands: `catalog refresh`, `status`, `read` and `check`, and
+`match --catalog`.
 
 Exit codes: 0 when the command did what it says, 1 when there is no catalog or a refresh failed
 (the previous catalog is kept), and 4 for bad arguments, as for every command (D27, D44).
@@ -15,12 +16,30 @@ from equinox.catalog import CatalogError
 from equinox.catalog.readings import OldCatalogError
 from equinox.models import EquivalenceCluster
 from equinox.models.catalog import CatalogSummary
+from equinox.reader import check as cross_check
 from equinox.reader import client, pricing, run
 from equinox.reader.client import Ask, ReaderError
+from equinox.reader.prompt import MODEL
 from equinox.sources import LiveFetchers, Loaded, Settings
 
 REFRESH = catalog.REFRESH_COMMAND
 SHOWN_PAIRS = 20
+
+
+def add_commands(commands, common: argparse.ArgumentParser) -> None:
+    """`catalog refresh`, `status`, `read` and `check` (D48, D57, D64)."""
+    every = commands.add_parser("catalog", help="every open market on both venues (D48)")
+    actions = every.add_subparsers(dest="action", required=True)
+    actions.add_parser("refresh", parents=[common], help="read and compare every open market")
+    actions.add_parser("status", parents=[common], help="the saved catalog's age and counts")
+    for action, about in (
+        ("read", "read unclear pairs' terms (D57)"),
+        ("check", "read the parsers' pairs with the model too (D64)"),
+    ):
+        read = actions.add_parser(action, parents=[common], help=about)
+        read.add_argument("--limit", type=int, required=True, help="the most markets to read")
+        read.add_argument("--model", default=MODEL, help=f"default: {MODEL}")
+        read.add_argument("--workers", type=int, default=4, help="requests at once (default: 4)")
 
 
 def command(
@@ -33,6 +52,8 @@ def command(
         return refresh(settings, live_fetcher)
     if args.action == "read":
         return read(settings, args.limit, args.model, args.workers, ask)
+    if args.action == "check":
+        return check(settings, args.limit, args.model, args.workers, ask)
     return status(settings)
 
 
@@ -53,15 +74,9 @@ def refresh(settings: Settings, live_fetcher: LiveFetchers | None = None) -> int
 
 def read(settings: Settings, limit: int, model: str, workers: int, ask: Ask | None) -> int:
     """Read the terms of at most `limit` markets in unclear pairs, and say what it cost (D57)."""
-    key = client.load_key(os.environ)
-    if key is None:
-        print(f"No {client.KEY_NAME} in the environment or in .env at the repository root.")
-        print("Nothing was read.")
+    found, ask = _model(settings, ask)
+    if found is None or ask is None:
         return 1
-    found = _latest(settings)
-    if found is None:
-        return 1
-    ask = ask or client.Cached(client.Claude(key), settings.cache_dir / "readings.sqlite")
     print(f"Reading at most {limit:,} markets of unclear pairs with {model}...", flush=True)
     try:
         report = run.read_catalog(found, ask, model, limit, _say, workers)
@@ -77,6 +92,48 @@ def read(settings: Settings, limit: int, model: str, workers: int, ask: Ask | No
         f"Pairs decided: {r.same_bet:,} same bet, {r.different:,} different, "
         f"{r.unclear:,} still unclear."
     )
+    _spent(ask, r.input_tokens, r.output_tokens)
+    return 0
+
+
+def check(settings: Settings, limit: int, model: str, workers: int, ask: Ask | None) -> int:
+    """Read at most `limit` markets of the parsers' pairs with the model, and list every pair the
+    two decide differently (D64). Changes nothing in the catalog."""
+    found, ask = _model(settings, ask)
+    if found is None or ask is None:
+        return 1
+    print(f"Checking at most {limit:,} markets of the parsers' pairs with {model}...", flush=True)
+    try:
+        r = cross_check.check_catalog(found, ask, model, limit, _say, workers)
+    except (ReaderError, OldCatalogError) as error:
+        print(f"Not checked: {error}. Answers already received are cached.")
+        return 1
+    print(
+        f"{r.markets:,} markets read in {_count(r.calls, 'request')}. Of {r.pairs:,} pairs, the "
+        f"model agrees with the parsers on {r.agree:,} and leaves {r.undecided:,} undecided."
+    )
+    print(f"{_count(len(r.disagreements), 'disagreement')}{':' if r.disagreements else '.'}")
+    for d in r.disagreements:
+        print(f"  {d.a} ~ {d.b}: parser: {d.parser}, model: {d.model}. {d.reasons[0]}")
+    _spent(ask, r.input_tokens, r.output_tokens)
+    return 0
+
+
+def _model(settings: Settings, ask: Ask | None) -> tuple[catalog.Catalog | None, Ask | None]:
+    """The latest catalog and the model to read it with: the cached client unless a test gives
+    one. (None, None) after saying why, when there is no key or no catalog."""
+    key = client.load_key(os.environ)
+    if key is None:
+        print(f"No {client.KEY_NAME} in the environment or in .env at the repository root.")
+        print("Nothing was read.")
+        return None, None
+    found = _latest(settings)
+    if found is None:
+        return None, None
+    return found, ask or client.Cached(client.Claude(key), settings.cache_dir / "readings.sqlite")
+
+
+def _spent(ask: Ask, input_tokens: int, output_tokens: int) -> None:
     if isinstance(ask, client.Cached):
         print(
             f"Spent on {_count(ask.sent, 'new request')}: {ask.input_tokens:,} input tokens and "
@@ -84,19 +141,18 @@ def read(settings: Settings, limit: int, model: str, workers: int, ask: Ask | No
             "from the cache at no cost."
         )
     else:
-        print(f"Used {r.input_tokens:,} input tokens and {r.output_tokens:,} output tokens.")
-    return 0
+        print(f"Used {input_tokens:,} input tokens and {output_tokens:,} output tokens.")
 
 
-def model_read(
+def same_bet(
     settings: Settings, market_id: str, live_fetcher: LiveFetchers | None
 ) -> tuple[EquivalenceCluster, Loaded] | str:
-    """The market's same bet as read by a model, ready to route (D58); else why not, or "" when
-    the catalog has none for it."""
+    """The market's same bet in the catalog, read by the parsers or a model, ready to route
+    (D58, D65); else why not, or "" when the catalog has none for it."""
     try:
         found = catalog.load_latest(settings.cache_dir)
         return pricing.priced_group(found, market_id, settings, live_fetcher) if found else ""
-    except (CatalogError, pricing.NotModelRead, sqlite3.Error):
+    except (CatalogError, pricing.NotInCatalog, sqlite3.Error):
         return ""
     except pricing.PricingError as error:
         return str(error)

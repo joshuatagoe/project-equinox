@@ -66,6 +66,10 @@ SAME_BET, UNCLEAR, NO_MATCH = "same bet", "unclear", "no match"
 STATUSES = (SAME_BET, UNCLEAR, NO_MATCH)
 """A catalog market's status, best first. Only "same bet" can be priced; "unclear" never is."""
 
+DIFFERENT = "different"
+"""A pair whose terms make it a different bet: kept for the record and for the cross-check
+(D57, D64). Never a market's status: such a market shows no match."""
+
 
 @dataclass(frozen=True)
 class CatalogSummary:

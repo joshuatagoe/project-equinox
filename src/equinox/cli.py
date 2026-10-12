@@ -29,7 +29,6 @@ from equinox.models import (
     RoutingStatus,
 )
 from equinox.reader.client import Ask
-from equinox.reader.prompt import MODEL
 from equinox.router import failure_trace, simulate
 from equinox.router.rationale import contracts, dollars, money_step
 from equinox.sources import ADAPTERS, LiveFetchers, Loaded, Settings, SettingsError
@@ -152,8 +151,8 @@ def _simulate(
     market = next((m for m in loaded.markets if m.market_id == order.market_id), None)
     cluster = cluster_for(order.market_id, build_clusters(loaded.markets))
     problem = ""
-    if market is None:  # perhaps a same bet a model read in the catalog (D58)
-        found = cli_catalog.model_read(settings, order.market_id, live_fetcher)
+    if market is None:  # perhaps a same bet in the catalog (D58, D65)
+        found = cli_catalog.same_bet(settings, order.market_id, live_fetcher)
         if isinstance(found, str):
             problem = found
         else:
@@ -281,14 +280,7 @@ def _parser() -> _Parser:
     commands.add_parser("markets", parents=[common], help="list canonical markets")
     match = commands.add_parser("match", parents=[common], help="group equivalent markets")
     match.add_argument("--catalog", action="store_true", help="add the catalog's unclear pairs")
-    every = commands.add_parser("catalog", help="every open market on both venues (D48)")
-    actions = every.add_subparsers(dest="action", required=True)
-    actions.add_parser("refresh", parents=[common], help="read and compare every open market")
-    actions.add_parser("status", parents=[common], help="the saved catalog's age and counts")
-    read = actions.add_parser("read", parents=[common], help="read unclear pairs' terms (D57)")
-    read.add_argument("--limit", type=int, required=True, help="the most markets to read")
-    read.add_argument("--model", default=MODEL, help=f"default: {MODEL}")
-    read.add_argument("--workers", type=int, default=4, help="requests at once (default: 4)")
+    cli_catalog.add_commands(commands, common)
     order = commands.add_parser("simulate", parents=[common], help="route a hypothetical order")
     order.add_argument("--market", required=True, help="e.g. kalshi:KXFEDDECISION-26OCT-H0")
     order.add_argument("--outcome", required=True, help="YES or NO")

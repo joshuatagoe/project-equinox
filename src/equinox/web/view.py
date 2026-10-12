@@ -54,7 +54,8 @@ class PageContext:
     stale_after: timedelta
     banner: pages.Banner
     price_catalog: Callable[[str], tuple[EquivalenceCluster, Loaded]] | None = None
-    """market ID -> its model-read group and loader (D58); raises PricingError or FetchError."""
+    """market ID -> its same-bet group from the catalog, and its loader (D58, D65); raises
+    PricingError or FetchError."""
 
 
 def build_view(source: str, loaded: Loaded, read_at: datetime, param: str = "") -> View:
@@ -71,6 +72,14 @@ def with_books(view: View, cluster: EquivalenceCluster) -> EquivalenceCluster:
 
 def find(view: View, key: str) -> Outcome | None:
     return next((o for o in view.outcomes if o.key == key), None)
+
+
+def holding(view: View, market_id: str) -> Outcome | None:
+    """The loaded outcome whose group holds this market, if any."""
+    return next(
+        (o for o in view.outcomes if any(m.market_id == market_id for m in o.cluster.markets)),
+        None,
+    )
 
 
 def choices(view: View) -> list[pages.Choice]:

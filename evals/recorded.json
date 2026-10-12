@@ -2613,6 +2613,166 @@
    "service_tier": "standard"
   }
  },
+ "8d15801d864ad30f5e7c8bee09c5e82a7eb1e93e7b9d13fb6eac408899fb77a8": {
+  "container": null,
+  "content": [
+   {
+    "caller": {
+     "type": "direct"
+    },
+    "id": "toolu_01WuqTo4HEnsNCN7acpDUVSh",
+    "input": {
+     "markets": [
+      {
+       "comparison": "eq",
+       "evidence": "If the result is a 0-0 draw in the Coventry City vs Newcastle United professional EPL soccer game",
+       "id": "m1",
+       "measure": "final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If Newcastle United wins 1-0 in the Coventry City vs Newcastle United professional EPL soccer game",
+       "id": "m2",
+       "measure": "final_score_coventry_city_0_newcastle_united_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If Coventry City wins 1-0 in the Coventry City vs Newcastle United professional EPL soccer game",
+       "id": "m3",
+       "measure": "final_score_coventry_city_1_newcastle_united_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If Newcastle United wins 2-1 in the Coventry City vs Newcastle United professional EPL soccer game",
+       "id": "m4",
+       "measure": "final_score_coventry_city_1_newcastle_united_2",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If Coventry City wins 2-1 in the Coventry City vs Newcastle United professional EPL soccer game",
+       "id": "m5",
+       "measure": "final_score_coventry_city_2_newcastle_united_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 0 - 0 Newcastle United FC?",
+       "id": "m6",
+       "measure": "final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 0 - 1 Newcastle United FC?",
+       "id": "m7",
+       "measure": "final_score_coventry_city_0_newcastle_united_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 1 - 0 Newcastle United FC?",
+       "id": "m8",
+       "measure": "final_score_coventry_city_1_newcastle_united_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 1 - 2 Newcastle United FC?",
+       "id": "m9",
+       "measure": "final_score_coventry_city_1_newcastle_united_2",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 2 - 1 Newcastle United FC?",
+       "id": "m10",
+       "measure": "final_score_coventry_city_2_newcastle_united_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1",
+       "unit": "indicator"
+      }
+     ]
+    },
+    "name": "record_terms",
+    "type": "tool_use"
+   }
+  ],
+  "diagnostics": null,
+  "id": "msg_011CfwcG8dxH8HCCeD7c4nfK",
+  "model": "claude-haiku-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 5793,
+   "output_tokens": 1479,
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "service_tier": "standard"
+  }
+ },
  "90cc6c814465314ce3c3370496a158970cde575689a6c50197e8939bd5c524c3": {
   "container": null,
   "content": [
@@ -2673,6 +2833,155 @@
    "inference_geo": "global",
    "input_tokens": 3137,
    "output_tokens": 275,
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "service_tier": "standard"
+  }
+ },
+ "96eebb74f061a4538ae30a7c25cbc3d15cdb0641946f1c7f570622f0ed9f2077": {
+  "container": null,
+  "content": [
+   {
+    "caller": {
+     "type": "direct"
+    },
+    "id": "toolu_01XYYf3VBDkLG6A7HvxbM2fS",
+    "input": {
+     "markets": [
+      {
+       "comparison": "eq",
+       "evidence": "If the score at the end of the 1st Half is Coventry City 0, Newcastle United 0",
+       "id": "m1",
+       "measure": "first_half_final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "Draw 0-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If the score at the end of the 1st Half is Coventry City 0, Newcastle United 1",
+       "id": "m2",
+       "measure": "first_half_final_score_coventry_city_0_newcastle_united_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "Newcastle United wins 1H 1-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If the score at the end of the 1st Half is Coventry City 1, Newcastle United 0",
+       "id": "m3",
+       "measure": "first_half_final_score_coventry_city_1_newcastle_united_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "Coventry City wins 1H 1-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 0 - 0 Newcastle United FC?",
+       "id": "m4",
+       "measure": "final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "reason": "",
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "0-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 0 - 1 Newcastle United FC?",
+       "id": "m5",
+       "measure": "final_score_0_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "0-1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: Coventry City FC 1 - 0 Newcastle United FC?",
+       "id": "m6",
+       "measure": "final_score_1_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "1st Half Exact Score: Coventry City FC 0 - 0 Newcastle United FC?",
+       "id": "m7",
+       "measure": "first_half_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "0-0",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "1st Half Exact Score: Coventry City FC 0 - 1 Newcastle United FC?",
+       "id": "m8",
+       "measure": "first_half_score_0_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "0-1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "1st Half Exact Score: Coventry City FC 1 - 0 Newcastle United FC?",
+       "id": "m9",
+       "measure": "first_half_score_1_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-12",
+       "readable": true,
+       "subject": "coventry_city_vs_newcastle_united",
+       "threshold": "1-0",
+       "unit": "indicator"
+      }
+     ]
+    },
+    "name": "record_terms",
+    "type": "tool_use"
+   }
+  ],
+  "diagnostics": null,
+  "id": "msg_011CfwcGTpdDAVbPK9PCVigR",
+  "model": "claude-haiku-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 6017,
+   "output_tokens": 1312,
    "output_tokens_details": {
     "thinking_tokens": 0
    },
@@ -3191,6 +3500,166 @@
    "inference_geo": "global",
    "input_tokens": 3503,
    "output_tokens": 303,
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "service_tier": "standard"
+  }
+ },
+ "cf0a306a3e395c2edf95f8c56b3c1280aba8b8738c2e9d8b85dd1be652b46e8c": {
+  "container": null,
+  "content": [
+   {
+    "caller": {
+     "type": "direct"
+    },
+    "id": "toolu_01Su75f6tvsUHttBR4mNRrnQ",
+    "input": {
+     "markets": [
+      {
+       "comparison": "eq",
+       "evidence": "If the result is a 0-0 draw in the RB Leipzig vs PSV Eindhoven professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time",
+       "id": "m1",
+       "measure": "final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If PSV Eindhoven wins 1-0 in the RB Leipzig vs PSV Eindhoven professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time",
+       "id": "m2",
+       "measure": "final_score_0_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If RB Leipzig wins 1-0 in the RB Leipzig vs PSV Eindhoven professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time",
+       "id": "m3",
+       "measure": "final_score_1_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If PSV Eindhoven wins 2-1 in the RB Leipzig vs PSV Eindhoven professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time",
+       "id": "m4",
+       "measure": "final_score_0_2",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "If RB Leipzig wins 2-1 in the RB Leipzig vs PSV Eindhoven professional Champions League soccer game originally scheduled for Oct 13, 2026 after 90 minutes plus stoppage time",
+       "id": "m5",
+       "measure": "final_score_2_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: RB Leipzig 0 - 0 PSV?",
+       "id": "m6",
+       "measure": "final_score_0_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: RB Leipzig 0 - 1 PSV?",
+       "id": "m7",
+       "measure": "final_score_0_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: RB Leipzig 1 - 0 PSV?",
+       "id": "m8",
+       "measure": "final_score_1_0",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: RB Leipzig 1 - 2 PSV?",
+       "id": "m9",
+       "measure": "final_score_1_2",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      },
+      {
+       "comparison": "eq",
+       "evidence": "Exact Score: RB Leipzig 2 - 1 PSV?",
+       "id": "m10",
+       "measure": "final_score_2_1",
+       "measured_by": "official_match_result",
+       "observed_on": "2026-10-13",
+       "readable": true,
+       "subject": "rb_leipzig_vs_psv_eindhoven",
+       "threshold": "1",
+       "unit": "indicator"
+      }
+     ]
+    },
+    "name": "record_terms",
+    "type": "tool_use"
+   }
+  ],
+  "diagnostics": null,
+  "id": "msg_011CfwcGmT2KigYytewT7n4H",
+  "model": "claude-haiku-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "inference_geo": "global",
+   "input_tokens": 5848,
+   "output_tokens": 1585,
    "output_tokens_details": {
     "thinking_tokens": 0
    },

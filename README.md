@@ -39,6 +39,7 @@ PYTHONPATH=src .venv/bin/python -m equinox simulate --market kalshi:KXFEDDECISIO
 | `python -m equinox catalog status` | The saved catalog's age and counts |
 | `python -m equinox match --catalog` | `match`, plus the catalog's summary and its 20 most similar unclear pairs |
 | `python -m equinox catalog read --limit N` | Has a model read the terms of up to N markets in unclear pairs; checks and rules decide them (see below) |
+| `python -m equinox catalog check --limit N` | Has the model read up to N markets of the parsers' pairs too, and lists every pair the two decide differently (see below) |
 
 Each command takes `--source live` (the default) or `--source fixtures`, and `--json` to print the full result instead of a report. `simulate` exits with a code per outcome: 0 routed, 1 market not found, 2 not enough liquidity, 3 over budget, 4 bad input, 5 no venue can take the order (D27).
 
@@ -60,7 +61,9 @@ A same bet the model read can be priced like a Fed outcome, with `simulate --mar
 
 The same day, a full read of the live catalog (12,910 markets, about $1.70) found 752 same bets; 30 of them, checked by hand against both venues' rules, had no false same-bet. Fed decisions keep their parsers, which are exact and free. The model's reads show which family deserves the next parser: exact scores, about 58% of those same bets (D60).
 
-`python -m equinox.reader.evals` scores the reader on three gold sets (the Fed meetings, hand-labelled pairs, and held-out pairs). On the recorded run it found 24 of 32 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
+Exact scores now have a parser on each venue (D61, D62). A live refresh on 2026-10-12 found 733 outcomes that are the same bet by their contract terms: the 15 Fed outcomes and 718 exact scores, at full time and at half time. The parser showed the 30-pair check was too small: checked against Kalshi's score fields and Polymarket's titles, 7 of the model's 456 score same bets were false, each a reversed score ("Racing Club De Lens wins 4-1" against "Racing Club de Lens 1 - 4 Sporting CP"). A parser's pair is priced from the catalog without the eval gate (D65): 10 YES on Coventry City 2-1 Newcastle United routed to Polymarket at $0.84 against $0.86 on Kalshi, at Medium confidence because the venues name different sources. `python -m equinox catalog check --limit N` reads the parsers' pairs with the model and lists where the two disagree (D64).
+
+`python -m equinox.reader.evals` scores the reader on four gold sets (the Fed meetings, hand-labelled pairs, held-out pairs, and exact scores labelled by the score parsers). On the recorded run it found 33 of 45 same bets with no false same-bet. The tests replay that run, so no test calls the model. [docs/EQUIVALENCE.md](docs/EQUIVALENCE.md) has the numbers and what a live sample found.
 
 ### The web UI
 
@@ -168,7 +171,8 @@ Each module has one job, stated at its top. Where to look for each part of the l
 | Where is the explanation written? | `src/equinox/router/rationale.py` |
 | Where do markets come from: live data or a snapshot? | `src/equinox/sources.py` |
 | How is every open market read and compared? | `src/equinox/catalog/__init__.py` (the refresh), `src/equinox/matcher/index.py` (finding candidates), `src/equinox/matcher/compare.py` (same bet, unclear, no match), `src/equinox/catalog/store.py` (the saved file) |
-| How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets), `src/equinox/reader/pricing.py` (when a model-read pair may be routed) |
+| How does a model read terms, and what stops a wrong reading? | `src/equinox/reader/prompt.py` (what is asked), `src/equinox/reader/checks.py` (what is refused), `src/equinox/reader/run.py` (reading the catalog), `src/equinox/reader/evals.py` (the gold sets), `src/equinox/reader/pricing.py` (when a catalog pair may be routed), `src/equinox/reader/check.py` (the model as a cross-check of the parsers) |
+| How are exact scores read? | `src/equinox/adapters/kalshi_terms.py` and `polymarket_terms.py` (each venue's wording), `src/equinox/adapters/scores.py` (one terms shape), `src/equinox/adapters/teams.py` and `team_aliases.json` (team names) |
 | How do the command line and the web pages present it? | `src/equinox/cli.py`, `src/equinox/cli_catalog.py`, `src/equinox/web/order.py`, `src/equinox/web/board.py`, `src/equinox/web/match.py`, `src/equinox/web/markets.py` |
 | Which tests pin the rules? | `tests/test_matcher.py` (the labelled pairs), `tests/test_router.py` (every status), `tests/test_index.py` (catalog candidates and statuses), `tests/test_docs.py` (this README's numbers) |
 
@@ -195,7 +199,8 @@ The brief notes that PEAK6 often uses Go on Google Cloud and allows other tools 
 
 Architecture §13 lists them with their reasons. In short:
 
-- One event family has a term parser: Fed rate decisions. Other markets are read by a model (D57); those pairs are priced at Medium confidence at most, and only while the recorded evals show no false same-bet (D58).
+- Two families have term parsers: Fed rate decisions and exact scores (D61). Other markets are read by a model (D57); those pairs are priced at Medium confidence at most, and only while the recorded evals show no false same-bet (D58). The model can reverse a score: 7 of its 456 score same bets were false, which the evals didn't catch (feat-12 adds them as traps).
+- A team name the rules and the alias table don't match loses its pair until the table grows (D62); the cross-check lists such pairs.
 - The catalog is as fresh as its last refresh, and a title pair is found only if the markets close within 3 days and share two informative words (D50).
 - Discovery rules are written per venue and family (D47): a venue that renames its series or tag needs a code change, and until then live runs use the pinned events.
 - Order books are treated as frozen at capture (A2). One order goes to one venue; there is no split routing.

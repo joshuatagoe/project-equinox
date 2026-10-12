@@ -44,5 +44,21 @@
     "mistakes": [
       "Presidential nominee: kalshi:KXPRESNOMR-28-JH ~ polymarket:561988 not read as the same bet"
     ]
+  },
+  "scores": {
+    "cases": 3,
+    "pairs": 68,
+    "same_labelled": 13,
+    "same_found": 9,
+    "false_same": 0,
+    "missed_same": 4,
+    "readings": 29,
+    "rejected": 0,
+    "mistakes": [
+      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV0NEW0 ~ polymarket:5299176 not read as the same bet",
+      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV0NEW1 ~ polymarket:5299177 not read as the same bet",
+      "Scores: Coventry v Newcastle, half time against full time: kalshi:KXEPL1HSCORE-26OCT12COVNEW-COV1NEW0 ~ polymarket:5299178 not read as the same bet",
+      "Scores: RB Leipzig v PSV, full time: kalshi:KXUCLSCORE-26OCT13RBLPSV-RBL1PSV2 ~ polymarket:5158654 not read as the same bet"
+    ]
   }
 }

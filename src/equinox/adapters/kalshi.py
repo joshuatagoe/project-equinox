@@ -30,8 +30,9 @@ from equinox.adapters.base import (
 )
 from equinox.adapters.kalshi_terms import (
     FAMILY_SERIES,
-    FED_DECISION,
+    Parser,
     fed_decision_terms,
+    parser_for,
     rules_text,
     strike_text,
 )
@@ -99,8 +100,8 @@ class KalshiAdapter(VenueAdapter):
                     (None, [f"kalshi: event {tracked.event_id} skipped: {describe(error)}"])
                 )
                 continue
-            parse_terms = tracked.family == FED_DECISION
-            if not parse_terms:
+            parse_terms = parser_for(event, tracked.family)
+            if parse_terms is None:
                 note = (
                     f"kalshi: event {tracked.event_id} has no term parser for family "
                     f"{tracked.family!r}, so its markets have no terms"
@@ -138,22 +139,33 @@ class KalshiAdapter(VenueAdapter):
         return self.fetch(f"{self.base_url}{path}")
 
     def _listed(
-        self, raw: dict[str, Any], event: dict[str, Any], shared: dict[str, Any], parse_terms: bool
+        self,
+        raw: dict[str, Any],
+        event: dict[str, Any],
+        shared: dict[str, Any],
+        parse_terms: Parser | None,
     ) -> Listed:
         ticker = raw.get("ticker")
         try:
             market = self._market(raw, event, shared, parse_terms)
         except BAD_DATA as error:
             return None, [f"kalshi: market {ticker} skipped: {describe(error)}"]
-        if parse_terms and market.terms is None:
+        if parse_terms is not None and market.terms is None:
             strike = json.dumps(raw.get("custom_strike"), default=str)
-            return market, [
-                f"kalshi: market {ticker} has no terms: no parser for custom_strike {strike}"
-            ]
+            why = (
+                f"no parser for custom_strike {strike}"
+                if parse_terms is fed_decision_terms
+                else f"its rules don't state the score in custom_strike {strike}"
+            )
+            return market, [f"kalshi: market {ticker} has no terms: {why}"]
         return market, []
 
     def _market(
-        self, raw: dict[str, Any], event: dict[str, Any], shared: dict[str, Any], parse_terms: bool
+        self,
+        raw: dict[str, Any],
+        event: dict[str, Any],
+        shared: dict[str, Any],
+        parse_terms: Parser | None,
     ) -> CanonicalMarket:
         ticker = raw["ticker"]
         rules = (raw.get("rules_primary"), raw.get("rules_secondary"))
@@ -165,7 +177,7 @@ class KalshiAdapter(VenueAdapter):
             title=raw.get("title") or f"{event['title']} {raw['yes_sub_title']}",
             outcome_label=raw["yes_sub_title"],
             rules_text="\n\n".join(part for part in rules if part),
-            terms=fed_decision_terms(raw, event) if parse_terms else None,
+            terms=parse_terms(raw, event) if parse_terms else None,
             tradable=raw.get("status") == "active",
             trading_closes_at=_time(raw.get("close_time")),
             resolves_at=_time(raw.get("expected_expiration_time")),
@@ -180,7 +192,7 @@ class KalshiAdapter(VenueAdapter):
 
 def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
     """An event's open Yes/No markets as catalog entries, how many were left out, and texts."""
-    fed = event.get("series_ticker") == FAMILY_SERIES[FED_DECISION]
+    parse_terms = parser_for(event)
     entries, skipped, texts = [], 0, {}
     for raw in event.get("markets") or []:
         if raw.get("status") in CLOSED:
@@ -199,7 +211,7 @@ def _catalog_entries(event: dict[str, Any]) -> CatalogListing:
                     tradable=raw.get("status") == "active",
                     yes_ask=listed_ask(raw.get("yes_ask_dollars")),
                     no_ask=listed_ask(raw.get("no_ask_dollars")),
-                    terms=fed_decision_terms(raw, event) if fed else None,
+                    terms=parse_terms(raw, event) if parse_terms else None,
                 )
             )
             texts[entries[-1].market_id] = MarketText(rules_text(raw), strike_text(raw))

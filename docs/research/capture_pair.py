@@ -44,6 +44,12 @@ def main(out: Path, market_ids: list[str]) -> None:
     loaded = load_by_id(Settings(source="live"), market_ids, lambda venue: recording)
     for market in loaded.markets:
         loaded.readers[market.venue].fetch_books(market)
+    save(out, recording)
+    print(f"markets: {[m.market_id for m in loaded.markets]}")
+
+
+def save(out: Path, recording: Recording) -> None:
+    """Every recorded response, unedited, with the index that maps each file to its URL."""
     out.mkdir(parents=True)
     files = {}
     for number, (url, body) in enumerate(recording.seen.items(), start=1):
@@ -52,7 +58,7 @@ def main(out: Path, market_ids: list[str]) -> None:
         files[name] = url
     index = {"captured_at": datetime.now(UTC).isoformat(), "files": files}
     (out / "index.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
-    print(f"{len(files)} responses saved in {out}: {[m.market_id for m in loaded.markets]}")
+    print(f"{len(files)} responses saved in {out}")
 
 
 if __name__ == "__main__":

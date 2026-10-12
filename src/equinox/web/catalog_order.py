@@ -1,9 +1,10 @@
-"""Pricing a same bet a model read, from the All markets page (D58).
+"""Pricing a same bet from the catalog, from the All markets page (D58, D65).
 
-The app sends the order page's requests here when the outcome key starts with `catalog:`. The
-group comes from the catalog through `reader.pricing`, which refuses it unless the committed evals
-allow routing model-read pairs. The books are fetched for this group only, and the result is
-rendered exactly as the order page renders a parser-read outcome.
+The app sends the order page's requests here when the outcome key starts with `catalog:` and the
+market isn't in a loaded family. The group comes from the catalog through `reader.pricing`: a
+parser's pair as it is, a model's only while the committed evals allow routing model-read pairs.
+The books are fetched for this group only, and the result is rendered exactly as the order page
+renders a loaded outcome.
 """
 
 from equinox.adapters.base import FetchError
@@ -15,7 +16,7 @@ from equinox.web import order, pages
 from equinox.web.view import Outcome, PageContext, View, data_param
 
 CATALOG = "catalog:"
-GROUP = "Read by a model, from the catalog"
+GROUP = "From the catalog of every open market"
 
 
 def page(view: View, params: dict[str, str], ctx: PageContext) -> str:

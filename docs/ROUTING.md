@@ -136,6 +136,10 @@ The fit-check markets show the same for test money. Meridian-style AAPL-330 is c
 
 The router doesn't know how a group's terms were read. A same bet a model read (EQUIVALENCE.md, D57) reaches it through the same cluster as a parser-read one, with two differences in what it is given: the pair is priced only when the committed evals show zero false same-bets for the model and prompt that read it (D58), and its cluster carries the risk flag "Terms read by a model", which the trace prints and which keeps the confidence at Medium. On 2026-10-11, 10 YES on Kalshi's `KXBALLONDOR-26-KMBA` (Mbappé wins the 2026 Ballon d'Or), read as the same bet as Polymarket `608540`, routed to Polymarket at $0.22 against $0.33 on Kalshi; the trace also flagged that Kalshi names foxnews.com and Polymarket francefootball.fr as the source.
 
+## Pairs a parser read from the catalog
+
+Exact scores have parsers (D61) but are not a discovered family, so a score pair is priced from the catalog too. The venues' listings are read again, their parsers give the terms, and the group goes to the router with no gate and no model flag (D65). On 2026-10-12, 10 YES on Coventry City 2-1 Newcastle United routed to Polymarket at $0.84 against $0.86 on Kalshi; the trace flagged that Kalshi settles by ESPN and Polymarket by the league's statistics, and that only Polymarket states what a postponement does.
+
 ## Assumptions
 
 Every trace carries these, worded for the reader (DECISIONS.md, Assumptions):
