@@ -9,7 +9,7 @@ from html import escape
 
 from equinox.catalog import review
 from equinox.catalog.review import ALIKE, EXACT, KINDS, MODEL, Pair
-from equinox.web import home, shell, words
+from equinox.web import explain, home, shell, words
 from equinox.web.shell import Context, href
 
 PER_PAGE = 40
@@ -41,7 +41,7 @@ def page(ctx: Context, params: dict[str, str]) -> str:
     found = review.listed(ctx.found, kind, asked)
     number = home.page_number(params.get("page", "1"))
     shown = found[(number - 1) * PER_PAGE : number * PER_PAGE]
-    listing = "".join(_pair(p) for p in shown) or shell.empty(
+    listing = "".join(_pair(p, review.keys_of(ctx.found, p)) for p in shown) or shell.empty(
         f"No pairs match “{asked}”." if asked else "No pairs of this kind."
     )
     body = (
@@ -53,16 +53,16 @@ def page(ctx: Context, params: dict[str, str]) -> str:
     return shell.layout("Matches", body, ctx, active="/matches")
 
 
-def _pair(p: Pair) -> str:
+def _pair(p: Pair, keys: tuple[str | None, str | None]) -> str:
     sides = "".join(
         f'<div><span class="small muted">{escape(words.venue(side.venue))}'
-        + (f" · {escape(side.event)}" if side.event and side.event != side.title else "")
+        + (f" · {escape(side.event)}" if side.event and side.event not in side.title else "")
         + f"</span><div>{escape(side.title)}</div></div>"
         for side in (p.a, p.b)
     )
     badge, style = BADGES[p.kind]
-    note = NOTES[p.kind].format(score=p.score)
-    reasons = "".join(f"<li>{escape(r)}</li>" for r in p.reasons)
+    said = words.both_pay(p.key, p.a.event) if p.kind == EXACT else ""
+    note = said or NOTES[p.kind].format(score=p.score)  # the matcher's own lines fold away (D99)
     check = ""
     if p.kind in (EXACT, MODEL):
         target = href("/bet", m=p.a.market_id, side="YES") + "#same-bet"
@@ -70,7 +70,7 @@ def _pair(p: Pair) -> str:
     return (
         f'<div class="pair"><div class="sides">{sides}</div>'
         f'<p class="small"><span class="tag {style}">{badge}</span> {escape(note)}</p>'
-        + (f"<ul class='notes small muted'>{reasons}</ul>" if reasons else "")
+        + explain.panel(p, keys)
         + f"{check}</div><!--/pair-->"
     )
 

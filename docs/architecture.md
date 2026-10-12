@@ -594,7 +594,7 @@ Server-rendered pages for the two people in `user/users.md`, built from the cata
 | `/`, Markets | Jordan | The events both venues list (`catalog/events.py`), soonest to close first (D88), as cards: topic (D87), closing date, the three likeliest outcomes with what YES costs on each venue, the cheaper marked, and how many outcomes both venues list. Topic chips filter them; `?q=` searches either market's title words. With no catalog it says how to build one. |
 | `/event?m=`, an event | Jordan | Every outcome of the event both venues list, likeliest first: what YES pays in words, how it matched (Equinox's own reader, or a model, Medium at most), YES and NO on each venue, Buy YES and Buy NO. |
 | `/bet?m=&side=&quantity=&budget=`, the order ticket | Jordan and Morgan | A line saying what comparing does and that nothing is bought, and fields that say what they mean (D92). The recommendation as the headline, then what the contracts pay: which venue, the total including fees, the saving over the runner-up. Then each venue's fills, average price, fee and total or why it can't take the order, the router's rationale, data notes in plain words and the assumptions. Beside it, "Is this really the same bet?": how it matched, the verdict and confidence, one column per venue and one row per rule (question, pays YES if, measured by, observed, settlement source, closing and resolution times, edge-case rules) with differing rows marked, and the risk flags. |
-| `/matches?show=&q=`, Matches | Morgan | Every pair Equinox kept (`catalog/review.py`), by kind with counts: exact matches, same bets a model read, pairs that only look alike (title score, never priced), pairs a model ruled different. Both venues' titles, how it was decided and the reasons; a same bet links to its ticket's "Is this really the same bet?" panel (D94). |
+| `/matches?show=&q=`, Matches | Morgan | Every pair Equinox kept (`catalog/review.py`), by kind with counts: exact matches, same bets a model read, pairs that only look alike (title score, never priced), pairs a model ruled different. Both venues' titles, how it was decided in words, and under "How it was decided" what was compared (event, outcome, who decides, date) for each venue with differences marked, and why (D99); a same bet links to its ticket's "Is this really the same bet?" panel (D94). |
 
 Rules the pages keep:
 - Every order goes through `simulate`, and every match through the matcher and the catalog; the ticket prices a pair through `reader/pricing.py` from where the catalog was read (D78). A test checks that the ticket and `cli.main --json` show the same totals.
@@ -705,7 +705,7 @@ src/equinox/
             # refresh, its SQLite file, the events both venues list, the pairs for review,
             # decisions kept across a refresh, the background refresh
   server.py              # the web app's routes and /health (§8.3)
-  web/      app.py  shell.py  home.py  event.py  ticket.py  same_bet.py  matches.py  order.py  words.py  style.py  script.py
+  web/      app.py  shell.py  home.py  event.py  ticket.py  same_bet.py  matches.py  explain.py  order.py  words.py  style.py  script.py
   tracked_events.json
   fixtures/
     snapshot-2026-10-10/ # raw Kalshi and Polymarket responses + index.json; the frozen baseline

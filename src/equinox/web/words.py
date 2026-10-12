@@ -154,6 +154,19 @@ def yes_pays(key: str | None, event_title: str) -> str:
     """What a share of YES pays, from a parser's terms key and the event's title (feat-13): a Fed
     move, or an exact score with the teams as the event names them; a plain general sentence for
     a market whose terms a parser didn't read."""
+    when = paid_when(key, event_title)
+    return f"YES pays $1 if {when}." if when else GENERIC
+
+
+def both_pay(key: str | None, event_title: str) -> str:
+    """An exact match in words (feat-14): what both venues pay YES for; "" if it can't be said."""
+    when = paid_when(key, event_title)
+    return f"Both venues pay $1 a YES share if {when}." if when else ""
+
+
+def paid_when(key: str | None, event_title: str) -> str:
+    """When YES pays, from a parser's terms key: "the Fed leaves its target rate unchanged", "the
+    score after 90 minutes is Coventry City 2, Newcastle United 1"; "" for other keys."""
     parts = (key or "").split("|")
     if len(parts) >= 7 and parts[1] == FED_CHANGE and parts[-3] in _COMPARISONS:
         terms = ContractTerms(
@@ -165,12 +178,12 @@ def yes_pays(key: str | None, event_title: str) -> str:
             threshold=Decimal(parts[-2]),
             unit=parts[-1],
         )
-        return f"YES pays $1 if {pays_if(terms)}."
+        return pays_if(terms)
     score, teams = _SCORE.match(parts[1]) if len(parts) > 1 else None, _TEAMS.match(event_title)
     if score and teams:
         when = "after 90 minutes" if score[1] == "full_time" else "at half time"
-        return f"YES pays $1 if the score {when} is {teams[1]} {score[2]}, {teams[2]} {score[3]}."
-    return GENERIC
+        return f"the score {when} is {teams[1]} {score[2]}, {teams[2]} {score[3]}"
+    return ""
 
 
 def _fed_move(terms: ContractTerms) -> tuple[str, str, str] | None:

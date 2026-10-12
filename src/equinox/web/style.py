@@ -158,6 +158,8 @@ th { color: var(--muted); font-weight: 600; font-size: 13px; }
 td.num, th.num { text-align: right; }
 tr.out td { color: var(--muted); }
 tr.differs th:first-child { color: var(--warn); }
+table.terms { margin: 8px 0; }
+table.terms td::first-letter { text-transform: uppercase; }
 details summary { cursor: pointer; color: var(--accent); font-weight: 600; margin-top: 8px; }
 ul.notes { margin: 8px 0 0; padding-left: 20px; }
 footer { color: var(--muted); font-size: 13px; margin-top: 40px; padding-top: 16px;
